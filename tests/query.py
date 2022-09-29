@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 
-from ddb_single.table import Table
+from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
@@ -18,13 +18,13 @@ class Test(BaseModel):
     sk = DBField(secondary_key=True)
     unique = DBField(unique_key=True)
     name = DBField(search_key=True)
-    attr = DBField()
+    attr = DBField(type=FieldType.NUMBER)
 
 query = Query(table)
 
 class Sample(unittest.TestCase):
     def test_create(self):
-        test = Test(unique="test", name="test", attr="test")
+        test = Test(unique="test", name="test", attr=3)
         print("test", test)
         query.model(test).create()
 
@@ -33,7 +33,7 @@ class Sample(unittest.TestCase):
         print(query.model(Test).get_by_unique("test"))
 
     def test_update(self):
-        test = Test(unique="test", name="test", attr="test")
+        test = Test(unique="test", name="test", attr=3)
         print("test", test.data)
         query.model(test).update()
 

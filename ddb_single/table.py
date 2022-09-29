@@ -1,14 +1,12 @@
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
-from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
 import time
 import traceback
 import uuid
 from enum import Enum
 
-from ddb_single.utils import is_same_json, json_import, json_export
 import ddb_single.utils_botos as util_b
 
 def default_pk_factory(model_name):
@@ -185,7 +183,7 @@ class Table:
                 while "LastEvaluatedKey" in response and len(res_data) < limit:
                     response = self.__table__.query(**kwargs, ExclusiveStartKey=response['LastEvaluatedKey'])
                     res_data += response['Items']
-                return json_export(res_data)
+                return util_b.json_export(res_data)
             else:
                 return []
 
@@ -200,7 +198,7 @@ class Table:
             }
         )
         res = util_b.deserialize(res.get('Item'))
-        res = json_export(res)
+        res = util_b.json_export(res)
         return res
 
     # アイテムをバッチで取得
@@ -234,7 +232,7 @@ class Table:
                 break
         
         res = util_b.deserialize(dynamo_table_data)
-        res = json_export(res)
+        res = util_b.json_export(res)
         return res
 
     # アイテムをバッチで取得
@@ -338,7 +336,7 @@ class Table:
     
     # アイテムの作成
     def create(self, item, batch=None):
-        item = json_import(item)
+        item = util_b.json_import(item)
         table = batch or self.__table__
         table.put_item(Item=item)
         return item
@@ -346,13 +344,13 @@ class Table:
     # アイテムの更新
     def update(self, item, batch=None, old_item=None):
         is_changed = False
-        item = json_import(item)
+        item = util_b.json_import(item)
         if not old_item and not batch:
             # 単一の処理で、既存のアイテムがない場合は、既存のアイテムを取得する
             old_item = self.get_item(item[self.__primary_key__], item[self.__secondary_key__])
         if old_item:
             new_item = {**old_item, **item}
-            if not is_same_json(old_item, new_item):
+            if not util_b.is_same_json(old_item, new_item):
                 self.create(new_item, batch)
                 is_changed = True
             return new_item, is_changed
@@ -362,7 +360,7 @@ class Table:
 
     # 作成のバッチ処理
     def batch_create(self, items, batch=None):
-        items = json_import(items)
+        items = util_b.json_import(items)
         if batch:
             for item in items:
                 batch.put_item(Item=item)
@@ -374,7 +372,7 @@ class Table:
 
     # 更新のバッチ処理
     def batch_update(self, items, batch=None):
-        items = json_import(items)
+        items = util_b.json_import(items)
         old_items = self.batch_get(items)
         new_items = []
         for item in items:
@@ -382,7 +380,7 @@ class Table:
             if old_item:
                 old_item = old_item[0]
                 new_item = {**old_item, **item} if old_item else item
-                if not is_same_json(old_item, new_item):
+                if not util_b.is_same_json(old_item, new_item):
                     new_items.append(new_item)
         self.batch_create(new_items, batch)
         return new_items

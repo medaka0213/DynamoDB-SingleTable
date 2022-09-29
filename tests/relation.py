@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 
-from ddb_single.table import Table
+from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
@@ -22,7 +22,7 @@ class User(BaseModel):
 
 
 class Message(BaseModel):
-    __model_name__ = "user"
+    __model_name__ = "message"
     __table__=table
     pk = DBField(primary_key=True)
     sk = DBField(secondary_key=True)
@@ -38,6 +38,6 @@ class Sample(unittest.TestCase):
         print("test", user)
         query.model(user).create()
 
-        message = Message(unique="test", content="test", user=user.get_unique_value())
+        message = Message(unique="test", content="test", user=user)
         print("message", message)
         query.model(message).create()

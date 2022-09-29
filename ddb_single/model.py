@@ -1,4 +1,4 @@
-from statistics import mode
+from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
@@ -52,7 +52,64 @@ class DBField:
         else:
             if not self.nullable:
                 raise ValueError(f"Not nullable: {self.__class__.__name__}")
+        if self.value is not None:
+            self._setup_relation()
+        self.value = self._validate_value(self.value)
         return self.value
+
+    def _setup_relation(self):
+        def extract_value(v, by_unique):
+            types = str, bytes, int, float, Decimal, bool
+            if not [t for t in types if isinstance(v, t)]:
+                if by_unique:
+                    return v.data[self.value.__unique_keys__[0]]
+                else:
+                    return v.data[self.value.__primary_key__]
+            else:
+                return v
+
+        if not self.is_list():
+            if self.relation:
+                self.value = extract_value(self.value, self.reletion_by_unique)
+            elif self.reference:
+                self.value = extract_value(self.value, self.reference_by_unique)
+        else:
+            if self.relation:
+                self.value = [extract_value(v, self.reletion_by_unique) for v in self.value]
+            elif self.reference:
+                self.value = [extract_value(v, self.reference_by_unique) for v in self.value]
+
+        return self.value
+
+    def _validate_value(self, value):
+        if self.is_list():
+            if not isinstance(value, list):
+                raise ValueError(f"Value {self.name} must be a list")
+            try:
+                if self.type == FieldType.LIST:
+                    return value
+                elif self.type == FieldType.STRING_SET:
+                    return set(value)
+                elif self.type == FieldType.NUMBER_SET:
+                    return set(map(Decimal, str(value)))
+                elif self.type == FieldType.BINARY_SET:
+                    return set(map(bytes, str(value)))
+            except:
+                raise ValueError(f"{self.name} must be a valid list")
+        else:
+            try:
+                if isinstance(value, list):
+                    raise ValueError(f"{self.name} must not be a list")
+                if self.type == FieldType.STRING: 
+                    return str(value)
+                elif self.type == FieldType.NUMBER:
+                    return Decimal(str(value))
+                elif self.type == FieldType.BINARY:
+                    return bytes(value)
+                elif self.type == FieldType.BOOLEAN:
+                    return bool(value)
+            except:
+                raise ValueError(f"Value {self.name} must be a valid value")
 
     def search_key_factory(self):
         return self.__table__.search_key_factory(self.__model_cls__.__model_name__, self.name)
@@ -153,21 +210,3 @@ class BaseModel():
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
-    
-    def get_unique_key(self):
-        return self.__unique_keys__[0]
-
-    def get_unique_value(self):
-        return self.data[self.get_unique_key()]
-
-    def get_primary_key(self):
-        return self.__primary_key__
-
-    def get_primary_value(self):
-        return self.data[self.__primary_key__]
-    
-    def get_secondary_key(self):
-        return self.__secondary_key__
-
-    def get_secondary_value(self):
-        return self.data[self.__secondary_key__]

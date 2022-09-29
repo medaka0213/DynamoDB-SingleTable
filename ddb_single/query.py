@@ -36,8 +36,49 @@ class Query:
     def search(self, *queries):
         return self.__table__.search(self.__model__.__model_name__, *queries)
 
+    # アイテムを取得
+    def get(self, pk:str):
+        res = self.__table__.get_item(pk)
+        return res
+
+    # ユニークキーで検索
+    def get_by_unique(self, value):
+        res = self.search(getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(value))
+        if res:
+            pk = res[0][self.__model__.__primary_key__]
+            return self.get(pk)
+
+    # Create/Update関連
+
+    # ヴァリデーション
+    def validate(self):
+        for k, v in self.__model__.data.items():
+            if k in self.__model__.__search_keys__:
+                field:DBField = self.__model__.__class__.__dict__[k]
+                if not field.validate(v):
+                    raise Exception(f"Validation error: {k}={v}")
+
     # 新規作成
-    def create(self, batch=None, remove_ex_search_items=False):
+    def create(self, batch=None, raise_if_exists=False):
+        old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
+        if old_item:
+            if raise_if_exists:
+                raise Exception("Item Already exists")
+            else:
+                self._update(old_item, batch=batch)
+        else:
+            self._create(batch)
+
+    # 更新
+    def update(self, batch=None):
+        old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
+        if old_item:
+            self._update(self, old_item, batch=batch)
+        else:
+            self._create(batch=batch)
+    
+    def _create(self, batch=None, remove_ex_search_items=False):
+        self.validate()
         search_items_add, search_items_rm = self.search_items()
         rel_items_add, rel_items_rm = self.relation_items()
         ref_items_add, ref_items_rm = self.reference_items()
@@ -52,31 +93,13 @@ class Query:
         else:
             self.__table__.batch_create(items_add, batch=batch)
 
-    # アイテムを取得
-    def get(self, pk:str):
-        res = self.__table__.get_item(pk)
-        return res
+    def _update(self, old_item, batch=None):
+        self.__model__.data = {**old_item, **self.__model__.data}
+        self.__model__.data[self.__model__.__primary_key__] = old_item[self.__model__.__primary_key__]
+        self.__model__.data[self.__model__.__secondary_key__] = old_item[self.__model__.__secondary_key__]
+        if not util_b.is_same_json(old_item, self.__model__.data):
+            self._create(batch=batch, remove_ex_search_items=True)
 
-    # ユニークキーで検索
-    def get_by_unique(self, value):
-        res = self.search(getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(value))
-        print("get_by_unique", self.__model__.__unique_keys__[0], value, res)
-        if res:
-            pk = res[0][self.__model__.__primary_key__]
-            return self.get(pk)
-    
-    # 更新
-    def update(self, batch=None):
-        old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
-        if old_item:
-            self.__model__.data = {**old_item, **self.__model__.data}
-            self.__model__.data[self.__model__.__primary_key__] = old_item[self.__model__.__primary_key__]
-            self.__model__.data[self.__model__.__secondary_key__] = old_item[self.__model__.__secondary_key__]
-            if not util_b.is_same_json(old_item, self.__model__.data):
-                self.create(batch=batch, remove_ex_search_items=True)
-        else:
-            self.create(batch=batch)
-    
     # 削除
     def delete(self, batch=None):
         self.__table__.clear_item(self.__model__.data[self.__model__.__primary_key__], batch=batch)
@@ -122,7 +145,7 @@ class Query:
         return result
     
     def _field2reference_items(self, field:DBField, value):
-        if field.reletion_by_unique:
+        if field.reference_by_unique:
             ref:BaseModel = field.reference
             if field.is_list():
                 pks = [self._get_other_item_by_unique(ref, value)[ref.__primary_key__] for value in value]
