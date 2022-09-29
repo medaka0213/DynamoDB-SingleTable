@@ -159,3 +159,15 @@ class BaseModel():
 
     def get_unique_value(self):
         return self.data[self.get_unique_key()]
+
+    def get_primary_key(self):
+        return self.__primary_key__
+
+    def get_primary_value(self):
+        return self.data[self.__primary_key__]
+    
+    def get_secondary_key(self):
+        return self.__secondary_key__
+
+    def get_secondary_value(self):
+        return self.data[self.__secondary_key__]
