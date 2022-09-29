@@ -6,7 +6,7 @@ from ddb_single.table import FieldType, Table
 import ddb_single.utils_botos as util_b
 
 
-class DBField():
+class DBField:
     __setup__ = False
     def __init__(self, type:FieldType=FieldType.STRING, default=None, default_factory=None, nullable=True, required=False, 
                  primary_key=False, secondary_key=False, unique_key=False, search_key=False, 
@@ -153,3 +153,9 @@ class BaseModel():
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
+    
+    def get_unique_key(self):
+        return self.__unique_keys__[0]
+
+    def get_unique_value(self):
+        return self.data[self.get_unique_key()]

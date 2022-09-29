@@ -4,8 +4,10 @@ from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
 
 class Query:
-    def __init__(self, table:Table):
+    def __init__(self, table:Table, model:Optional[BaseModel]=None):
         self.__table__ = table
+        if model:
+            self.model(model)
     
     def model(self, model:BaseModel):
         if not model.__setup__:
@@ -58,6 +60,7 @@ class Query:
     # ユニークキーで検索
     def get_by_unique(self, value):
         res = self.search(getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(value))
+        print("get_by_unique", self.__model__.__unique_keys__[0], value, res)
         if res:
             pk = res[0][self.__model__.__primary_key__]
             return self.get(pk)
@@ -98,9 +101,11 @@ class Query:
         }
     
     def _get_other_item_by_unique(self, target:BaseModel, value, table=None):
-        q = Query(target, table or self.__table__)
-        return q.get_by_unique(value)
-    
+        q = Query(table or self.__table__, target)
+        res = q.get_by_unique(value)
+        print("_get_other_item_by_unique", res)
+        return res
+
     def _field2relation_items(self, field:DBField, value):
         if field.reletion_by_unique:
             rel:BaseModel = field.relation()
