@@ -13,18 +13,19 @@ table.init()
 
 class Test(BaseModel):
     __table__=table
-    __model_name__ = "testmodel"
+    __model_name__ = "user"
     pk = DBField(primary_key=True)
     sk = DBField(secondary_key=True)
-    unique = DBField(unique_key=True)
-    name = DBField(search_key=True)
-    attr = DBField(type=FieldType.NUMBER)
+    name = DBField(unique_key=True)
+    email = DBField(search_key=True)
+    age = DBField(type=FieldType.NUMBER, search_key=True)
+    description=DBField()
 
 query = Query(table)
 
 class Sample(unittest.TestCase):
     def test_create(self):
-        test = Test(unique="test", name="test", attr=3)
+        test = Test(unique="test", name="test", age=20)
         print("test", test)
         query.model(test).create()
 
@@ -33,7 +34,7 @@ class Sample(unittest.TestCase):
         print(query.model(Test).get_by_unique("test"))
 
     def test_update(self):
-        test = Test(unique="test", name="test", attr=3)
+        test = Test(unique="test", name="test", age=20)
         print("test", test.data)
         query.model(test).update()
 
