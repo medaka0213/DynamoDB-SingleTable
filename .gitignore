@@ -3,4 +3,5 @@ __pycache__
 *.pyo
 *.egg-info
 build
+dist
 shared-local-instance.db

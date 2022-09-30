@@ -1,0 +1,217 @@
+<p>Python DynamoDB interface, specialized in single-table design. DynamoDB
+is high-performance serverless NoSQL, but difficult to disign tables.</p>
+<p>Single-table design needs only single table, and few GSIs (Global
+Secondary Indexes). It makes effective and easy to manage your whole
+data models for single service.</p>
+<div class="section" id="getting-started">
+<h2>Getting Started</h2>
+<div class="section" id="init-table">
+<h3>Init Table</h3>
+<pre><code><span class="kn">from</span> <span class="nn">ddb_single.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="nn">ddb_single.query</span> <span class="kn">import</span> <span class="n">Query</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
+    <span class="n">endpoint_url</span><span class="o">=</span><span class="s2">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">init</span><span class="p">()</span></code></pre>
+</div>
+<div class="section" id="data-models">
+<h3>Data Models</h3>
+<p>Each model hava to set 3 keys - primary_key �� Hash key for single item.
+default: <span class="docutils literal">{__model_name__}_{uuid}</span> - seconday_key �� Range key for
+item. default: <span class="docutils literal">{__model_name__}_item</span> - unique_key �� key to identify
+the item is the same. Mainly used to update item.</p>
+<p>And you can set <span class="docutils literal">serch_key</span> to enable search via GSI</p>
+<pre><code><span class="kn">from</span> <span class="nn">ddb_single.model</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span>
+<span class="kn">from</span> <span class="nn">ddb_single.table</span> <span class="kn">import</span> <span class="n">FieldType</span>
+
+<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">__table__</span><span class="o">=</span><span class="n">table</span>
+    <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
+    <span class="n">pk</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sk</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">secondary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">unique_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">search_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">FieldType</span><span class="o">.</span><span class="n">NUMBER</span><span class="p">,</span> <span class="n">search_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">description</span><span class="o">=</span><span class="n">DBField</span><span class="p">()</span></code></pre>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage</h2>
+<p>need ��Qurey�� object for CRUD;
+<span class="docutils literal"><span class="pre">query.model(foo).create</span> or search or update or delete</span></p>
+<pre><code><span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></code></pre>
+<div class="section" id="create-item">
+<h3>Create Item</h3>
+<p>If the item with same value of <span class="docutils literal">unique_key</span> already exist, exist item
+is updated.</p>
+<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john&#64;example.com&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></code></pre>
+<p>Then, multible items added.</p>
+<table>
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr><th class="head"><p>pk</p></th>
+<th class="head"><p>sk</p></th>
+<th class="head"><p>data</p></th>
+<th class="head"><p>name</p></th>
+<th class="head"><p>email</p></th>
+<th class="head"><p>des
+cription</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>u
+ser_item</p></td>
+<td></td>
+<td><p>John</p></td>
+<td><p><a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
+mple.com</p></td>
+<td><p>test</p></td>
+</tr>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>search_u
+ser_name</p></td>
+<td><p>John</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>s
+earch_us
+er_email</p></td>
+<td><p>new-
+<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
+mple.com</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>In addition to main item (sk=<span class="docutils literal">user_item</span>), multiple item
+(sk=<span class="docutils literal">search_{__model_name__}_{field_name}</span>) added to table. Those
+��search items�� are used to search</p>
+<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ��search items�� to extract
+target��s pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
+<table>
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr><th class="head"><p>sk = hash</p></th>
+<th class="head"><p>data = range</p></th>
+<th class="head"><p>pk</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>search_user_name</p></td>
+<td><p>John</p></td>
+<td><p>user_xxxx</p></td>
+</tr>
+<tr><td><p>search_user_email</p></td>
+<td><p><a href="mailto:new-john&#37;&#52;&#48;example&#46;com">new-john<span>&#64;</span>example<span>&#46;</span>com</a></p></td>
+<td><p>user_xxxx</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="search-items">
+<h3>Search Items</h3>
+<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">Test</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">Test</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john&#64;example.com&quot;}]</span></code></pre>
+<p><span class="docutils literal">get_by_unique</span> is easy to get single item by <span class="docutils literal">unique_key</span></p>
+<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">Test</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="c1"># -&gt; {&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john&#64;example.com&quot;}</span></code></pre>
+</div>
+<div class="section" id="update-item">
+<h3>Update Item</h3>
+<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">Test</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">Test</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;john&#64;example.com&quot;</span><span class="p">))</span>
+<span class="n">new_user</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span><span class="o">**</span><span class="n">user</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">new_user</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;new-john&#64;example.com&quot;</span>
+<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
+<p>Or use unique value to detect exist item.</p>
+<pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;new-john&#64;example.com&quot;</span><span class="p">)</span>
+<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
+<p>Then, tha value of ��main item�� and ��seach item�� changed</p>
+<table>
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr><th class="head"><p>pk</p></th>
+<th class="head"><p>sk</p></th>
+<th class="head"><p>data</p></th>
+<th class="head"><p>name</p></th>
+<th class="head"><p>email</p></th>
+<th class="head"><p>des
+cription</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>u
+ser_item</p></td>
+<td></td>
+<td><p>John</p></td>
+<td><p>new-
+<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
+mple.com</p></td>
+<td><p>test</p></td>
+</tr>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>search_u
+ser_name</p></td>
+<td><p>John</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr><td><p>u
+ser_xxxx</p></td>
+<td><p>s
+earch_us
+er_email</p></td>
+<td><p>new-
+<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
+mple.com</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="delete-item">
+<h3>Delete Item</h3>
+<pre>user = query.model(Test).search(Test.email.eq(&quot;new-john&#64;example.com&quot;))
+query.model(user[0]).delete()</pre>
+<p>Or use unique value to detect exist item.</p>
+<pre>query.model(User).delete_by_unique(&quot;John&quot;)</pre>
+</div>
+</div>
+
