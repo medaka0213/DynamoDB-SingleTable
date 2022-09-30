@@ -1,6 +1,9 @@
 from setuptools import setup
 import ddb_single
 
+with open('readme.md', 'r', encoding='utf-8') as fp:
+    LONG_DESCRIPTION = fp.read()
+
 setup(
     name='ddb_single',
     version=ddb_single.__version__,
@@ -12,6 +15,8 @@ setup(
     packages=[
         "ddb_single",
     ],
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     install_requires=["boto3"],
     classifiers=[
         'Programming Language :: Python :: 3.6',
