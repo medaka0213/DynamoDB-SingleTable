@@ -85,7 +85,7 @@ Then, `batch_get` items by pk.
 ### Search Items
 
 ```python
-user = query.model(Test).search(Test.name.eq("John"))
+user = query.model(User).search(User.name.eq("John"))
 print(user)
 # -> [{"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}]
 ```
@@ -93,7 +93,7 @@ print(user)
 `get_by_unique` is easy to get single item by `unique_key`
 
 ```python
-user = query.model(Test).get_by_unique("John")
+user = query.model(User).get_by_unique("John")
 print(user)
 # -> {"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}
 ```
@@ -101,8 +101,8 @@ print(user)
 ### Update Item
 
 ```python
-user = query.model(Test).search(Test.email.eq("john@example.com"))
-new_user = Test(**user[0])
+user = query.model(User).search(User.email.eq("john@example.com"))
+new_user = User(**user[0])
 new_user.email = "new-john@example.com"
 query.model(new_user).update()
 ```
@@ -110,7 +110,7 @@ query.model(new_user).update()
 Or use unique value to detect exist item.
 
 ```python
-new_user = Test(name="John", email="new-john@example.com")
+new_user = User(name="John", email="new-john@example.com")
 query.model(new_user).update()
 ```
 
@@ -127,7 +127,7 @@ Then, tha value of "main item" and "seach item" changed
 
 
 ```
-user = query.model(Test).search(Test.email.eq("new-john@example.com"))
+user = query.model(User).search(User.email.eq("new-john@example.com"))
 query.model(user[0]).delete()
 ```
 
