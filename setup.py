@@ -3,7 +3,7 @@ import ddb_single
 
 setup(
     name='ddb_single',
-    version='0.1',
+    version=ddb_single.__version__,
     description='Python DynamoDB interface, specialized in single-table design.',
     url='https://github.com/medaka0213/DynamoDB-SingleTable',
     author='medaka',

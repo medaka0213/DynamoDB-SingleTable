@@ -1,0 +1,45 @@
+ddb\_single package
+===================
+
+Submodules
+----------
+
+ddb\_single.model module
+------------------------
+
+.. automodule:: ddb_single.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ddb\_single.query module
+------------------------
+
+.. automodule:: ddb_single.query
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ddb\_single.table module
+------------------------
+
+.. automodule:: ddb_single.table
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ddb\_single.utils\_botos module
+-------------------------------
+
+.. automodule:: ddb_single.utils_botos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ddb_single
+   :members:
+   :undoc-members:
+   :show-inheritance:
