@@ -28,9 +28,9 @@ Init Table
 Data Models
 ~~~~~~~~~~~
 
-Each model hava to set 3 keys - primary_key ¡Ä Hash key for single item.
-default: ``{__model_name__}_{uuid}`` - seconday_key ¡Ä Range key for
-item. default: ``{__model_name__}_item`` - unique_key ¡Ä key to identify
+Each model hava to set 3 keys - primary_key â€¦ Hash key for single item.
+default: ``{__model_name__}_{uuid}`` - seconday_key â€¦ Range key for
+item. default: ``{__model_name__}_item`` - unique_key â€¦ key to identify
 the item is the same. Mainly used to update item.
 
 And you can set ``serch_key`` to enable search via GSI
@@ -53,7 +53,7 @@ And you can set ``serch_key`` to enable search via GSI
 Usage
 -----
 
-need ¡ÈQurey¡É object for CRUD;
+need â€œQureyâ€ object for CRUD;
 ``query.model(foo).create or search or update or delete``
 
 .. code:: python
@@ -90,10 +90,10 @@ Then, multible items added.
 
 In addition to main item (sk=\ ``user_item``), multiple item
 (sk=\ ``search_{__model_name__}_{field_name}``) added to table. Those
-¡Èsearch items¡É are used to search
+â€œsearch itemsâ€ are used to search
 
-The GSI ``DataSearchIndex`` is used to get ¡Èsearch items¡É to extract
-target¡Çs pk. Then, ``batch_get`` items by pk.
+The GSI ``DataSearchIndex`` is used to get â€œsearch itemsâ€ to extract
+targetâ€™s pk. Then, ``batch_get`` items by pk.
 
 ================= ==================== =========
 sk = hash         data = range         pk
@@ -136,7 +136,7 @@ Or use unique value to detect exist item.
    new_user = Test(name="John", email="new-john@example.com")
    query.model(new_user).update()
 
-Then, tha value of ¡Èmain item¡É and ¡Èseach item¡É changed
+Then, tha value of â€œmain itemâ€ and â€œseach itemâ€ changed
 
 +----------+----------+----------+------+----------+----------+
 | pk       | sk       | data     | name | email    | des      |

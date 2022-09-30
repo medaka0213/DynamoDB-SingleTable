@@ -18,9 +18,9 @@ data models for single service.</p>
 </div>
 <div class="section" id="data-models">
 <h3>Data Models</h3>
-<p>Each model hava to set 3 keys - primary_key ï¿½ï¿½ Hash key for single item.
-default: <span class="docutils literal">{__model_name__}_{uuid}</span> - seconday_key ï¿½ï¿½ Range key for
-item. default: <span class="docutils literal">{__model_name__}_item</span> - unique_key ï¿½ï¿½ key to identify
+<p>Each model hava to set 3 keys - primary_key ¡Ä Hash key for single item.
+default: <span class="docutils literal">{__model_name__}_{uuid}</span> - seconday_key ¡Ä Range key for
+item. default: <span class="docutils literal">{__model_name__}_item</span> - unique_key ¡Ä key to identify
 the item is the same. Mainly used to update item.</p>
 <p>And you can set <span class="docutils literal">serch_key</span> to enable search via GSI</p>
 <pre><code><span class="kn">from</span> <span class="nn">ddb_single.model</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span>
@@ -39,7 +39,7 @@ the item is the same. Mainly used to update item.</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage</h2>
-<p>need ï¿½ï¿½Qureyï¿½ï¿½ object for CRUD;
+<p>need ¡ÈQurey¡É object for CRUD;
 <span class="docutils literal"><span class="pre">query.model(foo).create</span> or search or update or delete</span></p>
 <pre><code><span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></code></pre>
 <div class="section" id="create-item">
@@ -104,9 +104,9 @@ mple.com</p></td>
 </table>
 <p>In addition to main item (sk=<span class="docutils literal">user_item</span>), multiple item
 (sk=<span class="docutils literal">search_{__model_name__}_{field_name}</span>) added to table. Those
-ï¿½ï¿½search itemsï¿½ï¿½ are used to search</p>
-<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ï¿½ï¿½search itemsï¿½ï¿½ to extract
-targetï¿½ï¿½s pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
+¡Èsearch items¡É are used to search</p>
+<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ¡Èsearch items¡É to extract
+target¡Çs pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
 <table>
 <colgroup>
 <col>
@@ -150,7 +150,7 @@ targetï¿½ï¿½s pk. Then, <span class="docutils literal">batch_get</span> items by
 <p>Or use unique value to detect exist item.</p>
 <pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;new-john&#64;example.com&quot;</span><span class="p">)</span>
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
-<p>Then, tha value of ï¿½ï¿½main itemï¿½ï¿½ and ï¿½ï¿½seach itemï¿½ï¿½ changed</p>
+<p>Then, tha value of ¡Èmain item¡É and ¡Èseach item¡É changed</p>
 <table>
 <colgroup>
 <col>
