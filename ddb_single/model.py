@@ -7,11 +7,30 @@ import ddb_single.utils_botos as util_b
 
 
 class DBField:
+    """
+    DBField is a field of a model. It is used to define the structure of a model.
+    """
     __setup__ = False
     def __init__(self, type:FieldType=FieldType.STRING, default=None, default_factory=None, nullable=True, required=False, 
                  primary_key=False, secondary_key=False, unique_key=False, search_key=False, 
                  reletion=None, reference=None, reletion_by_unique=True, reference_by_unique=True,
                  **kwargs):
+        """
+        Args:
+            type (FieldType): The type of the field. It can be one of the following: STRING, NUMBER, BINARY, BOOLEAN, NULL, LIST, MAP, or SET.
+            default: The default value of the field.
+            default_factory: The default factory of the field.
+            nullable (bool): Whether the field can be null.
+            required (bool): Whether the field is required.
+            primary_key (bool): Whether the field is a primary key.
+            secondary_key (bool): Whether the field is a secondary key.
+            unique_key (bool): Whether the field is a unique key.
+            search_key (bool): Whether the field is a search key.
+            reletion (BaseModel): The reletion model of the field.
+            reference (BaseModel): The reference model of the field.
+            reletion_by_unique (bool): Whether the reletion is by unique key.
+            reference_by_unique (bool): Whether the reference is by unique key.
+        """
         self.type = type
         self.default = default
         self.default_factory = default_factory
@@ -39,9 +58,19 @@ class DBField:
             self.default_factory = lambda x: self.__table__.sk(model_cls.__model_name__)
     
     def is_list(self):
+        """
+        Returns:
+            bool: Whether the field is a list.
+        """
         return self.type in [FieldType.LIST, FieldType.STRING_SET, FieldType.NUMBER_SET, FieldType.BINARY_SET]
 
     def validate(self, value=None):
+        """
+        Args:
+            value: The value to be validated. If not provided, the value of the field will be used.
+        Returns:
+            The validated value.
+        """
         self.__setup__ = True
         if value is not None:
             self.value = value
@@ -112,15 +141,33 @@ class DBField:
                 raise ValueError(f"Value {self.name} must be a valid value")
 
     def search_key_factory(self):
+        """
+        Returns:
+            str: The search key of the field.
+        """
         return self.__table__.search_key_factory(self.__model_cls__.__model_name__, self.name)
 
     def search_data_key(self):
+        """
+        Returns:
+            str: The search data key of the field.
+        """
         return self.__table__.search_data_key(self.type)
 
     def serch_index(self):
+        """
+        Returns:
+            str: The search index of the field.
+        """
         return self.__table__.serch_index(self.type)
 
     def search_item(self, pk):
+        """
+        Args:
+            pk: The primary key of the item.
+        Returns:
+            dict: The search item.
+        """
         return {
             self.__table__.__primary_key__: pk,
             self.__table__.__secondary_key__: self.search_key_factory(),
@@ -128,6 +175,13 @@ class DBField:
         }
     
     def key_ex(self, value, mode):
+        """
+        Args:
+            value: The value to be compared.
+            mode: The mode of the comparison.
+        Returns:
+            dict: The key expression.
+        """
         if self.secondary_key:
             raise ValueError(f"Secondary key can not be used as a key: {self.name}")
         res = {
@@ -153,9 +207,107 @@ class DBField:
         }
     
     def eq(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.EQ.
+        """
         return self.key_ex(value, util_b.QueryType.EQ)
+    
+    def ne(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.NE.
+        """
+        return self.key_ex(value, util_b.QueryType.N_EQ)
+    
+    def lt(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.LT.
+        """
+        return self.key_ex(value, util_b.QueryType.LT)
+    
+    def lte(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.LTE.
+        """
+        return self.key_ex(value, util_b.QueryType.LT_E)
+    
+    def gt(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.GT.
+        """
+        return self.key_ex(value, util_b.QueryType.GT)
+    
+    def gte(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.GTE.
+        """
+        return self.key_ex(value, util_b.QueryType.GT_E)
+    
+    def between(self, value1, value2):
+        """
+        Args:
+            value1: The value to be compared.
+            value2: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.BETWEEN.
+        """
+        return self.key_ex((value1, value2), util_b.QueryType.BETWEEN)
+    
+    def begins_with(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.BEGINS_WITH.
+        """
+        return self.key_ex(value, util_b.QueryType.BEGINS)
+    
+    def contains(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.CONTAINS.
+        """
+        return self.key_ex(value, util_b.QueryType.CONTAINS)
+    
+    def in_(self, value):
+        """
+        Args:
+            value: The value to be compared.
+        Returns:
+            dict: key_ex with mode QueryType.IN.
+        """
+        return self.key_ex(value, util_b.QueryType.IN)
 
 class BaseModel():
+    """
+    The base model class.
+    Examples:
+        >>> class User(BaseModel):
+        ...     __table__ = table
+        ...     __model_name__ = "user"
+        ...     id = DBField(primary_key=True, required=True)
+        ...     name = DBField(required=True)
+        ...     age = DBField(type=FieldType.NUMBER)
+    """
     __setup__ = False
     __use_unique_for_relations__ = True
     __model_name__:str = None

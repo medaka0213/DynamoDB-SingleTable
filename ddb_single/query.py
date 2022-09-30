@@ -10,6 +10,11 @@ class Query:
             self.model(model)
     
     def model(self, model:BaseModel):
+        """
+        Set DB data model.
+        Args:
+            model (BaseModel): DB data model
+        """
         if not model.__setup__:
             model = model()
         self.__model__ = model
@@ -34,15 +39,30 @@ class Query:
 
     # 検索
     def search(self, *queries):
+        """
+        Search items.
+        Args:
+            queries (List[dict]): Query objects
+        """
         return self.__table__.search(self.__model__.__model_name__, *queries)
 
     # アイテムを取得
     def get(self, pk:str):
+        """
+        Get single item.
+        Args:
+            pk: Primary key
+        """
         res = self.__table__.get_item(pk)
         return res
 
     # ユニークキーで検索
     def get_by_unique(self, value):
+        """
+        Get single item by unique key.
+        Args:
+            value: Unique key value
+        """
         res = self.search(getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(value))
         if res:
             pk = res[0][self.__model__.__primary_key__]
@@ -60,6 +80,12 @@ class Query:
 
     # 新規作成
     def create(self, batch=None, raise_if_exists=False):
+        """
+        Create a new item.
+        Args:
+            batch: BatchWriteItem
+            raise_if_exists (bool): Throw exception if item already exists
+        """
         old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
         if old_item:
             if raise_if_exists:
@@ -71,6 +97,11 @@ class Query:
 
     # 更新
     def update(self, batch=None):
+        """
+        Update an item.
+        Args:
+            batch: BatchWriteItem
+        """
         old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
         if old_item:
             self._update(self, old_item, batch=batch)
@@ -102,12 +133,21 @@ class Query:
 
     # 削除
     def delete(self, batch=None):
+        """
+        Delete an item.
+        Args:
+            batch: BatchWriteItem
+        """
         self.__table__.clear_item(self.__model__.data[self.__model__.__primary_key__], batch=batch)
     
     def delete_by_unique(self, value, batch=None):
+        """
+        Delete an item by unique key.
+        Args:
+            batch: BatchWriteItem
+        """
         item = self.get_by_unique(value)
         if item:
-            self.__model__.data = item
             self.delete(batch=batch)
 
     # 関連付け
