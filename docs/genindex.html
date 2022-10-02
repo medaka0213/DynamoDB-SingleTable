@@ -36,8 +36,11 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">DynamoDB SingleTable</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -91,14 +94,10 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddb_single.html#ddb_single.query.Query.add_reference">add_reference() (ddb_single.query.Query method)</a>
-</li>
-      <li><a href="ddb_single.html#ddb_single.query.Query.add_relation">add_relation() (ddb_single.query.Query method)</a>
+      <li><a href="ddb_single.html#ddb_single.utils_botos.attr_ex">attr_ex() (in module ddb_single.utils_botos)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddb_single.html#ddb_single.utils_botos.attr_ex">attr_ex() (in module ddb_single.utils_botos)</a>
-</li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.attr_method">attr_method() (in module ddb_single.utils_botos)</a>
 </li>
   </ul></td>
@@ -119,13 +118,17 @@
 </li>
       <li><a href="ddb_single.html#ddb_single.table.Table.batch_update">batch_update() (ddb_single.table.Table method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.table.Table.batch_writer">batch_writer() (ddb_single.table.Table method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.BEGINS">BEGINS (ddb_single.utils_botos.QueryType attribute)</a>
 </li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.begins_with">begins_with() (ddb_single.model.DBField method)</a>
+</li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.BETWEEN">BETWEEN (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.between">between() (ddb_single.model.DBField method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.table.FieldType.BINARY">BINARY (ddb_single.table.FieldType attribute)</a>
 </li>
@@ -145,9 +148,11 @@
 </li>
       <li><a href="ddb_single.html#ddb_single.table.Table.clear_relation">clear_relation() (ddb_single.table.Table method)</a>
 </li>
+      <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.CONTAINS">CONTAINS (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.CONTAINS">CONTAINS (ddb_single.utils_botos.QueryType attribute)</a>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.contains">contains() (ddb_single.model.DBField method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.query.Query.create">create() (ddb_single.query.Query method)</a>
 
@@ -206,6 +211,8 @@
 </li>
       <li><a href="ddb_single.html#ddb_single.table.default_pk_factory">default_pk_factory() (in module ddb_single.table)</a>
 </li>
+      <li><a href="ddb_single.html#ddb_single.table.default_sk_factory">default_sk_factory() (in module ddb_single.table)</a>
+</li>
       <li><a href="ddb_single.html#ddb_single.query.Query.delete">delete() (ddb_single.query.Query method)</a>
 
       <ul>
@@ -262,17 +269,21 @@
 </li>
       <li><a href="ddb_single.html#ddb_single.query.Query.get_pk">get_pk() (ddb_single.query.Query method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.query.Query.get_reference">get_reference() (ddb_single.query.Query method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.query.Query.get_relation">get_relation() (ddb_single.query.Query method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.query.Query.get_unique">get_unique() (ddb_single.query.Query method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.GT">GT (ddb_single.utils_botos.QueryType attribute)</a>
 </li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.gt">gt() (ddb_single.model.DBField method)</a>
+</li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.GT_E">GT_E (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.gte">gte() (ddb_single.model.DBField method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -289,6 +300,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.IN">IN (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.in_">in_() (ddb_single.model.DBField method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.table.Table.init">init() (ddb_single.table.Table method)</a>
 </li>
@@ -328,11 +341,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.table.FieldType.LIST">LIST (ddb_single.table.FieldType attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.LT">LT (ddb_single.utils_botos.QueryType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.lt">lt() (ddb_single.model.DBField method)</a>
+</li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.LT_E">LT_E (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.lte">lte() (ddb_single.model.DBField method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -368,6 +385,8 @@
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.N_EQ">N_EQ (ddb_single.utils_botos.QueryType attribute)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.utils_botos.QueryType.N_EX">N_EX (ddb_single.utils_botos.QueryType attribute)</a>
+</li>
+      <li><a href="ddb_single.html#ddb_single.model.DBField.ne">ne() (ddb_single.model.DBField method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -417,8 +436,6 @@
 </li>
       <li><a href="ddb_single.html#ddb_single.table.Table.reference">reference() (ddb_single.table.Table method)</a>
 </li>
-      <li><a href="ddb_single.html#ddb_single.query.Query.reference_items">reference_items() (ddb_single.query.Query method)</a>
-</li>
       <li><a href="ddb_single.html#ddb_single.table.Table.rel_key">rel_key() (ddb_single.table.Table method)</a>
 </li>
   </ul></td>
@@ -430,10 +447,6 @@
       <li><a href="ddb_single.html#ddb_single.table.Table.relation">relation() (ddb_single.table.Table method)</a>
 </li>
       <li><a href="ddb_single.html#ddb_single.query.Query.relation_items">relation_items() (ddb_single.query.Query method)</a>
-</li>
-      <li><a href="ddb_single.html#ddb_single.query.Query.remove_reference">remove_reference() (ddb_single.query.Query method)</a>
-</li>
-      <li><a href="ddb_single.html#ddb_single.query.Query.remove_relation">remove_relation() (ddb_single.query.Query method)</a>
 </li>
   </ul></td>
 </tr></table>

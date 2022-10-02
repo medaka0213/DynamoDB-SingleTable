@@ -36,146 +36,11 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">ddb_single package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ddb_single.model">ddb_single.model module</a><ul>
-<li><a class="reference internal" href="#ddb_single.model.BaseModel"><code class="docutils literal notranslate"><span class="pre">BaseModel</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField"><code class="docutils literal notranslate"><span class="pre">DBField</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.model.DBField.eq"><code class="docutils literal notranslate"><span class="pre">DBField.eq()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.is_list"><code class="docutils literal notranslate"><span class="pre">DBField.is_list()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.key_ex"><code class="docutils literal notranslate"><span class="pre">DBField.key_ex()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.search_data_key"><code class="docutils literal notranslate"><span class="pre">DBField.search_data_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.search_item"><code class="docutils literal notranslate"><span class="pre">DBField.search_item()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.search_key_factory"><code class="docutils literal notranslate"><span class="pre">DBField.search_key_factory()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.serch_index"><code class="docutils literal notranslate"><span class="pre">DBField.serch_index()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.setup"><code class="docutils literal notranslate"><span class="pre">DBField.setup()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.model.DBField.validate"><code class="docutils literal notranslate"><span class="pre">DBField.validate()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">DynamoDB SingleTable</a></li>
 </ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-ddb_single.query">ddb_single.query module</a><ul>
-<li><a class="reference internal" href="#ddb_single.query.Query"><code class="docutils literal notranslate"><span class="pre">Query</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.query.Query.add_reference"><code class="docutils literal notranslate"><span class="pre">Query.add_reference()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.add_relation"><code class="docutils literal notranslate"><span class="pre">Query.add_relation()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.create"><code class="docutils literal notranslate"><span class="pre">Query.create()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.delete"><code class="docutils literal notranslate"><span class="pre">Query.delete()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.delete_by_unique"><code class="docutils literal notranslate"><span class="pre">Query.delete_by_unique()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get"><code class="docutils literal notranslate"><span class="pre">Query.get()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get_by_unique"><code class="docutils literal notranslate"><span class="pre">Query.get_by_unique()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get_pk"><code class="docutils literal notranslate"><span class="pre">Query.get_pk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get_reference"><code class="docutils literal notranslate"><span class="pre">Query.get_reference()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get_relation"><code class="docutils literal notranslate"><span class="pre">Query.get_relation()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.get_unique"><code class="docutils literal notranslate"><span class="pre">Query.get_unique()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.model"><code class="docutils literal notranslate"><span class="pre">Query.model()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.reference_items"><code class="docutils literal notranslate"><span class="pre">Query.reference_items()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.relation_items"><code class="docutils literal notranslate"><span class="pre">Query.relation_items()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.remove_reference"><code class="docutils literal notranslate"><span class="pre">Query.remove_reference()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.remove_relation"><code class="docutils literal notranslate"><span class="pre">Query.remove_relation()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.search"><code class="docutils literal notranslate"><span class="pre">Query.search()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.search_items"><code class="docutils literal notranslate"><span class="pre">Query.search_items()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.update"><code class="docutils literal notranslate"><span class="pre">Query.update()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.query.Query.validate"><code class="docutils literal notranslate"><span class="pre">Query.validate()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-ddb_single.table">ddb_single.table module</a><ul>
-<li><a class="reference internal" href="#ddb_single.table.FieldType"><code class="docutils literal notranslate"><span class="pre">FieldType</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.BINARY"><code class="docutils literal notranslate"><span class="pre">FieldType.BINARY</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.BINARY_SET"><code class="docutils literal notranslate"><span class="pre">FieldType.BINARY_SET</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.BOOLEAN"><code class="docutils literal notranslate"><span class="pre">FieldType.BOOLEAN</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.LIST"><code class="docutils literal notranslate"><span class="pre">FieldType.LIST</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.MAP"><code class="docutils literal notranslate"><span class="pre">FieldType.MAP</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.NULL"><code class="docutils literal notranslate"><span class="pre">FieldType.NULL</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.NUMBER"><code class="docutils literal notranslate"><span class="pre">FieldType.NUMBER</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.NUMBER_SET"><code class="docutils literal notranslate"><span class="pre">FieldType.NUMBER_SET</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.STRING"><code class="docutils literal notranslate"><span class="pre">FieldType.STRING</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.FieldType.STRING_SET"><code class="docutils literal notranslate"><span class="pre">FieldType.STRING_SET</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ddb_single.table.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_create"><code class="docutils literal notranslate"><span class="pre">Table.batch_create()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_delete_items"><code class="docutils literal notranslate"><span class="pre">Table.batch_delete_items()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_get"><code class="docutils literal notranslate"><span class="pre">Table.batch_get()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_get_from_pks"><code class="docutils literal notranslate"><span class="pre">Table.batch_get_from_pks()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_update"><code class="docutils literal notranslate"><span class="pre">Table.batch_update()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.batch_writer"><code class="docutils literal notranslate"><span class="pre">Table.batch_writer()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.clear_item"><code class="docutils literal notranslate"><span class="pre">Table.clear_item()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.clear_reference"><code class="docutils literal notranslate"><span class="pre">Table.clear_reference()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.clear_relation"><code class="docutils literal notranslate"><span class="pre">Table.clear_relation()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.create"><code class="docutils literal notranslate"><span class="pre">Table.create()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.create_table"><code class="docutils literal notranslate"><span class="pre">Table.create_table()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.delete"><code class="docutils literal notranslate"><span class="pre">Table.delete()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.detele_item"><code class="docutils literal notranslate"><span class="pre">Table.detele_item()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.filter"><code class="docutils literal notranslate"><span class="pre">Table.filter()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.get_item"><code class="docutils literal notranslate"><span class="pre">Table.get_item()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.init"><code class="docutils literal notranslate"><span class="pre">Table.init()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.pk"><code class="docutils literal notranslate"><span class="pre">Table.pk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.pk2model"><code class="docutils literal notranslate"><span class="pre">Table.pk2model()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.pk2rel_key"><code class="docutils literal notranslate"><span class="pre">Table.pk2rel_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.pk2sk"><code class="docutils literal notranslate"><span class="pre">Table.pk2sk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.reference"><code class="docutils literal notranslate"><span class="pre">Table.reference()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.rel_key"><code class="docutils literal notranslate"><span class="pre">Table.rel_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.rel_key2pk"><code class="docutils literal notranslate"><span class="pre">Table.rel_key2pk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.rel_prefix"><code class="docutils literal notranslate"><span class="pre">Table.rel_prefix()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.relation"><code class="docutils literal notranslate"><span class="pre">Table.relation()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.search"><code class="docutils literal notranslate"><span class="pre">Table.search()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.search_data_key"><code class="docutils literal notranslate"><span class="pre">Table.search_data_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.search_key_factory"><code class="docutils literal notranslate"><span class="pre">Table.search_key_factory()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.serch_index"><code class="docutils literal notranslate"><span class="pre">Table.serch_index()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.sk"><code class="docutils literal notranslate"><span class="pre">Table.sk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.sk2model"><code class="docutils literal notranslate"><span class="pre">Table.sk2model()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.sk2pk"><code class="docutils literal notranslate"><span class="pre">Table.sk2pk()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.Table.update"><code class="docutils literal notranslate"><span class="pre">Table.update()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ddb_single.table.default_pk2model"><code class="docutils literal notranslate"><span class="pre">default_pk2model()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.default_pk_factory"><code class="docutils literal notranslate"><span class="pre">default_pk_factory()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.hash_key"><code class="docutils literal notranslate"><span class="pre">hash_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.table.range_key"><code class="docutils literal notranslate"><span class="pre">range_key()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-ddb_single.utils_botos">ddb_single.utils_botos module</a><ul>
-<li><a class="reference internal" href="#ddb_single.utils_botos.FilterStatus"><code class="docutils literal notranslate"><span class="pre">FilterStatus</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.utils_botos.FilterStatus.FILTER"><code class="docutils literal notranslate"><span class="pre">FilterStatus.FILTER</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.FilterStatus.SEATCH"><code class="docutils literal notranslate"><span class="pre">FilterStatus.SEATCH</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.FilterStatus.STAGED"><code class="docutils literal notranslate"><span class="pre">FilterStatus.STAGED</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType"><code class="docutils literal notranslate"><span class="pre">QueryType</span></code></a><ul>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.BEGINS"><code class="docutils literal notranslate"><span class="pre">QueryType.BEGINS</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.BETWEEN"><code class="docutils literal notranslate"><span class="pre">QueryType.BETWEEN</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.CONTAINS"><code class="docutils literal notranslate"><span class="pre">QueryType.CONTAINS</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.EQ"><code class="docutils literal notranslate"><span class="pre">QueryType.EQ</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.EX"><code class="docutils literal notranslate"><span class="pre">QueryType.EX</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.GT"><code class="docutils literal notranslate"><span class="pre">QueryType.GT</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.GT_E"><code class="docutils literal notranslate"><span class="pre">QueryType.GT_E</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.IN"><code class="docutils literal notranslate"><span class="pre">QueryType.IN</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.LT"><code class="docutils literal notranslate"><span class="pre">QueryType.LT</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.LT_E"><code class="docutils literal notranslate"><span class="pre">QueryType.LT_E</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.N_EQ"><code class="docutils literal notranslate"><span class="pre">QueryType.N_EQ</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.QueryType.N_EX"><code class="docutils literal notranslate"><span class="pre">QueryType.N_EX</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.attr_ex"><code class="docutils literal notranslate"><span class="pre">attr_ex()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.attr_method"><code class="docutils literal notranslate"><span class="pre">attr_method()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.deserialize"><code class="docutils literal notranslate"><span class="pre">deserialize()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.is_key"><code class="docutils literal notranslate"><span class="pre">is_key()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.is_same_json"><code class="docutils literal notranslate"><span class="pre">is_same_json()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.json_export"><code class="docutils literal notranslate"><span class="pre">json_export()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.json_import"><code class="docutils literal notranslate"><span class="pre">json_import()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.range_ex"><code class="docutils literal notranslate"><span class="pre">range_ex()</span></code></a></li>
-<li><a class="reference internal" href="#ddb_single.utils_botos.serialize"><code class="docutils literal notranslate"><span class="pre">serialize()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-ddb_single">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -209,48 +74,274 @@
 <span id="ddb-single-model-module"></span><h2>ddb_single.model module<a class="headerlink" href="#module-ddb_single.model" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ddb_single.model.BaseModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.model.</span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.BaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.model.</span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">__skip_validation__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The base model class.
+.. rubric:: Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">__table__</span> <span class="o">=</span> <span class="n">table</span>
+<span class="gp">... </span>    <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
+<span class="gp">... </span>    <span class="nb">id</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">age</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">FieldType</span><span class="o">.</span><span class="n">NUMBER</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ddb_single.model.DBField">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.model.</span></span><span class="sig-name descname"><span class="pre">DBField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.table.FieldType" title="ddb_single.table.FieldType"><span class="pre">FieldType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FieldType.STRING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_factory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nullable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reletion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reletion_by_unique</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_by_unique</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.model.</span></span><span class="sig-name descname"><span class="pre">DBField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.table.FieldType" title="ddb_single.table.FieldType"><span class="pre">FieldType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FieldType.STRING</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_factory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nullable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reletion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reletion_by_unique</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>DBField is a field of a model. It is used to define the structure of a model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.begins_with">
+<span class="sig-name descname"><span class="pre">begins_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.begins_with" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.BEGINS_WITH.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.between">
+<span class="sig-name descname"><span class="pre">between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.between" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value1</strong> – The value to be compared.</p></li>
+<li><p><strong>value2</strong> – The value to be compared.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.BETWEEN.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.contains" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.CONTAINS.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.eq">
 <span class="sig-name descname"><span class="pre">eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.eq" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.EQ.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.gt">
+<span class="sig-name descname"><span class="pre">gt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.gt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.GT.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.gte">
+<span class="sig-name descname"><span class="pre">gte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.gte" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.GTE.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.in_">
+<span class="sig-name descname"><span class="pre">in_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.in_" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.IN.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.is_list">
 <span class="sig-name descname"><span class="pre">is_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.is_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether the field is a list.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.key_ex">
 <span class="sig-name descname"><span class="pre">key_ex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.key_ex" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The value to be compared.</p></li>
+<li><p><strong>mode</strong> – The mode of the comparison.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The key expression.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.lt">
+<span class="sig-name descname"><span class="pre">lt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.lt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.LT.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.lte">
+<span class="sig-name descname"><span class="pre">lte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.lte" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.LTE.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ddb_single.model.DBField.ne">
+<span class="sig-name descname"><span class="pre">ne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.ne" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be compared.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>key_ex with mode QueryType.NE.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.search_data_key">
 <span class="sig-name descname"><span class="pre">search_data_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.search_data_key" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The search data key of the field.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.search_item">
 <span class="sig-name descname"><span class="pre">search_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.search_item" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pk</strong> – The primary key of the item.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The search item.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.search_key_factory">
 <span class="sig-name descname"><span class="pre">search_key_factory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.search_key_factory" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The search key of the field.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.serch_index">
 <span class="sig-name descname"><span class="pre">serch_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.serch_index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The search index of the field.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.setup">
@@ -259,8 +350,16 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.model.DBField.validate">
-<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.validate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.model.DBField.validate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to be validated. If not provided, the value of the field will be used.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The validated value.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -272,39 +371,41 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.query.</span></span><span class="sig-name descname"><span class="pre">Query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.table.Table" title="ddb_single.table.Table"><span class="pre">Table</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ddb_single.query.Query.add_reference">
-<span class="sig-name descname"><span class="pre">add_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.add_reference" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ddb_single.query.Query.add_relation">
-<span class="sig-name descname"><span class="pre">add_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.add_relation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.create">
 <span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.create" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Create a new item.
+:param batch: BatchWriteItem
+:param raise_if_exists: Throw exception if item already exists
+:type raise_if_exists: bool</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.delete">
-<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.delete" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an item.
+:param batch: BatchWriteItem</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.delete_by_unique">
 <span class="sig-name descname"><span class="pre">delete_by_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.delete_by_unique" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Delete an item by unique key.
+:param batch: BatchWriteItem</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get single item.
+:param pk: Primary key</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.get_by_unique">
 <span class="sig-name descname"><span class="pre">get_by_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get_by_unique" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get single item by unique key.
+:param value: Unique key value</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.get_pk">
@@ -313,12 +414,12 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.get_reference">
-<span class="sig-name descname"><span class="pre">get_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get_reference" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.DBField" title="ddb_single.model.DBField"><span class="pre">DBField</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get_reference" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.get_relation">
-<span class="sig-name descname"><span class="pre">get_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get_relation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.DBField" title="ddb_single.model.DBField"><span class="pre">DBField</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.get_relation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -329,12 +430,10 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.model">
 <span class="sig-name descname"><span class="pre">model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ddb_single.model.BaseModel" title="ddb_single.model.BaseModel"><span class="pre">BaseModel</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ddb_single.query.Query.reference_items">
-<span class="sig-name descname"><span class="pre">reference_items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.reference_items" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set DB data model.
+:param model: DB data model
+:type model: BaseModel</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.relation_items">
@@ -342,19 +441,12 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddb_single.query.Query.remove_reference">
-<span class="sig-name descname"><span class="pre">remove_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.remove_reference" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ddb_single.query.Query.remove_relation">
-<span class="sig-name descname"><span class="pre">remove_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.remove_relation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.search">
 <span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">queries</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.search" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Search items.
+:param queries: Query objects
+:type queries: List[dict]</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.search_items">
@@ -364,7 +456,9 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.update" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Update an item.
+:param batch: BatchWriteItem</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.query.Query.validate">
@@ -435,7 +529,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ddb_single.table.Table">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.table.</span></span><span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key='pk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key_factory=&lt;function</span> <span class="pre">default_pk_factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key2model=&lt;function</span> <span class="pre">default_pk2model&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_index_name='RangeIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key='sk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_prefix=''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_suffix='_item'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key='unique'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_prefix='search_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relation_prefix='rel_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relation_joint=''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_key='data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_index='DataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_num_key='data-n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_num_index='NumDataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_bin_key='data-b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_bin_index='BinDataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ReadCapacityUnits=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WriteCapacityUnits=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**table_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.table.</span></span><span class="sig-name descname"><span class="pre">Table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key='pk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key_factory=&lt;function</span> <span class="pre">default_pk_factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_key2model=&lt;function</span> <span class="pre">default_pk2model&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_index_name='RangeIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key='sk'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_prefix=''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_suffix='_item'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_key_factory=&lt;function</span> <span class="pre">default_sk_factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key='unique'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_key_type='S'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_prefix='search_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relation_prefix='rel_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relation_joint=''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_key='data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_index='DataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_num_key='data-n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_num_index='NumDataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_data_bin_key='data-b'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_bin_index='BinDataSearchIndex'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ReadCapacityUnits=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WriteCapacityUnits=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**table_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.table.Table.batch_create">
@@ -539,7 +633,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.table.Table.reference">
-<span class="sig-name descname"><span class="pre">reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table.reference" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table.reference" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -559,7 +653,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ddb_single.table.Table.relation">
-<span class="sig-name descname"><span class="pre">relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table.relation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.Table.relation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -612,6 +706,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="ddb_single.table.default_pk_factory">
 <span class="sig-prename descclassname"><span class="pre">ddb_single.table.</span></span><span class="sig-name descname"><span class="pre">default_pk_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.default_pk_factory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ddb_single.table.default_sk_factory">
+<span class="sig-prename descclassname"><span class="pre">ddb_single.table.</span></span><span class="sig-name descname"><span class="pre">default_sk_factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_item'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.table.default_sk_factory" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
