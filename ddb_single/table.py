@@ -171,7 +171,7 @@ class Table:
                     print(f"{len(res_data)}/{limit}")
                     response = self.__table__.scan(**kwargs, ExclusiveStartKey=response['LastEvaluatedKey'])
                     res_data += response['Items']
-                return json_export(res_data)
+                return util_b.json_export(res_data)
             else:
                 return []
 
