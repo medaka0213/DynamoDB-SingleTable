@@ -31,8 +31,7 @@ Each model has al least 3 keys
 And you can set `serch_key` to enable search via GSI 
 
 ```python
-from ddb_single.model import BaseModel, DBField
-from ddb_single.table import FieldType
+from ddb_single import BaseModel, DBField, FieldType
 
 class User(BaseModel):
     __table__=table
@@ -53,6 +52,7 @@ need "Qurey" object for CRUD
 - `query.model(foo).delete`
 
 ```python
+from ddb_single import Query
 query = Query(table)
 ```
 
