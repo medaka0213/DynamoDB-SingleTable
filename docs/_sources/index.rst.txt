@@ -11,3 +11,6 @@ Welcome to ddb_single's documentation!
    :caption: Contents:
 
    readme.md
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
