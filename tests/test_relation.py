@@ -27,13 +27,6 @@ class BlogPost(BaseModel):
     content = DBField(search_key=True)
     user = DBField(reletion=User)
 
-class Comment(BaseModel):
-    __table__=table
-    __model_name__ = "user"
-    target = DBField(reletion=BlogPost)
-    user = DBField(reletion=User)
-    description=DBField()
-
 print("table_name:", table.__table_name__)
 query = Query(table)
 
