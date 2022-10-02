@@ -258,7 +258,7 @@ class Table:
 
     # --- 検索関連 ---
     # 関連先を検索
-    def relation(self, pk, model_name="", field_name=""):
+    def relation(self, pk, model_name="", field_name="", pk_only=False):
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
         if model_name:
             KeyConditionExpression &= Key(self.__secondary_key__).begins_with(self.rel_prefix(model_name))
@@ -273,12 +273,14 @@ class Table:
             res = self._query(
                 KeyConditionExpression=KeyConditionExpression
             )
-        rel_pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
-        res = self.batch_get_from_pks(rel_pks)
-        return res
+        pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
+        if pk_only:
+            return pks
+        else:
+            return self.batch_get_from_pks(pks)
 
     # 関連元を検索
-    def reference(self, pk, model_name="", field_name=""):
+    def reference(self, pk, model_name="", field_name="", pk_only=False):
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.rel_key(pk))
         if field_name:
             # フィールドの指定がある場合
@@ -293,8 +295,11 @@ class Table:
                 KeyConditionExpression=KeyConditionExpression & Key(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__range_index_name__,
             )
-        res = self.batch_get_from_pks([r[self.__primary_key__] for r in res])
-        return res
+        pks = [r[self.__primary_key__] for r in res]
+        if pk_only:
+            return pks
+        else:
+            return self.batch_get_from_pks(pks)
     
     # フィルター
     def filter(self, items, searchExs):
@@ -308,7 +313,7 @@ class Table:
         return res
 
     # 検索
-    def search(self, model_name, *searchEx):
+    def search(self, model_name, *searchEx, pk_only=False):
         simple_ex = [s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEATCH]
         staged_ex = [s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.STAGED]
         filter_ex = [s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.FILTER]
@@ -326,9 +331,6 @@ class Table:
                     res &= set(_res)
                 else:
                     res = set(_res)
-            res = self.batch_get_from_pks(list(res))
-            #  filter_ex があればフィルタ
-            return self.filter(res, filter_ex)
         else:
             # シンプルにクエリ検索
             KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
@@ -347,8 +349,16 @@ class Table:
                 res = self._query(
                     KeyConditionExpression=KeyConditionExpression
                 ) or []
-            # staged_ex があればフィルタ
-            return self.filter(res, staged_ex)
+        if pk_only and not filter_ex:
+            return list(res)
+        else:
+            res = self.batch_get_from_pks(list(res))
+            #  filter_ex があればフィルタ
+            res = self.filter(res, filter_ex)
+            if pk_only:
+                return [r[self.__primary_key__] for r in res]
+            else:
+                return res
 
     # --- 更新関連 ---
     # バッチライター

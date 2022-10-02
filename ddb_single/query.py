@@ -26,7 +26,7 @@ class Query:
     def get_unique(self):
         return self.__model__.data[self.__model__.__unique_keys__[0]]
 
-    def search_items(self):
+    def _search_items(self):
         items_add = []
         items_remove = []
         for k in self.__model__.__search_keys__:
@@ -38,13 +38,13 @@ class Query:
         return items_add, items_remove
 
     # 検索
-    def search(self, *queries):
+    def search(self, *queries, pk_only=False):
         """
         Search items.
         Args:
             queries (List[dict]): Query objects
         """
-        return self.__table__.search(self.__model__.__model_name__, *queries)
+        return self.__table__.search(self.__model__.__model_name__, *queries, pk_only=pk_only)
 
     # アイテムを取得
     def get(self, pk:str):
@@ -109,8 +109,8 @@ class Query:
     
     def _create(self, batch=None, remove_ex_search_items=False):
         self.validate()
-        search_items_add, search_items_rm = self.search_items()
-        rel_items_add, rel_items_rm = self.relation_items()
+        search_items_add, search_items_rm = self._search_items()
+        rel_items_add, rel_items_rm = self._relation_items()
 
         items_add = search_items_add + rel_items_add
         items_remove = search_items_rm + rel_items_rm
@@ -181,7 +181,7 @@ class Query:
         result = [self._relation_item(pk, field) for pk in pks]
         return result
 
-    def relation_items(self):
+    def _relation_items(self):
         items_add = []
         items_exist = []
         for k in self.__model__.__relation_keys__:
@@ -202,7 +202,7 @@ class Query:
         return items_add, items_remove
 
     # Read
-    def get_relation(self, model:BaseModel="", field:DBField=""):
+    def get_relation(self, model:BaseModel="", field:DBField="", pk_only=False):
         # 関連を検索
         if not isinstance(model or "", str):
             model= model.__model_name__
@@ -210,9 +210,10 @@ class Query:
             field= field.name
         return self.__table__.relation(
             self.__model__.data[self.__model__.__primary_key__], 
-            model_name=model, field_name=field)
+            model_name=model, field_name=field,
+            pk_only=pk_only)
 
-    def get_reference(self, model:BaseModel="", field:DBField=""):
+    def get_reference(self, model:BaseModel="", field:DBField="", pk_only=False):
         # 参照を検索
         if not isinstance(model or "", str):
             model= model.__model_name__
@@ -220,4 +221,5 @@ class Query:
             field= field.name
         return self.__table__.reference(
             self.__model__.data[self.__model__.__primary_key__], 
-            model_name=model, field_name=field)
+            model_name=model, field_name=field,
+            pk_only=pk_only)
