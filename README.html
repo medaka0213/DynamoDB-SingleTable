@@ -7,8 +7,7 @@ data models for single service.</p>
 <h2>Getting Started</h2>
 <div class="section" id="init-table">
 <h3>Init Table</h3>
-<pre><code><span class="kn">from</span> <span class="nn">ddb_single.table</span> <span class="kn">import</span> <span class="n">Table</span>
-<span class="kn">from</span> <span class="nn">ddb_single.query</span> <span class="kn">import</span> <span class="n">Query</span>
+<pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Table</span>
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
     <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
@@ -18,9 +17,9 @@ data models for single service.</p>
 </div>
 <div class="section" id="data-models">
 <h3>Data Models</h3>
-<p>Each model has al least 3 keys - primary_key ? Hash key for single item.
-default: <span class="docutils literal">pk: {__model_name__}_{uuid}</span> - seconday_key ? Range key for
-item. default: <span class="docutils literal">sk: {__model_name__}_item</span> - unique_key ? key to
+<p>Each model has al least 3 keys - primary_key ??? Hash key for single item.
+default: <span class="docutils literal">pk: {__model_name__}_{uuid}</span> - seconday_key ??? Range key for
+item. default: <span class="docutils literal">sk: {__model_name__}_item</span> - unique_key ??? key to
 identify the item is the same. Mainly used to update item.</p>
 <p>And you can set <span class="docutils literal">serch_key</span> to enable search via GSI</p>
 <pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span><span class="p">,</span> <span class="n">FieldType</span>
@@ -36,7 +35,7 @@ identify the item is the same. Mainly used to update item.</p>
 </div>
 <div class="section" id="usage">
 <h2>Usage</h2>
-<p>need ?Qurey? object for CRUD - <span class="docutils literal"><span class="pre">query.model(foo).create</span></span> -
+<p>need ???Qurey??? object for CRUD - <span class="docutils literal"><span class="pre">query.model(foo).create</span></span> -
 <span class="docutils literal"><span class="pre">query.model(foo).get</span></span> - <span class="docutils literal"><span class="pre">query.model(foo).search</span></span> -
 <span class="docutils literal"><span class="pre">query.model(foo).update</span></span> - <span class="docutils literal"><span class="pre">query.model(foo).delete</span></span></p>
 <pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Query</span>
@@ -103,9 +102,9 @@ mple.com</p></td>
 </table>
 <p>In addition to main item (sk=<span class="docutils literal">user_item</span>), multiple item
 (sk=<span class="docutils literal">search_{__model_name__}_{field_name}</span>) added to table. Those
-?search items? are used to search</p>
-<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ?search items? to extract
-target?s pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
+???search items??? are used to search</p>
+<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ???search items??? to extract
+target???s pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
 <table>
 <colgroup>
 <col>
@@ -156,7 +155,7 @@ print(user)
 <p>Or use unique value to detect exist item.</p>
 <pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;new-john&#64;example.com&quot;</span><span class="p">)</span>
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
-<p>Then, tha value of ?main item? and ?seach item? changed</p>
+<p>Then, tha value of ???main item??? and ???seach item??? changed</p>
 <table>
 <colgroup>
 <col>
@@ -241,7 +240,7 @@ relation.</p>
     <span class="n">author</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span>
 <span class="p">)</span>
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></code></pre>
-<p>Then, tha value ?reletion item? added</p>
+<p>Then, tha value ???reletion item??? added</p>
 <table>
 <colgroup>
 <col>
@@ -307,7 +306,7 @@ relation.</p>
 </table>
 <p>In addition to main item (sk=<span class="docutils literal">blogpost_item</span>), relation item
 (sk=<span class="docutils literal">rel_{primary_key}</span>) added to table. The GSI <span class="docutils literal">DataSearchIndex</span>
-is used to get ?relation items? to extract target?s pk. Then,
+is used to get ???relation items??? to extract target???s pk. Then,
 <span class="docutils literal">batch_get</span> items by pk.</p>
 <table>
 <colgroup>
@@ -345,7 +344,7 @@ is used to get ?relation items? to extract target?s pk. Then,
 </div>
 <div class="section" id="search-reference">
 <h3>Search Reference</h3>
-<p>In this library, ?reference? is antonym to relation</p>
+<p>In this library, ???reference??? is antonym to relation</p>
 <p><span class="docutils literal">get_reference(model=Basemodel)</span> to search items related to the item</p>
 <pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
 <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
@@ -360,14 +359,14 @@ is used to get ?relation items? to extract target?s pk. Then,
 </div>
 <div class="section" id="update-relation">
 <h3>Update Relation</h3>
-<p>If relation key?s value changed, relationship also changed.</p>
+<p>If relation key???s value changed, relationship also changed.</p>
 <pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span>
 <span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">BlogPost</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
 <span class="n">blogpost</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_user</span>
 <span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
 
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
-<p>Then, ?reletion item? changed</p>
+<p>Then, ???reletion item??? changed</p>
 <table>
 <colgroup>
 <col>
@@ -452,7 +451,7 @@ is used to get ?relation items? to extract target?s pk. Then,
 <h3>Delete Relation</h3>
 <p>If related item deleted, relationship also deleted</p>
 <pre><code><span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">delete_by_unique</span><span class="p">(</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span></code></pre>
-<p>Then, ?reletion item? deleted. But main item?s value is not chenged.</p>
+<p>Then, ???reletion item??? deleted. But main item???s value is not chenged.</p>
 <table>
 <colgroup>
 <col>
