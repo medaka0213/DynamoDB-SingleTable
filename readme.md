@@ -11,7 +11,7 @@ It makes effective and easy to manage your whole data models for single service.
 ### Install
 
 ```
-pip install ddb_single
+pip install ddb-single
 ```
 
 ### Init Table
