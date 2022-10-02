@@ -27,9 +27,9 @@ Init Table
 Data Models
 ~~~~~~~~~~~
 
-Each model has al least 3 keys - primary_key ??? Hash key for single item.
-default: ``pk: {__model_name__}_{uuid}`` - seconday_key ??? Range key for
-item. default: ``sk: {__model_name__}_item`` - unique_key ??? key to
+Each model has al least 3 keys - primary_key ? Hash key for single item.
+default: ``pk: {__model_name__}_{uuid}`` - seconday_key ? Range key for
+item. default: ``sk: {__model_name__}_item`` - unique_key ? key to
 identify the item is the same. Mainly used to update item.
 
 And you can set ``serch_key`` to enable search via GSI
@@ -49,7 +49,7 @@ And you can set ``serch_key`` to enable search via GSI
 Usage
 -----
 
-need ???Qurey??? object for CRUD - ``query.model(foo).create`` -
+need ?Qurey? object for CRUD - ``query.model(foo).create`` -
 ``query.model(foo).get`` - ``query.model(foo).search`` -
 ``query.model(foo).update`` - ``query.model(foo).delete``
 
@@ -88,10 +88,10 @@ Then, multible items added.
 
 In addition to main item (sk=\ ``user_item``), multiple item
 (sk=\ ``search_{__model_name__}_{field_name}``) added to table. Those
-???search items??? are used to search
+?search items? are used to search
 
-The GSI ``DataSearchIndex`` is used to get ???search items??? to extract
-target???s pk. Then, ``batch_get`` items by pk.
+The GSI ``DataSearchIndex`` is used to get ?search items? to extract
+target?s pk. Then, ``batch_get`` items by pk.
 
 ================= ==================== =========
 sk = hash         data = range         pk
@@ -108,6 +108,14 @@ Search Items
    user = query.model(User).search(User.name.eq("John"))
    print(user)
    # -> [{"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}]
+
+``pk_only=True`` to extract pk without ``batch_get``
+
+.. code:: python
+
+   user_pks = query.model(User).search(User.name.eq("John"), pk_only=True)
+   print(user_pks)
+   # -> ["user_xxxx"]
 
 Get single item
 ~~~~~~~~~~~~~~~
@@ -128,6 +136,15 @@ Get single item
    print(user)
    # -> {"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}
 
+``pk_only=True`` option in ``get_by_unique`` to get ``primary key``
+without ``get_item``
+
+.. code:: python
+
+   pk = query.model(User).get_by_unique("John")
+   print(pk)
+   # -> "user_xxxx"
+
 Update Item
 ~~~~~~~~~~~
 
@@ -145,7 +162,7 @@ Or use unique value to detect exist item.
    new_user = User(name="John", email="new-john@example.com")
    query.model(new_user).update()
 
-Then, tha value of ???main item??? and ???seach item??? changed
+Then, tha value of ?main item? and ?seach item? changed
 
 +----------+----------+----------+------+----------+----------+
 | pk       | sk       | data     | name | email    | des      |
@@ -171,11 +188,64 @@ Delete Item
    user = query.model(User).search(User.email.eq("new-john@example.com"))
    query.model(user[0]).delete()
 
-Or use unique value to detect exist item.
+``primary key`` to detect exist item.
+
+::
+
+   query.model(User).delete_by_pk("user_xxxx")
+
+or ``unique key``
 
 ::
 
    query.model(User).delete_by_unique("John")
+
+Batch Writer
+------------
+
+``table.batch_writer()`` to create/update/delete multible items -
+``query.model(foo).create(batch=batch)`` -
+``query.model(foo).update(batch=batch)`` -
+``query.model(foo).delete(batch=batch)``
+
+Batch Create
+~~~~~~~~~~~~
+
+.. code:: python
+
+   with table.batch_writer() as batch:
+       for i in range(3):
+           user = User(name=f"test{i}", age=i+10)
+           query.model(user).create(batch=batch)
+   res = query.model(User).search(User.name.begins_with("test"))
+   print([(r["name"], r["age"]) for r in res])
+   # -> [("test0", 10), ("test1", 11), ("test2", 12)]
+
+Batch Update
+~~~~~~~~~~~~
+
+.. code:: python
+
+   with table.batch_writer() as batch:
+       for i in range(3):
+           user = User(name=f"test{i}", age=i+20)
+           query.model(user).update(batch=batch)
+   res = query.model(User).search(User.name.begins_with("test"))
+   print([(r["name"], r["age"]) for r in res])
+   # -> [("test0", 20), ("test1", 21), ("test2", 22)]
+
+Batch Delete
+~~~~~~~~~~~~
+
+.. code:: python
+
+   pks = query.model(User).search(User.name.begins_with("test"), pk_only=True)
+   with table.batch_writer() as batch:
+       for pk in pks:
+           query.model(user).delete_by_pk(pk, batch=batch)
+   res = query.model(User).search(User.name.begins_with("test"))
+   print(res)
+   # -> []
 
 Relationship
 ------------
@@ -209,7 +279,7 @@ Create Item
    )
    query.model(blogpost).create()
 
-Then, tha value ???reletion item??? added
+Then, tha value ?reletion item? added
 
 ============= ===================== ====== ==== ===== ====== ===========
 pk            sk                    data   name title author content
@@ -223,7 +293,7 @@ blogpost_xxxx rel_user_xxxx         author
 
 In addition to main item (sk=\ ``blogpost_item``), relation item
 (sk=\ ``rel_{primary_key}``) added to table. The GSI ``DataSearchIndex``
-is used to get ???relation items??? to extract target???s pk. Then,
+is used to get ?relation items? to extract target?s pk. Then,
 ``batch_get`` items by pk.
 
 ============= ============ =============
@@ -257,7 +327,7 @@ Also ``get_relation(field=DBField)`` to specify field
 Search Reference
 ~~~~~~~~~~~~~~~~
 
-In this library, ???reference??? is antonym to relation
+In this library, ?reference? is antonym to relation
 
 ``get_reference(model=Basemodel)`` to search items related to the item
 
@@ -281,7 +351,7 @@ Also ``get_reference(field=DBField)`` to specify field
 Update Relation
 ~~~~~~~~~~~~~~~
 
-If relation key???s value changed, relationship also changed.
+If relation key?s value changed, relationship also changed.
 
 .. code:: python
 
@@ -292,7 +362,7 @@ If relation key???s value changed, relationship also changed.
 
    query.model(blogpost).update()
 
-Then, ???reletion item??? changed
+Then, ?reletion item? changed
 
 +---------------+-----------------------+---------+---------+-------+---------+-------------+
 | pk            | sk                    | data    | name    | title | author  | content     |
@@ -321,7 +391,7 @@ If related item deleted, relationship also deleted
 
    query.model(user).delete_by_unique("Michael")
 
-Then, ???reletion item??? deleted. But main item???s value is not chenged.
+Then, ?reletion item? deleted. But main item?s value is not chenged.
 
 ============= ===================== ===== ==== ===== ======= ===========
 pk            sk                    data  name title author  content

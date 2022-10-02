@@ -1,13 +1,8 @@
 from setuptools import setup
 import ddb_single
 
-with open('readme.md', 'rw', encoding='utf-8') as fp:
+with open('readme.md', 'r') as fp:
     LONG_DESCRIPTION = fp.read()
-
-# エンコードをcp932にする
-with open('readme.rst', 'rw') as fp:
-    content = fp.read()
-    fp.write(content.encode('utf-8').decode('cp932'))
 
 setup(
     name='ddb_single',

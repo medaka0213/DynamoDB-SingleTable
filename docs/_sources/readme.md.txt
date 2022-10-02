@@ -92,6 +92,14 @@ print(user)
 # -> [{"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}]
 ```
 
+`pk_only=True` to extract pk without `batch_get`
+
+```python
+user_pks = query.model(User).search(User.name.eq("John"), pk_only=True)
+print(user_pks)
+# -> ["user_xxxx"]
+```
+
 ### Get single item
 
 `get(pk)` to get single item.
@@ -108,6 +116,14 @@ print(user)
 user = query.model(User).get_by_unique("John")
 print(user)
 # -> {"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}
+```
+
+`pk_only=True` option in `get_by_unique` to get `primary key` without `get_item`
+
+```python
+pk = query.model(User).get_by_unique("John")
+print(pk)
+# -> "user_xxxx"
 ```
 
 ### Update Item
@@ -137,17 +153,67 @@ Then, tha value of "main item" and "seach item" changed
 
 ### Delete Item
 
-
 ```
 user = query.model(User).search(User.email.eq("new-john@example.com"))
 query.model(user[0]).delete()
 ```
 
-Or use unique value to detect exist item.
+`primary key` to detect exist item.
+
+```
+query.model(User).delete_by_pk("user_xxxx")
+```
+
+
+or `unique key`
 
 ```
 query.model(User).delete_by_unique("John")
 ```
+
+## Batch Writer
+
+`table.batch_writer()` to create/update/delete multible items
+- `query.model(foo).create(batch=batch)`
+- `query.model(foo).update(batch=batch)`
+- `query.model(foo).delete(batch=batch)`
+
+### Batch Create
+
+```python
+with table.batch_writer() as batch:
+    for i in range(3):
+        user = User(name=f"test{i}", age=i+10)
+        query.model(user).create(batch=batch)
+res = query.model(User).search(User.name.begins_with("test"))
+print([(r["name"], r["age"]) for r in res])
+# -> [("test0", 10), ("test1", 11), ("test2", 12)]
+```
+
+### Batch Update
+
+```python
+with table.batch_writer() as batch:
+    for i in range(3):
+        user = User(name=f"test{i}", age=i+20)
+        query.model(user).update(batch=batch)
+res = query.model(User).search(User.name.begins_with("test"))
+print([(r["name"], r["age"]) for r in res])
+# -> [("test0", 20), ("test1", 21), ("test2", 22)]
+```
+
+### Batch Delete
+
+```python
+pks = query.model(User).search(User.name.begins_with("test"), pk_only=True)
+with table.batch_writer() as batch:
+    for pk in pks:
+        query.model(user).delete_by_pk(pk, batch=batch)
+res = query.model(User).search(User.name.begins_with("test"))
+print(res)
+# -> []
+```
+
 
 ## Relationship
 
