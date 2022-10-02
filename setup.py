@@ -6,7 +6,7 @@ with open('readme.md', 'r', encoding='utf-8') as fp:
 
 setup(
     name='ddb_single',
-    version=ddb_single.__version__,
+    version="0.2.2",
     description='Python DynamoDB interface, specialized in single-table design.',
     url='https://github.com/medaka0213/DynamoDB-SingleTable',
     author='medaka',

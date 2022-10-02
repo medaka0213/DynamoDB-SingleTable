@@ -5,7 +5,6 @@ sphinx-apidoc -f -o ./docs_src ./ddb_single
 sphinx-build ./docs_src ./docs
 
 python setup.py sdist bdist_wheel
-twine upload dist/*
 
 twine upload --repository testpypi dist/*
 twine upload --repository pypi dist/*
