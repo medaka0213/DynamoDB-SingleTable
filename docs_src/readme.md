@@ -236,7 +236,7 @@ class BlogPost(BaseModel):
 
 ```python
 blogpost = BlogPost(
-    title="Hello",
+    name="Hello",
     content="Hello world",
     author=self.user
 )
@@ -245,11 +245,11 @@ query.model(blogpost).create()
 
 Then, tha value "reletion item" added
 
-|pk|sk|data|name|title|author|content|
-|-|-|-|-|-|-|-|
+|pk|sk|data|name|author|content|
+|-|-|-|-|-|-|
 |user_xxxx|user_item||John|||
 |user_xxxx|search_user_name|John|
-|blogpost_xxxx|blogpost_item|||Hello|John|Hello world|
+|blogpost_xxxx|blogpost_item||Hello|John|Hello world|
 |blogpost_xxxx|search_blogpost_title|Hello|
 |blogpost_xxxx|rel_user_xxxx|author|
 
@@ -320,16 +320,15 @@ query.model(blogpost).update()
 
 Then, "reletion item" changed
 
-|pk|sk|data|name|title|author|content|
-|-|-|-|-|-|-|-|
+|pk|sk|data|name|author|content|
+|-|-|-|-|-|-|
 |user_xxxx|user_item||John|||
 |user_xxxx|search_user_name|John|
 |user_yyyy|user_item||Michael|||
 |user_yyyy|search_user_name|Michael|
-|blogpost_xxxx|blogpost_item|||Hello|Michael|Hello world|
+|blogpost_xxxx|blogpost_item||Hello|Michael|Hello world|
 |blogpost_xxxx|search_blogpost_title|Hello|
 |blogpost_xxxx|rel_user_yyyy|author|
-
 ### Delete Relation
 
 If related item deleted, relationship also deleted
@@ -341,9 +340,9 @@ query.model(user).delete_by_unique("Michael")
 Then, "reletion item" deleted.
 But main item's value is not chenged.
 
-|pk|sk|data|name|title|author|content|
-|-|-|-|-|-|-|-|
+|pk|sk|data|name|author|content|
+|-|-|-|-|-|-|
 |user_xxxx|user_item||John|||
 |user_xxxx|search_user_name|John|
-|blogpost_xxxx|blogpost_item|||Hello|Michael|Hello world|
+|blogpost_xxxx|blogpost_item||Hello|Michael|Hello world|
 |blogpost_xxxx|search_blogpost_title|Hello|

@@ -1,560 +1,463 @@
-<p>Python DynamoDB interface, specialized in single-table design. DynamoDB
-is high-performance serverless NoSQL, but difficult to disign tables.</p>
+<h1 id="dynamodb-singletable">DynamoDB SingleTable</h1>
+<p>Python DynamoDB interface, specialized in single-table design.
+DynamoDB is high-performance serverless NoSQL, but difficult to disign
+tables.</p>
 <p>Single-table design needs only single table, and few GSIs (Global
 Secondary Indexes). It makes effective and easy to manage your whole
 data models for single service.</p>
-<div class="section" id="getting-started">
-<h2>Getting Started</h2>
-<div class="section" id="init-table">
-<h3>Init Table</h3>
-<pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Table</span>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="init-table">Init Table</h3>
+<pre class="python"><code>from ddb_single import Table
 
-<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
-    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
-    <span class="n">endpoint_url</span><span class="o">=</span><span class="s2">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">table</span><span class="o">.</span><span class="n">init</span><span class="p">()</span></code></pre>
-</div>
-<div class="section" id="data-models">
-<h3>Data Models</h3>
-<p>Each model has al least 3 keys - primary_key ? Hash key for single item.
-default: <span class="docutils literal">pk: {__model_name__}_{uuid}</span> - seconday_key ? Range key for
-item. default: <span class="docutils literal">sk: {__model_name__}_item</span> - unique_key ? key to
-identify the item is the same. Mainly used to update item.</p>
-<p>And you can set <span class="docutils literal">serch_key</span> to enable search via GSI</p>
-<pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span><span class="p">,</span> <span class="n">FieldType</span>
+table = Table(
+    table_name=&quot;sample&quot;,
+    endpoint_url=&quot;http://localhost:8000&quot;,
+)
+table.init()</code></pre>
+<h3 id="data-models">Data Models</h3>
+<p>Each model has al least 3 keys - primary_key … Hash key for single
+item. default: <code>pk: {__model_name__}_{uuid}</code> - seconday_key …
+Range key for item. default: <code>sk: {__model_name__}_item</code> -
+unique_key … key to identify the item is the same. Mainly used to update
+item.</p>
+<p>And you can set <code>serch_key</code> to enable search via GSI</p>
+<pre class="python"><code>from ddb_single import BaseModel, DBField, FieldType
 
-<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">__table__</span><span class="o">=</span><span class="n">table</span>
-    <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">unique_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">email</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">search_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">age</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">FieldType</span><span class="o">.</span><span class="n">NUMBER</span><span class="p">,</span> <span class="n">search_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">description</span><span class="o">=</span><span class="n">DBField</span><span class="p">()</span></code></pre>
-</div>
-</div>
-<div class="section" id="usage">
-<h2>Usage</h2>
-<p>need ?Qurey? object for CRUD - <span class="docutils literal"><span class="pre">query.model(foo).create</span></span> -
-<span class="docutils literal"><span class="pre">query.model(foo).get</span></span> - <span class="docutils literal"><span class="pre">query.model(foo).search</span></span> -
-<span class="docutils literal"><span class="pre">query.model(foo).update</span></span> - <span class="docutils literal"><span class="pre">query.model(foo).delete</span></span></p>
-<pre><code><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Query</span>
-<span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></code></pre>
-<div class="section" id="create-item">
-<h3>Create Item</h3>
-<p>If the item with same value of <span class="docutils literal">unique_key</span> already exist, exist item
-is updated.</p>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john&#64;example.com&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
-<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></code></pre>
+class User(BaseModel):
+    __table__=table
+    __model_name__ = &quot;user&quot;
+    name = DBField(unique_key=True)
+    email = DBField(search_key=True)
+    age = DBField(type=FieldType.NUMBER, search_key=True)
+    description=DBField()</code></pre>
+<h2 id="usage">Usage</h2>
+<p>need “Qurey” object for CRUD - <code>query.model(foo).create</code> -
+<code>query.model(foo).get</code> - <code>query.model(foo).search</code>
+- <code>query.model(foo).update</code> -
+<code>query.model(foo).delete</code></p>
+<pre class="python"><code>from ddb_single import Query
+query = Query(table)</code></pre>
+<h3 id="create-item">Create Item</h3>
+<p>If the item with same value of <code>unique_key</code> already exist,
+exist item is updated.</p>
+<pre class="python"><code>user = User(name=&quot;John&quot;, email=&quot;john@example.com&quot;, description=&quot;test&quot;)
+query.model(user).create()</code></pre>
 <p>Then, multible items added.</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>pk</p></th>
-<th class="head"><p>sk</p></th>
-<th class="head"><p>data</p></th>
-<th class="head"><p>name</p></th>
-<th class="head"><p>email</p></th>
-<th class="head"><p>des
-cription</p></th>
+<tr class="header">
+<th>pk</th>
+<th>sk</th>
+<th>data</th>
+<th>name</th>
+<th>email</th>
+<th>description</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>u
-ser_item</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>user_item</td>
 <td></td>
-<td><p>John</p></td>
-<td><p><a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
-mple.com</p></td>
-<td><p>test</p></td>
+<td>John</td>
+<td>john@example.com</td>
+<td>test</td>
 </tr>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>search_u
-ser_name</p></td>
-<td><p>John</p></td>
+<tr class="even">
+<td>user_xxxx</td>
+<td>search_user_name</td>
+<td>John</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>s
-earch_us
-er_email</p></td>
-<td><p>new-
-<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
-mple.com</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>search_user_email</td>
+<td>new-john@example.com</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-<p>In addition to main item (sk=<span class="docutils literal">user_item</span>), multiple item
-(sk=<span class="docutils literal">search_{__model_name__}_{field_name}</span>) added to table. Those
-?search items? are used to search</p>
-<p>The GSI <span class="docutils literal">DataSearchIndex</span> is used to get ?search items? to extract
-target?s pk. Then, <span class="docutils literal">batch_get</span> items by pk.</p>
+<p>In addition to main item (sk=<code>user_item</code>), multiple item
+(sk=<code>search_{__model_name__}_{field_name}</code>) added to table.
+Those “search items” are used to search</p>
+<p>The GSI <code>DataSearchIndex</code> is used to get “search items” to
+extract target’s pk. Then, <code>batch_get</code> items by pk.</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>sk = hash</p></th>
-<th class="head"><p>data = range</p></th>
-<th class="head"><p>pk</p></th>
+<tr class="header">
+<th>sk = hash</th>
+<th>data = range</th>
+<th>pk</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>search_user_name</p></td>
-<td><p>John</p></td>
-<td><p>user_xxxx</p></td>
+<tr class="odd">
+<td>search_user_name</td>
+<td>John</td>
+<td>user_xxxx</td>
 </tr>
-<tr><td><p>search_user_email</p></td>
-<td><p><a href="mailto:new-john&#37;&#52;&#48;example&#46;com">new-john<span>&#64;</span>example<span>&#46;</span>com</a></p></td>
-<td><p>user_xxxx</p></td>
+<tr class="even">
+<td>search_user_email</td>
+<td>new-john@example.com</td>
+<td>user_xxxx</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="search-items">
-<h3>Search Items</h3>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john&#64;example.com&quot;}]</span></code></pre>
-<p><span class="docutils literal">pk_only=True</span> to extract pk without <span class="docutils literal">batch_get</span></p>
-<pre><code><span class="n">user_pks</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">),</span> <span class="n">pk_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">user_pks</span><span class="p">)</span>
-<span class="c1"># -&gt; [&quot;user_xxxx&quot;]</span></code></pre>
-</div>
-<div class="section" id="get-single-item">
-<h3>Get single item</h3>
-<p><span class="docutils literal">get(pk)</span> to get single item.</p>
-<pre>user = query.model(User).get(&quot;user_xxxx&quot;)
+<h3 id="search-items">Search Items</h3>
+<pre class="python"><code>user = query.model(User).search(User.name.eq(&quot;John&quot;))
 print(user)
-# -&gt; {&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john&#64;example.com&quot;}</pre>
-<p><span class="docutils literal">get_by_unique</span> to get item by <span class="docutils literal">unique_key</span></p>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># -&gt; {&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john&#64;example.com&quot;}</span></code></pre>
-<p><span class="docutils literal">pk_only=True</span> option in <span class="docutils literal">get_by_unique</span> to get <span class="docutils literal">primary key</span>
-without <span class="docutils literal">get_item</span></p>
-<pre><code><span class="n">pk</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
-<span class="c1"># -&gt; &quot;user_xxxx&quot;</span></code></pre>
-</div>
-<div class="section" id="update-item">
-<h3>Update Item</h3>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;john&#64;example.com&quot;</span><span class="p">))</span>
-<span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">user</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">new_user</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;new-john&#64;example.com&quot;</span>
-<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
+# -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john@example.com&quot;}]</code></pre>
+<p><code>pk_only=True</code> to extract pk without
+<code>batch_get</code></p>
+<pre class="python"><code>user_pks = query.model(User).search(User.name.eq(&quot;John&quot;), pk_only=True)
+print(user_pks)
+# -&gt; [&quot;user_xxxx&quot;]</code></pre>
+<h3 id="get-single-item">Get single item</h3>
+<p><code>get(pk)</code> to get single item.</p>
+<pre><code>user = query.model(User).get(&quot;user_xxxx&quot;)
+print(user)
+# -&gt; {&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john@example.com&quot;}</code></pre>
+<p><code>get_by_unique</code> to get item by <code>unique_key</code></p>
+<pre class="python"><code>user = query.model(User).get_by_unique(&quot;John&quot;)
+print(user)
+# -&gt; {&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john@example.com&quot;}</code></pre>
+<p><code>pk_only=True</code> option in <code>get_by_unique</code> to get
+<code>primary key</code> without <code>get_item</code></p>
+<pre class="python"><code>pk = query.model(User).get_by_unique(&quot;John&quot;)
+print(pk)
+# -&gt; &quot;user_xxxx&quot;</code></pre>
+<h3 id="update-item">Update Item</h3>
+<pre class="python"><code>user = query.model(User).search(User.email.eq(&quot;john@example.com&quot;))
+new_user = User(**user[0])
+new_user.email = &quot;new-john@example.com&quot;
+query.model(new_user).update()</code></pre>
 <p>Or use unique value to detect exist item.</p>
-<pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;new-john&#64;example.com&quot;</span><span class="p">)</span>
-<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">new_user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
-<p>Then, tha value of ?main item? and ?seach item? changed</p>
+<pre class="python"><code>new_user = User(name=&quot;John&quot;, email=&quot;new-john@example.com&quot;)
+query.model(new_user).update()</code></pre>
+<p>Then, tha value of “main item” and “seach item” changed</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>pk</p></th>
-<th class="head"><p>sk</p></th>
-<th class="head"><p>data</p></th>
-<th class="head"><p>name</p></th>
-<th class="head"><p>email</p></th>
-<th class="head"><p>des
-cription</p></th>
+<tr class="header">
+<th>pk</th>
+<th>sk</th>
+<th>data</th>
+<th>name</th>
+<th>email</th>
+<th>description</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>u
-ser_item</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>user_item</td>
 <td></td>
-<td><p>John</p></td>
-<td><p>new-
-<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
-mple.com</p></td>
-<td><p>test</p></td>
+<td>John</td>
+<td>new-john@example.com</td>
+<td>test</td>
 </tr>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>search_u
-ser_name</p></td>
-<td><p>John</p></td>
+<tr class="even">
+<td>user_xxxx</td>
+<td>search_user_name</td>
+<td>John</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>u
-ser_xxxx</p></td>
-<td><p>s
-earch_us
-er_email</p></td>
-<td><p>new-
-<a href="mailto:john&#37;&#52;&#48;exa">john<span>&#64;</span>exa</a>
-mple.com</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>search_user_email</td>
+<td>new-john@example.com</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="delete-item">
-<h3>Delete Item</h3>
-<pre>user = query.model(User).search(User.email.eq(&quot;new-john&#64;example.com&quot;))
-query.model(user[0]).delete()</pre>
-<p><span class="docutils literal">primary key</span> to detect exist item.</p>
-<pre>query.model(User).delete_by_pk(&quot;user_xxxx&quot;)</pre>
-<p>or <span class="docutils literal">unique key</span></p>
-<pre>query.model(User).delete_by_unique(&quot;John&quot;)</pre>
-</div>
-</div>
-<div class="section" id="batch-writer">
-<h2>Batch Writer</h2>
-<p><span class="docutils literal">table.batch_writer()</span> to create/update/delete multible items -
-<span class="docutils literal"><span class="pre">query.model(foo).create(batch=batch)</span></span> -
-<span class="docutils literal"><span class="pre">query.model(foo).update(batch=batch)</span></span> -
-<span class="docutils literal"><span class="pre">query.model(foo).delete(batch=batch)</span></span></p>
-<div class="section" id="batch-create">
-<h3>Batch Create</h3>
-<pre><code><span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;test</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span>
-        <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">begins_with</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">([(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">res</span><span class="p">])</span>
-<span class="c1"># -&gt; [(&quot;test0&quot;, 10), (&quot;test1&quot;, 11), (&quot;test2&quot;, 12)]</span></code></pre>
-</div>
-<div class="section" id="batch-update">
-<h3>Batch Update</h3>
-<pre><code><span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;test</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">20</span><span class="p">)</span>
-        <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">begins_with</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">([(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">res</span><span class="p">])</span>
-<span class="c1"># -&gt; [(&quot;test0&quot;, 20), (&quot;test1&quot;, 21), (&quot;test2&quot;, 22)]</span></code></pre>
-</div>
-<div class="section" id="batch-delete">
-<h3>Batch Delete</h3>
-<pre><code><span class="n">pks</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">begins_with</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">),</span> <span class="n">pk_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">pks</span><span class="p">:</span>
-        <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">delete_by_pk</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">begins_with</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-<span class="c1"># -&gt; []</span></code></pre>
-</div>
-</div>
-<div class="section" id="relationship">
-<h2>Relationship</h2>
-<div class="section" id="create-model">
-<h3>Create Model</h3>
-<p>You can sat relationns to other models <span class="docutils literal">relation=BaseModel</span> to set
-relation.</p>
-<pre><code><span class="k">class</span> <span class="nc">BlogPost</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;blogpost&quot;</span>
-    <span class="n">__table__</span><span class="o">=</span><span class="n">table</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">unique_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">()</span>
-    <span class="n">author</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">reletion</span><span class="o">=</span><span class="n">User</span><span class="p">)</span></code></pre>
-</div>
-<div class="section" id="id1">
-<span id="create-item-1"></span><h3>Create Item</h3>
-<pre><code><span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span>
-    <span class="n">content</span><span class="o">=</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span>
-    <span class="n">author</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span>
-<span class="p">)</span>
-<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></code></pre>
-<p>Then, tha value ?reletion item? added</p>
+<h3 id="delete-item">Delete Item</h3>
+<pre><code>user = query.model(User).search(User.email.eq(&quot;new-john@example.com&quot;))
+query.model(user[0]).delete()</code></pre>
+<p><code>primary key</code> to detect exist item.</p>
+<pre><code>query.model(User).delete_by_pk(&quot;user_xxxx&quot;)</code></pre>
+<p>or <code>unique key</code></p>
+<pre><code>query.model(User).delete_by_unique(&quot;John&quot;)</code></pre>
+<h2 id="batch-writer">Batch Writer</h2>
+<p><code>table.batch_writer()</code> to create/update/delete multible
+items - <code>query.model(foo).create(batch=batch)</code> -
+<code>query.model(foo).update(batch=batch)</code> -
+<code>query.model(foo).delete(batch=batch)</code></p>
+<h3 id="batch-create">Batch Create</h3>
+<pre class="python"><code>with table.batch_writer() as batch:
+    for i in range(3):
+        user = User(name=f&quot;test{i}&quot;, age=i+10)
+        query.model(user).create(batch=batch)
+res = query.model(User).search(User.name.begins_with(&quot;test&quot;))
+print([(r[&quot;name&quot;], r[&quot;age&quot;]) for r in res])
+# -&gt; [(&quot;test0&quot;, 10), (&quot;test1&quot;, 11), (&quot;test2&quot;, 12)]</code></pre>
+<h3 id="batch-update">Batch Update</h3>
+<pre class="python"><code>with table.batch_writer() as batch:
+    for i in range(3):
+        user = User(name=f&quot;test{i}&quot;, age=i+20)
+        query.model(user).update(batch=batch)
+res = query.model(User).search(User.name.begins_with(&quot;test&quot;))
+print([(r[&quot;name&quot;], r[&quot;age&quot;]) for r in res])
+# -&gt; [(&quot;test0&quot;, 20), (&quot;test1&quot;, 21), (&quot;test2&quot;, 22)]</code></pre>
+<h3 id="batch-delete">Batch Delete</h3>
+<pre class="python"><code>pks = query.model(User).search(User.name.begins_with(&quot;test&quot;), pk_only=True)
+with table.batch_writer() as batch:
+    for pk in pks:
+        query.model(user).delete_by_pk(pk, batch=batch)
+res = query.model(User).search(User.name.begins_with(&quot;test&quot;))
+print(res)
+# -&gt; []</code></pre>
+<h2 id="relationship">Relationship</h2>
+<h3 id="create-model">Create Model</h3>
+<p>You can sat relationns to other models
+<code>relation=BaseModel</code> to set relation.</p>
+<pre class="python"><code>class BlogPost(BaseModel):
+    __model_name__ = &quot;blogpost&quot;
+    __table__=table
+    name = DBField(unique_key=True)
+    content = DBField()
+    author = DBField(reletion=User)</code></pre>
+<h3 id="create-item-1">Create Item</h3>
+<pre class="python"><code>blogpost = BlogPost(
+    name=&quot;Hello&quot;,
+    content=&quot;Hello world&quot;,
+    author=self.user
+)
+query.model(blogpost).create()</code></pre>
+<p>Then, tha value “reletion item” added</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>pk</p></th>
-<th class="head"><p>sk</p></th>
-<th class="head"><p>data</p></th>
-<th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
-<th class="head"><p>author</p></th>
-<th class="head"><p>content</p></th>
+<tr class="header">
+<th>pk</th>
+<th>sk</th>
+<th>data</th>
+<th>name</th>
+<th>author</th>
+<th>content</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>user_xxxx</p></td>
-<td><p>user_item</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>user_item</td>
 <td></td>
-<td><p>John</p></td>
+<td>John</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>user_xxxx</td>
+<td>search_user_name</td>
+<td>John</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>user_xxxx</p></td>
-<td><p>search_user_name</p></td>
-<td><p>John</p></td>
+<tr class="odd">
+<td>blogpost_xxxx</td>
+<td>blogpost_item</td>
 <td></td>
+<td>Hello</td>
+<td>John</td>
+<td>Hello world</td>
+</tr>
+<tr class="even">
+<td>blogpost_xxxx</td>
+<td>search_blogpost_title</td>
+<td>Hello</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>blogpost_item</p></td>
-<td></td>
-<td></td>
-<td><p>Hello</p></td>
-<td><p>John</p></td>
-<td><p>Hello world</p></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>search_blogpost_title</p></td>
-<td><p>Hello</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>rel_user_xxxx</p></td>
-<td><p>author</p></td>
-<td></td>
+<tr class="odd">
+<td>blogpost_xxxx</td>
+<td>rel_user_xxxx</td>
+<td>author</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-<p>In addition to main item (sk=<span class="docutils literal">blogpost_item</span>), relation item
-(sk=<span class="docutils literal">rel_{primary_key}</span>) added to table. The GSI <span class="docutils literal">DataSearchIndex</span>
-is used to get ?relation items? to extract target?s pk. Then,
-<span class="docutils literal">batch_get</span> items by pk.</p>
+<p>In addition to main item (sk=<code>blogpost_item</code>), relation
+item (sk=<code>rel_{primary_key}</code>) added to table. The GSI
+<code>DataSearchIndex</code> is used to get “relation items” to extract
+target’s pk. Then, <code>batch_get</code> items by pk.</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>sk = hash</p></th>
-<th class="head"><p>data = range</p></th>
-<th class="head"><p>pk</p></th>
+<tr class="header">
+<th>sk = hash</th>
+<th>data = range</th>
+<th>pk</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>rel_user_xxxx</p></td>
-<td><p>author</p></td>
-<td><p>blogpost_xxxx</p></td>
+<tr class="odd">
+<td>rel_user_xxxx</td>
+<td>author</td>
+<td>blogpost_xxxx</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="search-relations">
-<h3>Search Relations</h3>
-<p><span class="docutils literal">get_relation(model=Basemodel)</span> to search relations</p>
-<pre><code><span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">BlogPost</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
-<span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
+<h3 id="search-relations">Search Relations</h3>
+<p><code>get_relation(model=Basemodel)</code> to search relations</p>
+<pre class="python"><code>blogpost = query.model(BlogPost).get_by_unique(&quot;Hello&quot;)
+blogpost = BlogPost(**blogpost)
 
-<span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">get_relation</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">User</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;}]</span></code></pre>
-<p>Also <span class="docutils literal">get_relation(field=DBField)</span> to specify field</p>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">get_relation</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="n">BlogPost</span><span class="o">.</span><span class="n">author</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;}]</span></code></pre>
-</div>
-<div class="section" id="search-reference">
-<h3>Search Reference</h3>
-<p>In this library, ?reference? is antonym to relation</p>
-<p><span class="docutils literal">get_reference(model=Basemodel)</span> to search items related to the item</p>
-<pre><code><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
-<span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
+user = query.model(blogpost).get_relation(model=User)
+print(user)
+# -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;}]</code></pre>
+<p>Also <code>get_relation(field=DBField)</code> to specify field</p>
+<pre class="python"><code>user = query.model(blogpost).get_relation(field=BlogPost.author)
+print(user)
+# -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;}]</code></pre>
+<h3 id="search-reference">Search Reference</h3>
+<p>In this library, “reference” is antonym to relation</p>
+<p><code>get_reference(model=Basemodel)</code> to search items related
+to the item</p>
+<pre class="python"><code>user = query.model(User).get_by_unique(&quot;John&quot;)
+user = User(**blogpost)
 
-<span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">get_reference</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">BlogPost</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span>
-<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;blogpost_xxxx&quot;, &quot;sk&quot;:&quot;blogpost_item&quot;, &quot;name&quot;:&quot;Hello&quot;}]</span></code></pre>
-<p>Also <span class="docutils literal">get_reference(field=DBField)</span> to specify field</p>
-<pre><code><span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">get_reference</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="n">BlogPost</span><span class="o">.</span><span class="n">author</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span>
-<span class="c1"># -&gt; [{&quot;pk&quot;:&quot;blogpost_xxxx&quot;, &quot;sk&quot;:&quot;blogpost_item&quot;, &quot;name&quot;:&quot;Hello&quot;}]</span></code></pre>
-</div>
-<div class="section" id="update-relation">
-<h3>Update Relation</h3>
-<p>If relation key?s value changed, relationship also changed.</p>
-<pre><code><span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span>
-<span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">BlogPost</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
-<span class="n">blogpost</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_user</span>
-<span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
+blogpost = query.model(blogpost).get_reference(model=BlogPost)
+print(blogpost)
+# -&gt; [{&quot;pk&quot;:&quot;blogpost_xxxx&quot;, &quot;sk&quot;:&quot;blogpost_item&quot;, &quot;name&quot;:&quot;Hello&quot;}]</code></pre>
+<p>Also <code>get_reference(field=DBField)</code> to specify field</p>
+<pre class="python"><code>blogpost = query.model(user).get_reference(field=BlogPost.author)
+print(blogpost)
+# -&gt; [{&quot;pk&quot;:&quot;blogpost_xxxx&quot;, &quot;sk&quot;:&quot;blogpost_item&quot;, &quot;name&quot;:&quot;Hello&quot;}]</code></pre>
+<h3 id="update-relation">Update Relation</h3>
+<p>If relation key’s value changed, relationship also changed.</p>
+<pre class="python"><code>new_user = User(name=&quot;Michael&quot;)
+blogpost = query.model(BlogPost).get_by_unique(&quot;Hello&quot;)
+blogpost[&quot;author&quot;] = new_user
+blogpost = BlogPost(**blogpost)
 
-<span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">blogpost</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code></pre>
-<p>Then, ?reletion item? changed</p>
+query.model(blogpost).update()</code></pre>
+<p>Then, “reletion item” changed</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>pk</p></th>
-<th class="head"><p>sk</p></th>
-<th class="head"><p>data</p></th>
-<th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
-<th class="head"><p>author</p></th>
-<th class="head"><p>content</p></th>
+<tr class="header">
+<th>pk</th>
+<th>sk</th>
+<th>data</th>
+<th>name</th>
+<th>author</th>
+<th>content</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>user_xxxx</p></td>
-<td><p>user_item</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>user_item</td>
 <td></td>
-<td><p>John</p></td>
+<td>John</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>user_xxxx</td>
+<td>search_user_name</td>
+<td>John</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>user_xxxx</p></td>
-<td><p>search_user_name</p></td>
-<td><p>John</p></td>
+<tr class="odd">
+<td>user_yyyy</td>
+<td>user_item</td>
 <td></td>
+<td>Michael</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>user_yyyy</td>
+<td>search_user_name</td>
+<td>Michael</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>user_yyyy</p></td>
-<td><p>user_item</p></td>
+<tr class="odd">
+<td>blogpost_xxxx</td>
+<td>blogpost_item</td>
 <td></td>
-<td><p>Michael</p></td>
+<td>Hello</td>
+<td>Michael</td>
+<td>Hello world</td>
+</tr>
+<tr class="even">
+<td>blogpost_xxxx</td>
+<td>search_blogpost_title</td>
+<td>Hello</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>user_yyyy</p></td>
-<td><p>search_user_name</p></td>
-<td><p>Michael</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>blogpost_item</p></td>
-<td></td>
-<td></td>
-<td><p>Hello</p></td>
-<td><p>Michael</p></td>
-<td><p>Hello world</p></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>search_blogpost_title</p></td>
-<td><p>Hello</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>rel_user_yyyy</p></td>
-<td><p>author</p></td>
-<td></td>
+<tr class="odd">
+<td>blogpost_xxxx</td>
+<td>rel_user_yyyy</td>
+<td>author</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="delete-relation">
-<h3>Delete Relation</h3>
+<h3 id="delete-relation">Delete Relation</h3>
 <p>If related item deleted, relationship also deleted</p>
-<pre><code><span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">delete_by_unique</span><span class="p">(</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span></code></pre>
-<p>Then, ?reletion item? deleted. But main item?s value is not chenged.</p>
+<pre class="python"><code>query.model(user).delete_by_unique(&quot;Michael&quot;)</code></pre>
+<p>Then, “reletion item” deleted. But main item’s value is not
+chenged.</p>
 <table>
-<colgroup>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-<col>
-</colgroup>
 <thead>
-<tr><th class="head"><p>pk</p></th>
-<th class="head"><p>sk</p></th>
-<th class="head"><p>data</p></th>
-<th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
-<th class="head"><p>author</p></th>
-<th class="head"><p>content</p></th>
+<tr class="header">
+<th>pk</th>
+<th>sk</th>
+<th>data</th>
+<th>name</th>
+<th>author</th>
+<th>content</th>
 </tr>
 </thead>
 <tbody>
-<tr><td><p>user_xxxx</p></td>
-<td><p>user_item</p></td>
+<tr class="odd">
+<td>user_xxxx</td>
+<td>user_item</td>
 <td></td>
-<td><p>John</p></td>
+<td>John</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>user_xxxx</td>
+<td>search_user_name</td>
+<td>John</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr><td><p>user_xxxx</p></td>
-<td><p>search_user_name</p></td>
-<td><p>John</p></td>
+<tr class="odd">
+<td>blogpost_xxxx</td>
+<td>blogpost_item</td>
 <td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>Hello</td>
+<td>Michael</td>
+<td>Hello world</td>
 </tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>blogpost_item</p></td>
-<td></td>
-<td></td>
-<td><p>Hello</p></td>
-<td><p>Michael</p></td>
-<td><p>Hello world</p></td>
-</tr>
-<tr><td><p>blogpost_xxxx</p></td>
-<td><p>search_blogpost_title</p></td>
-<td><p>Hello</p></td>
-<td></td>
+<tr class="even">
+<td>blogpost_xxxx</td>
+<td>search_blogpost_title</td>
+<td>Hello</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-

@@ -380,7 +380,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <div class="section" id="id1">
 <h3>Create Item<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span>
     <span class="n">content</span><span class="o">=</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span>
     <span class="n">author</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span>
 <span class="p">)</span>
@@ -394,7 +394,6 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <th class="head"><p>sk</p></th>
 <th class="head"><p>data</p></th>
 <th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
 <th class="head"><p>author</p></th>
 <th class="head"><p>content</p></th>
 </tr>
@@ -406,7 +405,6 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p>John</p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>user_xxxx</p></td>
 <td><p>search_user_name</p></td>
@@ -414,11 +412,9 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>blogpost_xxxx</p></td>
 <td><p>blogpost_item</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p>Hello</p></td>
 <td><p>John</p></td>
@@ -430,12 +426,10 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>blogpost_xxxx</p></td>
 <td><p>rel_user_xxxx</p></td>
 <td><p>author</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
@@ -514,7 +508,6 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <th class="head"><p>sk</p></th>
 <th class="head"><p>data</p></th>
 <th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
 <th class="head"><p>author</p></th>
 <th class="head"><p>content</p></th>
 </tr>
@@ -526,12 +519,10 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p>John</p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>user_xxxx</p></td>
 <td><p>search_user_name</p></td>
 <td><p>John</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
@@ -542,7 +533,6 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p>Michael</p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>user_yyyy</p></td>
 <td><p>search_user_name</p></td>
@@ -550,11 +540,9 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>blogpost_xxxx</p></td>
 <td><p>blogpost_item</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p>Hello</p></td>
 <td><p>Michael</p></td>
@@ -566,12 +554,10 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>blogpost_xxxx</p></td>
 <td><p>rel_user_yyyy</p></td>
 <td><p>author</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
@@ -593,7 +579,6 @@ But main item’s value is not chenged.</p>
 <th class="head"><p>sk</p></th>
 <th class="head"><p>data</p></th>
 <th class="head"><p>name</p></th>
-<th class="head"><p>title</p></th>
 <th class="head"><p>author</p></th>
 <th class="head"><p>content</p></th>
 </tr>
@@ -605,7 +590,6 @@ But main item’s value is not chenged.</p>
 <td><p>John</p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>user_xxxx</p></td>
 <td><p>search_user_name</p></td>
@@ -613,11 +597,9 @@ But main item’s value is not chenged.</p>
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
-<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>blogpost_xxxx</p></td>
 <td><p>blogpost_item</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p>Hello</p></td>
 <td><p>Michael</p></td>
@@ -626,7 +608,6 @@ But main item’s value is not chenged.</p>
 <tr class="row-odd"><td><p>blogpost_xxxx</p></td>
 <td><p>search_blogpost_title</p></td>
 <td><p>Hello</p></td>
-<td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
 <td><p></p></td>
