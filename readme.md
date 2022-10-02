@@ -11,8 +11,7 @@ It makes effective and easy to manage your whole data models for single service.
 ### Init Table
 
 ```python
-from ddb_single.table import Table
-from ddb_single.query import Query
+from ddb_single import Table
 
 table = Table(
     table_name="sample",
