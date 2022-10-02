@@ -57,7 +57,7 @@ class Query:
         return res
 
     # ユニークキーで検索
-    def get_by_unique(self, value):
+    def get_by_unique(self, value, pk_only=False):
         """
         Get single item by unique key.
         Args:
@@ -66,7 +66,10 @@ class Query:
         res = self.search(getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(value))
         if res:
             pk = res[0][self.__model__.__primary_key__]
-            return self.get(pk)
+            if pk_only:
+                return pk
+            else:
+                return self.get(pk)
 
     # Create/Update関連
 

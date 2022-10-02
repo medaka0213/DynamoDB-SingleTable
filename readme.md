@@ -92,6 +92,14 @@ print(user)
 # -> [{"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}]
 ```
 
+`pk_only=True` to extract pk without `batch_get`
+
+```python
+user_pks = query.model(User).search(User.name.eq("John"), pk_only=True)
+print(user_pks)
+# -> ["user_xxxx"]
+```
+
 ### Get single item
 
 `get(pk)` to get single item.
@@ -108,6 +116,14 @@ print(user)
 user = query.model(User).get_by_unique("John")
 print(user)
 # -> {"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}
+```
+
+`pk_only=True` option in `get_by_unique` to get `primary key` without `get_item`
+
+```python
+pk = query.model(User).get_by_unique("John")
+print(pk)
+# -> "user_xxxx"
 ```
 
 ### Update Item
