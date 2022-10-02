@@ -1,5 +1,4 @@
 import unittest
-import asyncio
 
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
