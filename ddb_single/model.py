@@ -1,6 +1,5 @@
 from decimal import Decimal
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 
 from ddb_single.table import FieldType, Table
 import ddb_single.utils_botos as util_b

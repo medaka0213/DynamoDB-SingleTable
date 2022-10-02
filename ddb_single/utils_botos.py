@@ -141,16 +141,12 @@ from decimal import Decimal
 def is_same_json(data_0, data_1):
     if type(data_0) == dict or type(data_1) == dict:
         keys = list(set( list(data_0.keys()) + list(data_1.keys() )))
-
         for k in keys:
-            #値がなければアウト
+            #値がなければFalse
             if (not k in data_1) or (not k in data_0):
                 return False
-            
             if not is_same_json(data_0.get(k), data_1.get(k)):
-
                 return False
-
     elif type(data_0) == list and type(data_1) == list:
         if len(data_0) != len(data_1):
             return False
@@ -160,7 +156,6 @@ def is_same_json(data_0, data_1):
                     return False
     else:
         return data_0 == data_1
-    
     return True
 
 # ユーティリティ
