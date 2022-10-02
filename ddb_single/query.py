@@ -150,10 +150,11 @@ class Query:
             self.delete(item, batch=batch)
 
     # 関連付け
-    def _relation_item(self, pk):
+    def _relation_item(self, pk, field:DBField):
         return {
             self.__model__.__primary_key__: self.__model__.data[self.__model__.__primary_key__], 
-            self.__model__.__secondary_key__: self.__table__.rel_key(pk)
+            self.__model__.__secondary_key__: self.__table__.rel_key(pk),
+            self.__table__.__search_data_key__: field.name
         }
     
     def _get_other_item_by_unique(self, target:BaseModel, value, table=None, default=None):
@@ -177,7 +178,7 @@ class Query:
                     pks = [value]
                 else:
                     pks = []
-        result = [self._relation_item(pk) for pk in pks]
+        result = [self._relation_item(pk, field) for pk in pks]
         return result
 
     def relation_items(self):
@@ -187,7 +188,7 @@ class Query:
             field:DBField = self.__model__.__class__.__dict__[k]
             rel:BaseModel = field.relation
             _items_exist = self.__table__.relation(self.__model__.data[self.__model__.__primary_key__], rel.__model_name__)
-            _items_exist = [self._relation_item(i[self.__table__.__primary_key__]) for i in _items_exist]
+            _items_exist = [self._relation_item(i[self.__table__.__primary_key__], field) for i in _items_exist]
             if k in self.__model__.data.keys():
                 _items_add = self._field2relation_items(field, self.__model__.data[k])
                 items_add.extend(_items_add)
@@ -201,14 +202,22 @@ class Query:
         return items_add, items_remove
 
     # Read
-    def get_relation(self, model:BaseModel=""):
+    def get_relation(self, model:BaseModel="", field:DBField=""):
         # 関連を検索
         if not isinstance(model or "", str):
             model= model.__model_name__
-        return self.__table__.relation(self.__model__.data[self.__model__.__primary_key__], model)
+        if not isinstance(field or "", str):
+            field= field.name
+        return self.__table__.relation(
+            self.__model__.data[self.__model__.__primary_key__], 
+            model_name=model, field_name=field)
 
-    def get_reference(self, model:BaseModel=""):
+    def get_reference(self, model:BaseModel="", field:DBField=""):
         # 参照を検索
         if not isinstance(model or "", str):
             model= model.__model_name__
-        return self.__table__.reference(self.__model__.data[self.__model__.__primary_key__], model)
+        if not isinstance(field or "", str):
+            field= field.name
+        return self.__table__.reference(
+            self.__model__.data[self.__model__.__primary_key__], 
+            model_name=model, field_name=field)
