@@ -5,10 +5,10 @@ from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
-import uuid
+import datetime
 
 table = Table(
-    table_name=uuid.uuid4().hex,
+    table_name="query_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
 )
 table.init()
