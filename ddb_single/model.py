@@ -13,7 +13,7 @@ class DBField:
     __setup__ = False
     def __init__(self, type:FieldType=FieldType.STRING, default=None, default_factory=None, nullable=True, required=False, 
                  primary_key=False, secondary_key=False, unique_key=False, search_key=False, 
-                 reletion=None, reference=None, reletion_by_unique=True, reference_by_unique=True,
+                 reletion=None, reletion_by_unique=True,
                  **kwargs):
         """
         Args:
@@ -41,9 +41,7 @@ class DBField:
         self.unique_key = unique_key
         self.search_key = search_key or unique_key
         self.relation = reletion
-        self.reference = reference
         self.reletion_by_unique = reletion_by_unique
-        self.reference_by_unique = reference_by_unique
         self.value = None
     
     def setup(self, name, model_cls):
@@ -97,18 +95,12 @@ class DBField:
                     return v.data[self.value.__primary_key__]
             else:
                 return v
-
         if not self.is_list():
             if self.relation:
                 self.value = extract_value(self.value, self.reletion_by_unique)
-            elif self.reference:
-                self.value = extract_value(self.value, self.reference_by_unique)
         else:
             if self.relation:
                 self.value = [extract_value(v, self.reletion_by_unique) for v in self.value]
-            elif self.reference:
-                self.value = [extract_value(v, self.reference_by_unique) for v in self.value]
-
         return self.value
 
     def _validate_value(self, value):
@@ -346,8 +338,6 @@ class BaseModel():
                     self.__search_keys__.append(k)
                 if v.relation:
                     self.__relation_keys__.append(k)
-                if v.reference:
-                    self.__reference_keys__.append(k)
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
