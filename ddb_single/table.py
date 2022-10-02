@@ -259,20 +259,17 @@ class Table:
     # --- 検索関連 ---
     # 関連先を検索
     def relation(self, pk, model_name=""):
-        KeyConditionExpression = Key(self.__primary_key__).eq(pk)
-        if model_name:
-            KeyConditionExpression &= Key(self.__secondary_key__).begins_with(self.rel_prefix(model_name))
+        KeyConditionExpression = Key(self.__primary_key__).eq(pk) & Key(self.__secondary_key__).begins_with(self.rel_prefix(model_name))
         res = self._query(
             KeyConditionExpression=KeyConditionExpression
         )
-        res = self.batch_get_from_pks([r[self.__primary_key__] for r in res])
+        rel_pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
+        res = self.batch_get_from_pks(rel_pks)
         return res
 
     # 関連元を検索
     def reference(self, pk, model_name=""):
-        KeyConditionExpression = Key(self.__secondary_key__).eq(self.rel_key(pk))
-        if model_name:
-            KeyConditionExpression &= Key(self.__primary_key__).begins_with(model_name)
+        KeyConditionExpression = Key(self.__secondary_key__).eq(self.rel_key(pk)) & Key(self.__primary_key__).begins_with(model_name)
         res = self._query(
             KeyConditionExpression=KeyConditionExpression,
             IndexName=self.__range_index_name__,
