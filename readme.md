@@ -45,7 +45,12 @@ class User(BaseModel):
 
 ## Usage
 
-need "Qurey" object for CRUD; `query.model(foo).create or search or update or delete`
+need "Qurey" object for CRUD
+- `query.model(foo).create`
+- `query.model(foo).get`
+- `query.model(foo).search`
+- `query.model(foo).update`
+- `query.model(foo).delete`
 
 ```python
 query = Query(table)
@@ -88,7 +93,17 @@ print(user)
 # -> [{"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}]
 ```
 
-`get_by_unique` is easy to get single item by `unique_key`
+### Get single item
+
+`get(pk)` to get single item.
+
+```
+user = query.model(User).get("user_xxxx")
+print(user)
+# -> {"pk":"user_xxxx", "sk":"user_item", "name":"John", "email":"john@example.com"}
+```
+
+`get_by_unique` to get item by `unique_key`
 
 ```python
 user = query.model(User).get_by_unique("John")
