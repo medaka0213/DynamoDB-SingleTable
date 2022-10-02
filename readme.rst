@@ -11,6 +11,13 @@ data models for single service.
 Getting Started
 ---------------
 
+Install
+~~~~~~~
+
+::
+
+   pip install ddb_single
+
 Init Table
 ~~~~~~~~~~
 
@@ -27,9 +34,9 @@ Init Table
 Data Models
 ~~~~~~~~~~~
 
-Each model has al least 3 keys - primary_key Ö Hash key for single item.
-default: ``pk: {__model_name__}_{uuid}`` - seconday_key Ö Range key for
-item. default: ``sk: {__model_name__}_item`` - unique_key Ö key to
+Each model has al least 3 keys - primary_key ‚Ä¶ Hash key for single item.
+default: ``pk: {__model_name__}_{uuid}`` - seconday_key ‚Ä¶ Range key for
+item. default: ``sk: {__model_name__}_item`` - unique_key ‚Ä¶ key to
 identify the item is the same. Mainly used to update item.
 
 And you can set ``serch_key`` to enable search via GSI
@@ -49,7 +56,7 @@ And you can set ``serch_key`` to enable search via GSI
 Usage
 -----
 
-need ìQureyî object for CRUD - ``query.model(foo).create`` -
+need ‚ÄúQurey‚Äù object for CRUD - ``query.model(foo).create`` -
 ``query.model(foo).get`` - ``query.model(foo).search`` -
 ``query.model(foo).update`` - ``query.model(foo).delete``
 
@@ -88,10 +95,10 @@ Then, multible items added.
 
 In addition to main item (sk=\ ``user_item``), multiple item
 (sk=\ ``search_{__model_name__}_{field_name}``) added to table. Those
-ìsearch itemsî are used to search
+‚Äúsearch items‚Äù are used to search
 
-The GSI ``DataSearchIndex`` is used to get ìsearch itemsî to extract
-targetís pk. Then, ``batch_get`` items by pk.
+The GSI ``DataSearchIndex`` is used to get ‚Äúsearch items‚Äù to extract
+target‚Äôs pk. Then, ``batch_get`` items by pk.
 
 ================= ==================== =========
 sk = hash         data = range         pk
@@ -162,7 +169,7 @@ Or use unique value to detect exist item.
    new_user = User(name="John", email="new-john@example.com")
    query.model(new_user).update()
 
-Then, tha value of ìmain itemî and ìseach itemî changed
+Then, tha value of ‚Äúmain item‚Äù and ‚Äúseach item‚Äù changed
 
 +----------+----------+----------+------+----------+----------+
 | pk       | sk       | data     | name | email    | des      |
@@ -279,7 +286,7 @@ Create Item
    )
    query.model(blogpost).create()
 
-Then, tha value ìreletion itemî added
+Then, tha value ‚Äúreletion item‚Äù added
 
 ============= ===================== ====== ===== ====== ===========
 pk            sk                    data   name  author content
@@ -293,7 +300,7 @@ blogpost_xxxx rel_user_xxxx         author
 
 In addition to main item (sk=\ ``blogpost_item``), relation item
 (sk=\ ``rel_{primary_key}``) added to table. The GSI ``DataSearchIndex``
-is used to get ìrelation itemsî to extract targetís pk. Then,
+is used to get ‚Äúrelation items‚Äù to extract target‚Äôs pk. Then,
 ``batch_get`` items by pk.
 
 ============= ============ =============
@@ -327,7 +334,7 @@ Also ``get_relation(field=DBField)`` to specify field
 Search Reference
 ~~~~~~~~~~~~~~~~
 
-In this library, ìreferenceî is antonym to relation
+In this library, ‚Äúreference‚Äù is antonym to relation
 
 ``get_reference(model=Basemodel)`` to search items related to the item
 
@@ -351,7 +358,7 @@ Also ``get_reference(field=DBField)`` to specify field
 Update Relation
 ~~~~~~~~~~~~~~~
 
-If relation keyís value changed, relationship also changed.
+If relation key‚Äôs value changed, relationship also changed.
 
 .. code:: python
 
@@ -362,7 +369,7 @@ If relation keyís value changed, relationship also changed.
 
    query.model(blogpost).update()
 
-Then, ìreletion itemî changed
+Then, ‚Äúreletion item‚Äù changed
 
 ============= ===================== ======= ======= ======= ===========
 pk            sk                    data    name    author  content
@@ -385,7 +392,7 @@ If related item deleted, relationship also deleted
 
    query.model(user).delete_by_unique("Michael")
 
-Then, ìreletion itemî deleted. But main itemís value is not chenged.
+Then, ‚Äúreletion item‚Äù deleted. But main item‚Äôs value is not chenged.
 
 ============= ===================== ===== ===== ======= ===========
 pk            sk                    data  name  author  content

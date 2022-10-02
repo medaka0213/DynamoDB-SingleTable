@@ -1,5 +1,5 @@
 pandoc -f markdown -t rst -o readme.rst readme.md
-python -m readme_renderer readme.md -o readme.html
+pandoc -f markdown -t html -o readme.html readme.md
 
 Copy-Item -Path readme.md -Destination docs_src/readme.md  -Force
 sphinx-apidoc -f -o ./docs_src ./ddb_single

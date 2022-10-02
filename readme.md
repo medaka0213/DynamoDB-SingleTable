@@ -8,6 +8,12 @@ It makes effective and easy to manage your whole data models for single service.
 
 ## Getting Started
 
+### Install
+
+```
+pip install ddb_single
+```
+
 ### Init Table
 
 ```python
