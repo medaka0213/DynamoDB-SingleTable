@@ -12,6 +12,9 @@ import ddb_single.utils_botos as util_b
 def default_pk_factory(model_name):
     return f"{model_name}_{uuid.uuid4().hex}"
 
+def default_sk_factory(model_name, prefix="", suffix="_item"):
+    return f"{prefix}{model_name}{suffix}"
+
 def default_pk2model(pk):
     return pk.split("_", 1)[0]
 
@@ -55,6 +58,7 @@ class Table:
         secondary_key_type="S", 
         secondary_key_prefix="", 
         secondary_key_suffix="_item",
+        secondary_key_factory=default_sk_factory,
         unique_key="unique", 
         unique_key_type="S",
         search_prefix="search_", 
@@ -83,6 +87,7 @@ class Table:
         self.__secondary_key_type__ = secondary_key_type
         self.__secondary_key_prefix__ = secondary_key_prefix
         self.__secondary_key_suffix__ = secondary_key_suffix
+        self.__secondary_key_factory__ = secondary_key_factory
         self.__unique_key__ = unique_key
         self.__unique_key_type__ = unique_key_type
         self.__search_prefix__ = search_prefix
@@ -104,7 +109,7 @@ class Table:
         return self.__primary_key2model__(pk)
 
     def sk(self, model_name):
-        return f"{self.__secondary_key_prefix__}{model_name}{self.__secondary_key_suffix__}"
+        return self.__secondary_key_factory__(model_name, self.__secondary_key_prefix__, self.__secondary_key_suffix__)
     
     def sk2model(self, sk):
         return sk[len(self.__secondary_key_prefix__):-len(self.__secondary_key_suffix__)]

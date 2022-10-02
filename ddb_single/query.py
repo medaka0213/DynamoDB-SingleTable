@@ -16,7 +16,7 @@ class Query:
             model (BaseModel): DB data model
         """
         if not model.__setup__:
-            model = model()
+            model = model(__skip_validation__=True)
         self.__model__ = model
         return self
 
@@ -31,7 +31,7 @@ class Query:
         items_remove = []
         for k in self.__model__.__search_keys__:
             field:DBField = self.__model__.__class__.__dict__[k]
-            if k in self.__model__.data.keys():
+            if k in self.__model__.data.keys() and field.value is not None:
                 items_add.append(field.search_item(self.__model__.data[self.__model__.__primary_key__]))
             else:
                 items_remove.append(field.search_item(self.__model__.data[self.__model__.__primary_key__]))
@@ -75,8 +75,7 @@ class Query:
         for k, v in self.__model__.data.items():
             if k in self.__model__.__search_keys__:
                 field:DBField = self.__model__.__class__.__dict__[k]
-                if not field.validate(v):
-                    raise Exception(f"Validation error: {k}={v}")
+                field.validate(v)
 
     # 新規作成
     def create(self, batch=None, raise_if_exists=False):
@@ -104,7 +103,7 @@ class Query:
         """
         old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
         if old_item:
-            self._update(self, old_item, batch=batch)
+            self._update(old_item, batch=batch)
         else:
             self._create(batch=batch)
     
@@ -132,13 +131,14 @@ class Query:
             self._create(batch=batch, remove_ex_search_items=True)
 
     # 削除
-    def delete(self, batch=None):
+    def delete(self, target:dict=None, batch=None):
         """
         Delete an item.
         Args:
             batch: BatchWriteItem
         """
-        self.__table__.clear_item(self.__model__.data[self.__model__.__primary_key__], batch=batch)
+        target = target or self.__model__.data
+        self.__table__.clear_item(target[self.__model__.__primary_key__], batch=batch)
     
     def delete_by_unique(self, value, batch=None):
         """
@@ -148,7 +148,7 @@ class Query:
         """
         item = self.get_by_unique(value)
         if item:
-            self.delete(batch=batch)
+            self.delete(item, batch=batch)
 
     # 関連付け
     def _relation_item(self, pk):

@@ -64,7 +64,7 @@ class DBField:
         """
         return self.type in [FieldType.LIST, FieldType.STRING_SET, FieldType.NUMBER_SET, FieldType.BINARY_SET]
 
-    def validate(self, value=None):
+    def validate(self, value=None, skip=False):
         """
         Args:
             value: The value to be validated. If not provided, the value of the field will be used.
@@ -78,12 +78,13 @@ class DBField:
             self.value = self.default
         elif self.default_factory:
             self.value = self.default_factory(self.__model_cls__)
-        else:
-            if not self.nullable:
-                raise ValueError(f"Not nullable: {self.__class__.__name__}")
-        if self.value is not None:
-            self._setup_relation()
-        self.value = self._validate_value(self.value)
+        if not skip:
+            if value is None:
+                if not self.nullable:
+                    raise ValueError(f"Not nullable: {self.__class__.__name__}")
+            else:
+                self._setup_relation()
+                self.value = self._validate_value(self.value)
         return self.value
 
     def _setup_relation(self):
@@ -313,12 +314,12 @@ class BaseModel():
     __model_name__:str = None
     __table__: Table = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, __skip_validation__= False, **kwargs):
         self._setup()
         self.data = {}
         for k, v in self.__class__.__dict__.items():
             if isinstance(v, DBField):
-                self.data[k] = v.validate(kwargs.get(k))
+                self.data[k] = v.validate(kwargs.get(k), __skip_validation__)
                 if v.required and not k in kwargs:
                     raise ValueError(f"Missing required field: {k}")
 
@@ -330,23 +331,15 @@ class BaseModel():
         self.data = {}
         self.__search_keys__ = []
         self.__unique_keys__ = []
-        self.__primary_key__ = None
-        self.__secondary_key__ = None
+        self.__primary_key__ = self.__table__.__primary_key__
+        self.__secondary_key__ = self.__table__.__secondary_key__
         self.__relation_keys__ = []
         self.__reference_keys__ = []
+        setattr(self.__class__, self.__primary_key__, DBField(primary_key=True, default=self.__table__.pk(self.__model_name__)))
+        setattr(self.__class__, self.__secondary_key__, DBField(secondary_key=True, default=self.__table__.sk(self.__model_name__)))
         for k, v in self.__class__.__dict__.items():
             if isinstance(v, DBField):
                 v.setup(k, self)
-                if v.primary_key:
-                    if not self.__primary_key__:
-                        self.__primary_key__ = k
-                    else:
-                        raise ValueError(f"Duplicate primary key: {k}")
-                if v.secondary_key:
-                    if not self.__secondary_key__:
-                        self.__secondary_key__ = k
-                    else:
-                        raise ValueError(f"Duplicate secondary key: {k}")
                 if v.unique_key:
                     self.__unique_keys__.append(k)
                 if v.search_key or v.unique_key:
@@ -355,10 +348,6 @@ class BaseModel():
                     self.__relation_keys__.append(k)
                 if v.reference:
                     self.__reference_keys__.append(k)
-        if not self.__primary_key__:
-            raise ValueError(f"Missing primary key: {self.__model_name__}")
-        if not self.__secondary_key__:
-            raise ValueError(f"Missing secondary key: {self.__model_name__}")
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
