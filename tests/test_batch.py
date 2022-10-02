@@ -52,11 +52,30 @@ class TestCRUD(unittest.TestCase):
             target = [x for x in res if x["name"] == f"test{i}"][0]
             self.assertEqual(target["age"], i+10)
 
-    def test_04_delete(self):
+    def test_04_01_delete_by_unique(self):
         with table.batch_writer() as batch:
-            for i in range(5):
+            for i in range(3):
                 query.model(User).delete_by_unique(f"test{i}", batch=batch)
-
         # 効果確認
         res = query.model(User).search(User.name.begins_with("test"))
-        self.assertEqual(len(res), 5)
+        self.assertEqual(len(res), 7)
+
+    def test_04_02_delete(self):
+        items = query.model(User).search(User.name.begins_with("test"))
+        with table.batch_writer() as batch:
+            for i in range(3):
+                user = User(**items[i])
+                query.model(user).delete(batch=batch)
+        # 効果確認
+        res = query.model(User).search(User.name.begins_with("test"))
+        self.assertEqual(len(res), 4)
+
+    def test_04_03_delete_by_pk(self):
+        pks = query.model(User).search(User.name.begins_with("test"), pk_only=True)
+        with table.batch_writer() as batch:
+            for pk in pks[:3]:
+                query.model(User).delete_by_pk(pk, batch=batch)
+        # 効果確認
+        res = query.model(User).search(User.name.begins_with("test"))
+        self.assertEqual(len(res), 1)
+

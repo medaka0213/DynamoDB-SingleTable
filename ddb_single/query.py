@@ -130,6 +130,15 @@ class Query:
             self._create(batch=batch, remove_ex_search_items=True)
 
     # 削除
+    def delete_by_pk(self, pk, batch=None):
+        """
+        Delete an item by primary key.
+        Args:
+            pk: Primary key
+            batch: BatchWriteItem
+        """
+        self.__table__.clear_item(pk, batch=batch)
+
     def delete(self, target:dict=None, batch=None):
         """
         Delete an item.
@@ -137,7 +146,7 @@ class Query:
             batch: BatchWriteItem
         """
         target = target or self.__model__.data
-        self.__table__.clear_item(target[self.__model__.__primary_key__], batch=batch)
+        self.delete_by_pk(target[self.__model__.__primary_key__], batch=batch)
     
     def delete_by_unique(self, value, batch=None):
         """
