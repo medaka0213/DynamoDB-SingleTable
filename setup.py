@@ -11,7 +11,7 @@ with open('readme.rst', 'rw') as fp:
 
 setup(
     name='ddb_single',
-    version="0.2.2",
+    version=ddb_single.__version__,
     description='Python DynamoDB interface, specialized in single-table design.',
     url='https://github.com/medaka0213/DynamoDB-SingleTable',
     author='medaka',
