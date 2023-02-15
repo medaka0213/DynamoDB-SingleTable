@@ -119,6 +119,7 @@ class DBField:
                     return set(map(Decimal, str(value)))
                 elif self.type == FieldType.BINARY_SET:
                     return set(map(bytes, str(value)))
+                return value
             except:
                 raise ValueError(f"{self.name} must be a valid list")
         else:
@@ -133,6 +134,7 @@ class DBField:
                     return bytes(value)
                 elif self.type == FieldType.BOOLEAN:
                     return bool(value)
+                return value
             except:
                 raise ValueError(f"Value {self.name} must be a valid value")
 

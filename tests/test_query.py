@@ -23,6 +23,7 @@ class User(BaseModel):
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
     description=DBField()
+    config = DBField(type=FieldType.MAP)
 
 query = Query(table)
 
@@ -32,7 +33,8 @@ class TestCRUD(unittest.TestCase):
     def test_01_create(self):
         test = User(
             name="test", 
-            age=20
+            age=20,
+            config={"a": 1, "b": 2}
         )
         query.model(test).create()
         # 効果確認
@@ -40,6 +42,10 @@ class TestCRUD(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(res["pk"], test.data["pk"])
         self.assertEqual(res["sk"], test.data["sk"])
+        self.assertEqual(res["name"], test.data["name"])
+        self.assertEqual(res["age"], test.data["age"])
+        self.assertEqual(res["config"]["a"], test.data["config"]["a"])
+        self.assertEqual(res["config"]["b"], test.data["config"]["b"])
 
     def test_02_0_search(self):
         res = query.model(User).search(User.name.eq("test"))
