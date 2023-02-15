@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable 0.3.0 documentation</title>
+  <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable 0.3.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -107,7 +107,7 @@ It makes effective and easy to manage your whole data models for single service.
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h2>
 <div class="section" id="install">
 <h3>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ddb_single</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ddb</span><span class="o">-</span><span class="n">single</span>
 </pre></div>
 </div>
 </div>
@@ -253,7 +253,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pk_only=True</span></code> option in <code class="docutils literal notranslate"><span class="pre">get_by_unique</span></code> to get <code class="docutils literal notranslate"><span class="pre">primary</span> <span class="pre">key</span></code> without <code class="docutils literal notranslate"><span class="pre">get_item</span></code></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pk</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pk</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">pk_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
 <span class="c1"># -&gt; &quot;user_xxxx&quot;</span>
 </pre></div>

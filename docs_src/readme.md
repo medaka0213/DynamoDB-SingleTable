@@ -11,7 +11,7 @@ It makes effective and easy to manage your whole data models for single service.
 ### Install
 
 ```
-pip install ddb_single
+pip install ddb-single
 ```
 
 ### Init Table
@@ -127,7 +127,7 @@ print(user)
 `pk_only=True` option in `get_by_unique` to get `primary key` without `get_item`
 
 ```python
-pk = query.model(User).get_by_unique("John")
+pk = query.model(User).get_by_unique("John", pk_only=True)
 print(pk)
 # -> "user_xxxx"
 ```

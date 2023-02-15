@@ -16,7 +16,7 @@ Install
 
 ::
 
-   pip install ddb_single
+   pip install ddb-single
 
 Init Table
 ~~~~~~~~~~
@@ -148,7 +148,7 @@ without ``get_item``
 
 .. code:: python
 
-   pk = query.model(User).get_by_unique("John")
+   pk = query.model(User).get_by_unique("John", pk_only=True)
    print(pk)
    # -> "user_xxxx"
 

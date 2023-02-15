@@ -7,7 +7,7 @@ Secondary Indexes). It makes effective and easy to manage your whole
 data models for single service.</p>
 <h2 id="getting-started">Getting Started</h2>
 <h3 id="install">Install</h3>
-<pre><code>pip install ddb_single</code></pre>
+<pre><code>pip install ddb-single</code></pre>
 <h3 id="init-table">Init Table</h3>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ddb_single <span class="im">import</span> Table</span>
@@ -137,7 +137,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a hr
 <p><code>pk_only=True</code> option in <code>get_by_unique</code> to get
 <code>primary key</code> without <code>get_item</code></p>
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pk <span class="op">=</span> query.model(User).get_by_unique(<span class="st">&quot;John&quot;</span>)</span>
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pk <span class="op">=</span> query.model(User).get_by_unique(<span class="st">&quot;John&quot;</span>, pk_only<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pk)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; &quot;user_xxxx&quot;</span></span></code></pre></div>
 <h3 id="update-item">Update Item</h3>
