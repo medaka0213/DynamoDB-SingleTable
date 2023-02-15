@@ -41,8 +41,13 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
+
+    def test_02_1_search_by_get_field(self):
+        res = query.model(User).search(User().get_field("name").eq("test"))
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name"], "test")
     
-    def test_02_1_get_by_unique(self):
+    def test_02_2_get_by_unique(self):
         res = query.model(User).get_by_unique("test")
         self.assertIsNotNone(res)
         self.assertEqual(res["name"], "test")

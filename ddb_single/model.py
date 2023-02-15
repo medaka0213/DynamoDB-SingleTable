@@ -340,3 +340,17 @@ class BaseModel():
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
+    
+    def get_field(self, key:str) -> DBField:
+        """
+        Args:
+            key: DBField name.
+        Returns:
+            DBField: DBField instance.
+        """
+        res = self.__class__.__dict__.get(key)
+        print("__getitem__", res)
+        if isinstance(res, DBField):
+            return res
+        raise KeyError(f"Key {key} not found")
+
