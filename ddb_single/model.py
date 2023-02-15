@@ -4,6 +4,10 @@ from boto3.dynamodb.conditions import Key
 from ddb_single.table import FieldType, Table
 import ddb_single.utils_botos as util_b
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DBField:
     """

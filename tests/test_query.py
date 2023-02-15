@@ -6,6 +6,10 @@ from ddb_single.query import Query
 
 import datetime
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 table = Table(
     table_name="query_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",

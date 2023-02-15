@@ -3,6 +3,10 @@ from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class Query:
     def __init__(self, table:Table, model:Optional[BaseModel]=None):
         self.__table__ = table

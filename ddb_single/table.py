@@ -9,6 +9,10 @@ from enum import Enum
 
 import ddb_single.utils_botos as util_b
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 def default_pk_factory(model_name):
     return f"{model_name}_{uuid.uuid4().hex}"
 
@@ -318,6 +322,7 @@ class Table:
         staged_ex = [s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.STAGED]
         filter_ex = [s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.FILTER]
         if staged_ex:
+            logger.debug(f"staged_ex: {staged_ex}")
             res = set()
             all_items = []
             for i, searchEx in enumerate(searchEx):
@@ -333,6 +338,7 @@ class Table:
                     res = set(_res)
         else:
             # シンプルにクエリ検索
+            logger.debug(f"simple_ex: {simple_ex}")
             KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
             for ex in simple_ex:
                 KeyConditionExpression &= ex["KeyConditionExpression"]
@@ -344,14 +350,23 @@ class Table:
                 res = self._query(
                     KeyConditionExpression=KeyConditionExpression,
                     FilterExpression=FilterExpression,
+                    IndexName=self.__range_index_name__,
                 ) or []
             else:
+                # フィルタがなければ全件検索
+                logger.debug(f"FilterExpression not found")
                 res = self._query(
-                    KeyConditionExpression=KeyConditionExpression
+                    KeyConditionExpression=KeyConditionExpression,
+                    IndexName=self.__range_index_name__,
                 ) or []
+            if pk_only:
+                return [r[self.__primary_key__] for r in res]
+            else:
+                return res
         if pk_only and not filter_ex:
             return list(res)
         else:
+            logger.debug(f"batch_get: {res}")
             res = self.batch_get_from_pks(list(res))
             #  filter_ex があればフィルタ
             res = self.filter(res, filter_ex)
