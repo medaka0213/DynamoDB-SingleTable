@@ -35,7 +35,7 @@ class Query:
         items_remove = []
         for k in self.__model__.__search_keys__:
             field:DBField = self.__model__.__class__.__dict__[k]
-            if k in self.__model__.data.keys() and field.value is not None:
+            if k in self.__model__.data.keys() and field.value is not None and field.value != "":
                 items_add.append(field.search_item(self.__model__.data[self.__model__.__primary_key__]))
             else:
                 items_remove.append(field.search_item(self.__model__.data[self.__model__.__primary_key__]))
