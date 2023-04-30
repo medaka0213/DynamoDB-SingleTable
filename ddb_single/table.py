@@ -181,7 +181,7 @@ class Table:
 
     # クエリ
     def _query(self, **kwargs):
-        limit = kwargs.get("Limit")
+        limit = kwargs.get("Limit", float('inf'))
         try:
             response = self.__table__.query(**kwargs)
         except ClientError as e:
