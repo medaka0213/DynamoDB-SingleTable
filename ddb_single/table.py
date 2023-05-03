@@ -325,7 +325,7 @@ class Table:
             logger.debug(f"staged_ex: {staged_ex}")
             res = set()
             all_items = []
-            for i, searchEx in enumerate(searchEx):
+            for i, searchEx in enumerate(staged_ex):
                 _res = self._query(
                     KeyConditionExpression=searchEx["KeyConditionExpression"],
                     IndexName=searchEx["IndexName"],
