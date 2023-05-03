@@ -199,13 +199,16 @@ class Table:
     # アイテムの取得
     def get_item(self, pk, sk=None):
         sk = sk if sk else self.pk2sk(pk)
-        res = self.__client__.get_item(
+        res: dict = self.__client__.get_item(
             TableName=self.__table_name__,
             Key={
                 self.__primary_key__: {self.__primary_key_type__: pk},
                 self.__secondary_key__: {self.__secondary_key_type__: sk}
             }
         )
+        if 'Item' not in res:
+            # アイテムがない場合はNoneを返す
+            return None
         res = util_b.deserialize(res.get('Item'))
         res = util_b.json_export(res)
         return res
