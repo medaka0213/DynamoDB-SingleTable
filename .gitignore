@@ -7,4 +7,3 @@ dist
 shared-local-instance.db
 .coverage
 docs
-docs_src

@@ -62,7 +62,7 @@ jobs:
 
       - name: Generate docs
         run: |
-          cp ./README.md ./docs_src/index.md
+          cp ./readme.md ./docs_src/readme.md
           sphinx-apidoc -f -o ./docs_src ./ddb_single
           sphinx-build ./docs_src ./docs
 
