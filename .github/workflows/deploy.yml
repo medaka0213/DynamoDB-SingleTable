@@ -11,8 +11,6 @@ on:
 jobs:
   lint_and_test:
     runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: ${{ github.event.release.tag_name }}
 
     steps:
       - name: Checkout repository
@@ -61,6 +59,8 @@ jobs:
       - name: Build
         run: |
           python setup.py sdist --formats=zip
+        env:
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
 
       - name: Publish a Python distribution to PyPI
         if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
