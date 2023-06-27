@@ -9,7 +9,6 @@ import datetime
 table = Table(
     table_name="batch_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
-    region_name="ap-northeast-1",
 )
 table.init()
 
