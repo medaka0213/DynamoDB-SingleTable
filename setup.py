@@ -1,4 +1,4 @@
-import os
+import ddb_single
 from setuptools import setup
 
 with open("readme.md", "r") as fp:
@@ -7,13 +7,10 @@ with open("readme.md", "r") as fp:
 with open("requirements.txt", "r") as fp:
     INSTALL_REQUIRES = fp.read().splitlines()
 
-RELEASE_VERSION = (
-    os.environ.get("RELEASE_VERSION", "").split("/")[-1].replace("v", "") or "0.0.0"
-)
 
 setup(
     name="ddb_single",
-    version=RELEASE_VERSION,
+    version=ddb_single.__version__,
     description="Python DynamoDB interface, specialized in single-table design.",
     url="https://github.com/medaka0213/DynamoDB-SingleTable",
     author="medaka",
