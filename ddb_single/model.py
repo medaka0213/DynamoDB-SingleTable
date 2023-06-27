@@ -211,6 +211,8 @@ class DBField:
         Returns:
             dict: The key expression.
         """
+        if self.ignore_case and isinstance(value, str):
+            value = value.lower()
         if self.secondary_key:
             raise ValueError(f"Secondary key can not be used as a key: {self.name}")
         res = {

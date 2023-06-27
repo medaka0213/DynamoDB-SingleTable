@@ -57,20 +57,38 @@ class TestCRUD(unittest.TestCase):
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
 
-    def test_02_1_search_by_get_field(self):
+    def test_02_1_0_search_by_get_field(self):
+        """Search by get_field"""
         res = query.model(User).search(User().get_field("name").eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
+
+    def test_02_1_1_search_by_get_field_not_found(self):
+        """Search by get_field: not found"""
+        res = query.model(User).search(User().get_field("name").eq("Test"))
+        self.assertEqual(len(res), 0)
 
     def test_02_2_get_by_unique(self):
         res = query.model(User).get_by_unique("test")
         self.assertIsNotNone(res)
         self.assertEqual(res["name"], "test")
 
-    def test_02_3_search_ignore_case(self):
+    def test_02_3_0_search_ignore_case(self):
+        """Search ignoring case"""
         res = query.model(User).search(User.name_ignore_nase.eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name_ignore_nase"], "Test")
+
+    def test_02_3_1_search_ignore_case_found_if_uppercase(self):
+        """Search ignoring case: found if uppercase"""
+        res = query.model(User).search(User.name_ignore_nase.eq("TEST"))
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name_ignore_nase"], "Test")
+
+    def test_02_3_2_search_ignore_case_not_found(self):
+        """Search ignoring case: not found"""
+        res = query.model(User).search(User.name_ignore_nase.eq("NOTFOUND"))
+        self.assertEqual(len(res), 0)
 
     def test_03_update(self):
         test = query.model(User).get_by_unique("test")
