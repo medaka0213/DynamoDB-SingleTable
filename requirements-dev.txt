@@ -2,3 +2,5 @@ sphinx
 myst-parser
 flake8
 coverage
+pipenv
+wheel

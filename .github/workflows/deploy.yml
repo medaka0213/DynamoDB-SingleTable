@@ -1,0 +1,68 @@
+name: Upload pypi package release
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run flake8 linter
+        run: |
+          flake8 ddb_single --max-line-length=120
+          flake8 tests --max-line-length=120
+          flake8 setup.py --max-line-length=120
+
+      - name: Run unittest
+        run: |
+          docker run -d -p 8000:8000 amazon/dynamodb-local
+          coverage run -m unittest discover -s tests/
+          coverage report
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: lint_and_test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Build
+        run: |
+          python setup.py sdist --formats=zip
+
+      - name: Publish a Python distribution to PyPI
+        if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

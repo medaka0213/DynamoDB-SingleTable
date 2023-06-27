@@ -28,7 +28,6 @@ jobs:
 
       - name: Run flake8 linter
         run: |
-
           flake8 ddb_single --max-line-length=120
           flake8 tests --max-line-length=120
           flake8 setup.py --max-line-length=120
