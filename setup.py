@@ -1,6 +1,5 @@
 import os
 from setuptools import setup
-import ddb_single
 
 with open("readme.md", "r") as fp:
     LONG_DESCRIPTION = fp.read()
