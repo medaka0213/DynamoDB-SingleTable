@@ -81,4 +81,4 @@ jobs:
           branch: gh-pages
           folder: ./docs
           clean: true
-          commit-message: Deploy as of ${{ github.event.ref }}
+          commit-message: Deploy as of ${{ github.sha }}
