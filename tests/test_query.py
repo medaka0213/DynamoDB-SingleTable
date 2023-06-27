@@ -24,6 +24,7 @@ class User(BaseModel):
     __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
+    name_ignore_nase = DBField(search_key=True, ignore_case=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
     description = DBField()
@@ -37,7 +38,9 @@ print("table_name:", table.__table_name__)
 
 class TestCRUD(unittest.TestCase):
     def test_01_create(self):
-        test = User(name="test", age=20, config={"a": 1, "b": 2})
+        test = User(
+            name="test", name_ignore_nase="Test", age=20, config={"a": 1, "b": 2}
+        )
         query.model(test).create()
         # 効果確認
         res = query.model(User).get(test.data["pk"])
@@ -63,6 +66,11 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).get_by_unique("test")
         self.assertIsNotNone(res)
         self.assertEqual(res["name"], "test")
+
+    def test_02_3_search_ignore_case(self):
+        res = query.model(User).search(User.name_ignore_nase.eq("test"))
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name_ignore_nase"], "Test")
 
     def test_03_update(self):
         test = query.model(User).get_by_unique("test")

@@ -29,6 +29,7 @@ class DBField:
         search_key=False,
         reletion=None,
         reletion_by_unique=True,
+        ignore_case=False,
         **kwargs,
     ):
         """
@@ -58,6 +59,7 @@ class DBField:
         self.search_key = search_key or unique_key
         self.relation = reletion
         self.reletion_by_unique = reletion_by_unique
+        self.ignore_case = ignore_case
         self.value = None
 
     def setup(self, name, model_cls):
@@ -191,10 +193,14 @@ class DBField:
         Returns:
             dict: The search item.
         """
+        _value = self.value
+        if self.ignore_case and isinstance(_value, str):
+            # lower case if self.ignore_case = True
+            _value = _value.lower()
         return {
             self.__table__.__primary_key__: pk,
             self.__table__.__secondary_key__: self.search_key_factory(),
-            self.search_data_key(): self.value,
+            self.search_data_key(): _value,
         }
 
     def key_ex(self, value, mode):
