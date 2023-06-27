@@ -22,6 +22,6 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=INSTALL_REQUIRES,
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
     ],
 )
