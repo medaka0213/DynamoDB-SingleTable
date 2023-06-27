@@ -5,3 +5,5 @@ __pycache__
 build
 dist
 shared-local-instance.db
+.coverage
+docs

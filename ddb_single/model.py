@@ -13,14 +13,27 @@ class DBField:
     """
     DBField is a field of a model. It is used to define the structure of a model.
     """
+
     __setup__ = False
-    def __init__(self, type:FieldType=FieldType.STRING, default=None, default_factory=None, nullable=True, required=False, 
-                 primary_key=False, secondary_key=False, unique_key=False, search_key=False, 
-                 reletion=None, reletion_by_unique=True,
-                 **kwargs):
+
+    def __init__(
+        self,
+        type: FieldType = FieldType.STRING,
+        default=None,
+        default_factory=None,
+        nullable=True,
+        required=False,
+        primary_key=False,
+        secondary_key=False,
+        unique_key=False,
+        search_key=False,
+        reletion=None,
+        reletion_by_unique=True,
+        **kwargs,
+    ):
         """
         Args:
-            type (FieldType): The type of the field. It can be one of the following: STRING, NUMBER, BINARY, BOOLEAN, NULL, LIST, MAP, or SET.
+            type (FieldType): The type of the field.
             default: The default value of the field.
             default_factory: The default factory of the field.
             nullable (bool): Whether the field can be null.
@@ -46,7 +59,7 @@ class DBField:
         self.relation = reletion
         self.reletion_by_unique = reletion_by_unique
         self.value = None
-    
+
     def setup(self, name, model_cls):
         self.__model_cls__ = model_cls
         self.__table__: Table = model_cls.__table__
@@ -57,13 +70,18 @@ class DBField:
         if self.secondary_key:
             self.default = None
             self.default_factory = lambda x: self.__table__.sk(model_cls.__model_name__)
-    
+
     def is_list(self):
         """
         Returns:
             bool: Whether the field is a list.
         """
-        return self.type in [FieldType.LIST, FieldType.STRING_SET, FieldType.NUMBER_SET, FieldType.BINARY_SET]
+        return self.type in [
+            FieldType.LIST,
+            FieldType.STRING_SET,
+            FieldType.NUMBER_SET,
+            FieldType.BINARY_SET,
+        ]
 
     def validate(self, value=None, skip=False):
         """
@@ -98,12 +116,15 @@ class DBField:
                     return v.data[self.value.__primary_key__]
             else:
                 return v
+
         if not self.is_list():
             if self.relation:
                 self.value = extract_value(self.value, self.reletion_by_unique)
         else:
             if self.relation:
-                self.value = [extract_value(v, self.reletion_by_unique) for v in self.value]
+                self.value = [
+                    extract_value(v, self.reletion_by_unique) for v in self.value
+                ]
         return self.value
 
     def _validate_value(self, value):
@@ -120,13 +141,14 @@ class DBField:
                 elif self.type == FieldType.BINARY_SET:
                     return set(map(bytes, str(value)))
                 return value
-            except:
+            except Exception as e:
+                logger.error("Error: %s", e)
                 raise ValueError(f"{self.name} must be a valid list")
         else:
             try:
                 if isinstance(value, list):
                     raise ValueError(f"{self.name} must not be a list")
-                if self.type == FieldType.STRING: 
+                if self.type == FieldType.STRING:
                     return str(value)
                 elif self.type == FieldType.NUMBER:
                     return Decimal(str(value))
@@ -135,7 +157,8 @@ class DBField:
                 elif self.type == FieldType.BOOLEAN:
                     return bool(value)
                 return value
-            except:
+            except Exception as e:
+                logger.error("Error: %s", e)
                 raise ValueError(f"Value {self.name} must be a valid value")
 
     def search_key_factory(self):
@@ -143,7 +166,9 @@ class DBField:
         Returns:
             str: The search key of the field.
         """
-        return self.__table__.search_key_factory(self.__model_cls__.__model_name__, self.name)
+        return self.__table__.search_key_factory(
+            self.__model_cls__.__model_name__, self.name
+        )
 
     def search_data_key(self):
         """
@@ -171,7 +196,7 @@ class DBField:
             self.__table__.__secondary_key__: self.search_key_factory(),
             self.search_data_key(): self.value,
         }
-    
+
     def key_ex(self, value, mode):
         """
         Args:
@@ -187,23 +212,27 @@ class DBField:
         }
         if util_b.is_key(mode):
             if self.primary_key:
-                return {**res,
+                return {
+                    **res,
                     "KeyConditionExpression": util_b.range_ex(self.name, value, mode),
-                    "FilterStatus": util_b.FilterStatus.SEATCH
+                    "FilterStatus": util_b.FilterStatus.SEATCH,
                 }
             elif self.search_key:
-                KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(self.search_key_factory()) \
-                    & util_b.range_ex(self.search_data_key(), value, mode)
-                return {**res,
+                KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
+                    self.search_key_factory()
+                ) & util_b.range_ex(self.search_data_key(), value, mode)
+                return {
+                    **res,
                     "KeyConditionExpression": KeyConditionExpression,
                     "IndexName": self.serch_index(),
-                    "FilterStatus": util_b.FilterStatus.STAGED
+                    "FilterStatus": util_b.FilterStatus.STAGED,
                 }
-        return {**res,
+        return {
+            **res,
             "FilterExpression": util_b.attr_ex(self.name, value, mode),
-            "FilterStatus": util_b.FilterStatus.FILTER
+            "FilterStatus": util_b.FilterStatus.FILTER,
         }
-    
+
     def eq(self, value):
         """
         Args:
@@ -212,7 +241,7 @@ class DBField:
             dict: key_ex with mode QueryType.EQ.
         """
         return self.key_ex(value, util_b.QueryType.EQ)
-    
+
     def ne(self, value):
         """
         Args:
@@ -221,7 +250,7 @@ class DBField:
             dict: key_ex with mode QueryType.NE.
         """
         return self.key_ex(value, util_b.QueryType.N_EQ)
-    
+
     def lt(self, value):
         """
         Args:
@@ -230,7 +259,7 @@ class DBField:
             dict: key_ex with mode QueryType.LT.
         """
         return self.key_ex(value, util_b.QueryType.LT)
-    
+
     def lte(self, value):
         """
         Args:
@@ -239,7 +268,7 @@ class DBField:
             dict: key_ex with mode QueryType.LTE.
         """
         return self.key_ex(value, util_b.QueryType.LT_E)
-    
+
     def gt(self, value):
         """
         Args:
@@ -248,7 +277,7 @@ class DBField:
             dict: key_ex with mode QueryType.GT.
         """
         return self.key_ex(value, util_b.QueryType.GT)
-    
+
     def gte(self, value):
         """
         Args:
@@ -257,7 +286,7 @@ class DBField:
             dict: key_ex with mode QueryType.GTE.
         """
         return self.key_ex(value, util_b.QueryType.GT_E)
-    
+
     def between(self, value1, value2):
         """
         Args:
@@ -267,7 +296,7 @@ class DBField:
             dict: key_ex with mode QueryType.BETWEEN.
         """
         return self.key_ex((value1, value2), util_b.QueryType.BETWEEN)
-    
+
     def begins_with(self, value):
         """
         Args:
@@ -276,7 +305,7 @@ class DBField:
             dict: key_ex with mode QueryType.BEGINS_WITH.
         """
         return self.key_ex(value, util_b.QueryType.BEGINS)
-    
+
     def contains(self, value):
         """
         Args:
@@ -285,7 +314,7 @@ class DBField:
             dict: key_ex with mode QueryType.CONTAINS.
         """
         return self.key_ex(value, util_b.QueryType.CONTAINS)
-    
+
     def in_(self, value):
         """
         Args:
@@ -295,7 +324,8 @@ class DBField:
         """
         return self.key_ex(value, util_b.QueryType.IN)
 
-class BaseModel():
+
+class BaseModel:
     """
     The base model class.
     Examples:
@@ -306,18 +336,19 @@ class BaseModel():
         ...     name = DBField(required=True)
         ...     age = DBField(type=FieldType.NUMBER)
     """
+
     __setup__ = False
     __use_unique_for_relations__ = True
-    __model_name__:str = None
+    __model_name__: str = None
     __table__: Table = None
 
-    def __init__(self, __skip_validation__= False, **kwargs):
+    def __init__(self, __skip_validation__=False, **kwargs):
         self._setup()
         self.data = {}
         for k, v in self.__class__.__dict__.items():
             if isinstance(v, DBField):
                 self.data[k] = v.validate(kwargs.get(k), __skip_validation__)
-                if v.required and not k in kwargs:
+                if v.required and k not in kwargs:
                     raise ValueError(f"Missing required field: {k}")
 
     def _setup(self):
@@ -332,8 +363,16 @@ class BaseModel():
         self.__secondary_key__ = self.__table__.__secondary_key__
         self.__relation_keys__ = []
         self.__reference_keys__ = []
-        setattr(self.__class__, self.__primary_key__, DBField(primary_key=True, default=self.__table__.pk(self.__model_name__)))
-        setattr(self.__class__, self.__secondary_key__, DBField(secondary_key=True, default=self.__table__.sk(self.__model_name__)))
+        setattr(
+            self.__class__,
+            self.__primary_key__,
+            DBField(primary_key=True, default=self.__table__.pk(self.__model_name__)),
+        )
+        setattr(
+            self.__class__,
+            self.__secondary_key__,
+            DBField(secondary_key=True, default=self.__table__.sk(self.__model_name__)),
+        )
         for k, v in self.__class__.__dict__.items():
             if isinstance(v, DBField):
                 v.setup(k, self)
@@ -346,8 +385,8 @@ class BaseModel():
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
             raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
-    
-    def get_field(self, key:str) -> DBField:
+
+    def get_field(self, key: str) -> DBField:
         """
         Args:
             key: DBField name.
@@ -359,4 +398,3 @@ class BaseModel():
         if isinstance(res, DBField):
             return res
         raise KeyError(f"Key {key} not found")
-

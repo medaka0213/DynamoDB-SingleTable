@@ -16,46 +16,40 @@ table = Table(
 )
 table.init()
 
+
 class User(BaseModel):
-    __table__=table
+    __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
-    description=DBField()
+    description = DBField()
+
 
 query = Query(table)
 
 print("table_name:", table.__table_name__)
 
+
 class TestSearch(unittest.TestCase):
     def setUp(self):
-        test = User(
-            name="test1",
-            age=21
-        )
+        test = User(name="test1", age=21)
         query.model(test).create()
-        test = User(
-            name="test2",
-            age=22
-        )
+        test = User(name="test2", age=22)
         query.model(test).create()
-        test = User(
-            name="test3",
-            age=23
-        )
+        test = User(name="test3", age=23)
         query.model(test).create()
 
     def test_search(self):
         res = query.model(User).search(User.name.eq("test1"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test1")
-    
+
     def test_get_by_unique(self):
         res = query.model(User).get_by_unique("test2")
         self.assertIsNotNone(res)
         self.assertEqual(res["name"], "test2")
-    
+
     def test_search_by_get_field(self):
         res = query.model(User).search(User().get_field("name").eq("test3"))
         self.assertEqual(len(res), 1)

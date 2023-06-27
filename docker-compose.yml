@@ -9,7 +9,6 @@ services:
         working_dir: /home/dynamodblocal
         volumes:
             - "./docker/dynamodb:/home/dynamodblocal/data"
-        working_dir: /home/dynamodblocal
     dynamodb-admin:
         image: aaronshaf/dynamodb-admin
         tty: true

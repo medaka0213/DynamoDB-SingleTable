@@ -12,39 +12,36 @@ table = Table(
 )
 table.init()
 
+
 class User(BaseModel):
-    __table__=table
+    __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
-    description=DBField()
+    description = DBField()
+
 
 class BlogPost(BaseModel):
     __model_name__ = "blogpost"
-    __table__=table
+    __table__ = table
     title = DBField(unique_key=True)
     content = DBField(search_key=True)
     author = DBField(reletion=User)
 
+
 print("table_name:", table.__table_name__)
 query = Query(table)
 
+
 class TestRelation(unittest.TestCase):
     def setUp(self) -> None:
-        self.user = User(
-            name="test",
-            age=20
-        )
+        self.user = User(name="test", age=20)
         query.model(self.user).create()
         return super().setUp()
 
     def test_01_create(self):
-        blogpost = BlogPost(
-            title="test",
-            content="test",
-            author=self.user
-        )
+        blogpost = BlogPost(title="test", content="test", author=self.user)
         query.model(blogpost).create()
         # 効果確認
         res = query.model(BlogPost).get(blogpost.data["pk"])
@@ -54,14 +51,14 @@ class TestRelation(unittest.TestCase):
     def test_02_0_get_rel(self):
         blogpost = query.model(BlogPost).search(BlogPost.title.eq("test"))
         self.assertEqual(len(blogpost), 1)
-        
-        #モデルから検索
+
+        # モデルから検索
         blogpost = BlogPost(**blogpost[0])
         res = query.model(blogpost).get_relation(model=User)
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
-        #フィールドから検索
+        # フィールドから検索
         res = query.model(blogpost).get_relation(field=BlogPost.author)
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
@@ -72,17 +69,14 @@ class TestRelation(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["title"], "test")
-        #フィールドから検索
+        # フィールドから検索
         res = query.model(self.user).get_reference(field=BlogPost.author)
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["title"], "test")
 
     def test_03_update(self):
-        new_user = User(
-            name="test2",
-            age=20
-        )
+        new_user = User(name="test2", age=20)
         query.model(new_user).create()
         res = query.model(User).search(User.name.eq("test2"))
         self.assertIsNotNone(res)
@@ -104,4 +98,3 @@ class TestRelation(unittest.TestCase):
         rel_user = query.model(blogpost).get_relation(model=User)
         self.assertEqual(len(rel_user), 1)
         self.assertEqual(rel_user[0]["name"], "test2")
-

@@ -1,0 +1,42 @@
+# lint_and_test.yml
+name: Lint and Test
+
+on:
+  push:
+    branches-ignore:
+      - "prod*"
+    tags-ignore:
+      - "*"
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Run mock server
+        run: |
+          docker compose up dynamodb-local -d
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run flake8 linter
+        run: |
+          flake8 ddb_single --max-line-length=120
+          flake8 tests --max-line-length=120
+          flake8 setup.py --max-line-length=120
+
+      - name: Run unittest
+        run: |
+          coverage run -m unittest discover -s tests/
+          coverage report

@@ -16,26 +16,25 @@ table = Table(
 )
 table.init()
 
+
 class User(BaseModel):
-    __table__=table
+    __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
-    description=DBField()
+    description = DBField()
     config = DBField(type=FieldType.MAP)
+
 
 query = Query(table)
 
 print("table_name:", table.__table_name__)
 
+
 class TestCRUD(unittest.TestCase):
     def test_01_create(self):
-        test = User(
-            name="test", 
-            age=20,
-            config={"a": 1, "b": 2}
-        )
+        test = User(name="test", age=20, config={"a": 1, "b": 2})
         query.model(test).create()
         # 効果確認
         res = query.model(User).get(test.data["pk"])
@@ -56,7 +55,7 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User().get_field("name").eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
-    
+
     def test_02_2_get_by_unique(self):
         res = query.model(User).get_by_unique("test")
         self.assertIsNotNone(res)
