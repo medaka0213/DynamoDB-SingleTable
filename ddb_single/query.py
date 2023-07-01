@@ -180,7 +180,17 @@ class Query:
             batch: BatchWriteItem
         """
         target = target or self.__model__.data
-        self.delete_by_pk(target[self.__model__.__primary_key__], batch=batch)
+        if target.get(self.__model__.__unique_keys__[0]):
+            # unique があれば unique で削除
+            self.delete_by_unique(
+                target[self.__model__.__unique_keys__[0]], batch=batch
+            )
+        elif target.get(self.__model__.__primary_key__):
+            # pk があれば pk で削除
+            self.delete_by_pk(target[self.__model__.__primary_key__], batch=batch)
+        else:
+            # 両方とも無ければエラー
+            raise Exception("Primary key or Unique key is required.")
 
     def delete_by_unique(self, value, batch=None):
         """
@@ -188,9 +198,9 @@ class Query:
         Args:
             batch: BatchWriteItem
         """
-        item = self.get_by_unique(value)
-        if item:
-            self.delete(item, batch=batch)
+        target = self.get_by_unique(value)
+        pk = target.get(self.__model__.__primary_key__)
+        self.delete_by_pk(pk, batch=batch)
 
     # 関連付け
     def _relation_item(self, pk, field: DBField):

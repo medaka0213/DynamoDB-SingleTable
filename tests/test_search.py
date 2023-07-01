@@ -5,13 +5,12 @@ from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
 import datetime
-
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 table = Table(
-    table_name="query_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    table_name="search_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
     aws_access_key_id="ACCESS_ID",
@@ -69,3 +68,7 @@ class TestSearch(unittest.TestCase):
     def test_begins(self):
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 3)
+
+
+if __name__ == "__main__":
+    unittest.main()

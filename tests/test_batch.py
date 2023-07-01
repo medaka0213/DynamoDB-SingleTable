@@ -6,6 +6,11 @@ from ddb_single.query import Query
 
 import datetime
 
+
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 table = Table(
     table_name="batch_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
@@ -83,3 +88,7 @@ class TestCRUD(unittest.TestCase):
         # 効果確認
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

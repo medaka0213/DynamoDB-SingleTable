@@ -1,14 +1,13 @@
 import unittest
-
+from unittest.mock import patch, MagicMock
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
 import datetime
-
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 table = Table(
     table_name="query_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
@@ -38,19 +37,34 @@ print("table_name:", table.__table_name__)
 
 class TestCRUD(unittest.TestCase):
     def test_01_create(self):
-        test = User(
-            name="test", name_ignore_nase="Test", age=20, config={"a": 1, "b": 2}
+        test1 = User(
+            name="test",
+            name_ignore_nase="Test",
+            age=20,
+            config={"a": 1, "b": 2},
         )
-        query.model(test).create()
+        test2 = User(
+            pk="user_test2",
+            name="test2",
+            name_ignore_nase="Test2",
+        )
+        test3 = User(
+            pk="user_test3",
+            name="test3",
+            name_ignore_nase="Test3",
+        )
+        query.model(test1).create()
+        query.model(test2).create()
+        query.model(test3).create()
         # 効果確認
-        res = query.model(User).get(test.data["pk"])
+        res = query.model(User).get(test1.data["pk"])
         self.assertIsNotNone(res)
-        self.assertEqual(res["pk"], test.data["pk"])
-        self.assertEqual(res["sk"], test.data["sk"])
-        self.assertEqual(res["name"], test.data["name"])
-        self.assertEqual(res["age"], test.data["age"])
-        self.assertEqual(res["config"]["a"], test.data["config"]["a"])
-        self.assertEqual(res["config"]["b"], test.data["config"]["b"])
+        self.assertEqual(res["pk"], test1.data["pk"])
+        self.assertEqual(res["sk"], test1.data["sk"])
+        self.assertEqual(res["name"], test1.data["name"])
+        self.assertEqual(res["age"], test1.data["age"])
+        self.assertEqual(res["config"]["a"], test1.data["config"]["a"])
+        self.assertEqual(res["config"]["b"], test1.data["config"]["b"])
 
     def test_02_0_search(self):
         res = query.model(User).search(User.name.eq("test"))
@@ -107,3 +121,39 @@ class TestCRUD(unittest.TestCase):
         # 効果確認
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 0)
+
+    def test_04_02_delete_by_pk(self):
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test2"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User).delete_by_pk("user_test2")
+        # 効果確認
+        res = query.model(User).search(User.name.eq("test2"))
+        self.assertEqual(len(res), 0)
+
+    @patch("ddb_single.query.Query.delete_by_pk")
+    def test_04_03_delete_by_pk_2(self, mock_delete_by_pk: MagicMock):
+        """Delete by primary key: query.model(payload).delete()"""
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test3"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User(**res[0])).delete()
+        # 効果確認
+        mock_delete_by_pk.assert_called_once_with("user_test3", batch=None)
+
+    @patch("ddb_single.query.Query.delete_by_unique")
+    def test_04_03_delete_by_unique_2(self, mock_delete_by_unique: MagicMock):
+        """Delete by unique key: query.model(payload).delete()"""
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test3"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User(name="test3")).delete()
+        # 効果確認
+        mock_delete_by_unique.assert_called_once_with("test3", batch=None)
+
+
+if __name__ == "__main__":
+    unittest.main()
