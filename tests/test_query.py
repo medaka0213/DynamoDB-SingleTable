@@ -122,12 +122,6 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 0)
 
-    def test_04_delete(self):
-        query.model(User).delete_by_unique("test")
-        # 効果確認
-        res = query.model(User).search(User.name.eq("test"))
-        self.assertEqual(len(res), 0)
-
     def test_04_02_delete_by_pk(self):
         # 対象データが存在することを確認
         res = query.model(User).search(User.name.eq("test2"))
