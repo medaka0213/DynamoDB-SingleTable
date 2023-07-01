@@ -198,9 +198,9 @@ class Query:
         Args:
             batch: BatchWriteItem
         """
-        item = self.get_by_unique(value)
-        if item:
-            self.delete(item, batch=batch)
+        target = self.get_by_unique(value)
+        pk = target.get(self.__model__.__primary_key__)
+        self.delete_by_pk(pk, batch=batch)
 
     # 関連付け
     def _relation_item(self, pk, field: DBField):
