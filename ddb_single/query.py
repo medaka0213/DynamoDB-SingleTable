@@ -118,7 +118,7 @@ class Query:
             if raise_if_exists:
                 raise Exception("Item Already exists")
             else:
-                self._update(old_item, batch=batch)
+                self._update(old_item, new_item={}, batch=batch)
         else:
             self._create(batch)
 
