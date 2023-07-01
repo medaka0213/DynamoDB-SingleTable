@@ -104,7 +104,8 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name_ignore_nase.eq("NOTFOUND"))
         self.assertEqual(len(res), 0)
 
-    def test_03_update(self):
+    def test_03_01_update(self):
+        """Update by primary key: query.model(payload).update()"""
         test = query.model(User).get_by_unique("test")
         test["age"] = 30
         new_test = User(**test)
@@ -112,6 +113,17 @@ class TestCRUD(unittest.TestCase):
         # 効果確認
         res = query.model(User).get_by_unique("test")
         self.assertEqual(res["age"], 30)
+        # 二重投稿になってないか確認
+        res = query.model(User).search(User.name.eq("test"))
+        self.assertEqual(len(res), 1)
+
+    def test_03_02_update(self):
+        """Update by primary key: query.model(payload).update(target)"""
+        test = query.model(User).get_by_unique("test")
+        query.model(User(**test)).update({"age": 40})
+        # 効果確認
+        res = query.model(User).get_by_unique("test")
+        self.assertEqual(res["age"], 40)
         # 二重投稿になってないか確認
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)

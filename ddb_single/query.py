@@ -123,17 +123,18 @@ class Query:
             self._create(batch)
 
     # 更新
-    def update(self, batch=None):
+    def update(self, target: dict = None, batch=None):
         """
         Update an item.
         Args:
+            target: Target item
             batch: BatchWriteItem
         """
-        old_item = self.get_by_unique(
+        payload = self.get_by_unique(
             self.__model__.data[self.__model__.__unique_keys__[0]]
         )
-        if old_item:
-            self._update(old_item, batch=batch)
+        if payload:
+            self._update(payload, target or {}, batch=batch)
         else:
             self._create(batch=batch)
 
@@ -152,8 +153,8 @@ class Query:
         else:
             self.__table__.batch_create(items_add, batch=batch)
 
-    def _update(self, old_item, batch=None):
-        self.__model__.data = {**old_item, **self.__model__.data}
+    def _update(self, old_item, new_item, batch=None):
+        self.__model__.data = {**old_item, **self.__model__.data, **new_item}
         self.__model__.data[self.__model__.__primary_key__] = old_item[
             self.__model__.__primary_key__
         ]
