@@ -1,5 +1,5 @@
 import unittest
-
+from unittest.mock import patch, MagicMock
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
@@ -107,3 +107,36 @@ class TestCRUD(unittest.TestCase):
         # 効果確認
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 0)
+
+    def test_04_02_delete_by_pk(self):
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test2"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User).delete_by_pk("user_test2")
+        # 効果確認
+        res = query.model(User).search(User.name.eq("test2"))
+        self.assertEqual(len(res), 0)
+
+    @patch("ddb_single.query.Query.delete_by_pk")
+    def test_04_03_delete_by_pk_2(self, mock_delete_by_pk: MagicMock):
+        """Delete by primary key: query.model(payload).delete()"""
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test3"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User(**res[0])).delete()
+        # 効果確認
+        mock_delete_by_pk.assert_called_once_with("user_test3", batch=None)
+
+    @patch("ddb_single.query.Query.delete_by_unique")
+    def test_04_03_delete_by_unique_2(self, mock_delete_by_unique: MagicMock):
+        """Delete by unique key: query.model(payload).delete()"""
+        # 対象データが存在することを確認
+        res = query.model(User).search(User.name.eq("test3"))
+        self.assertEqual(len(res), 1)
+        # 削除
+        query.model(User(name=res[0]["name"])).delete()
+        print(query.__model__.data)
+        # 効果確認
+        mock_delete_by_unique.assert_called_once_with("user_test3", batch=None)
