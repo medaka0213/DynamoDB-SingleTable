@@ -5,6 +5,9 @@ from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 
 import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 table = Table(
     table_name="rel_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
@@ -101,3 +104,7 @@ class TestRelation(unittest.TestCase):
         rel_user = query.model(blogpost).get_relation(model=User)
         self.assertEqual(len(rel_user), 1)
         self.assertEqual(rel_user[0]["name"], "test2")
+
+
+if __name__ == "__main__":
+    unittest.main()
