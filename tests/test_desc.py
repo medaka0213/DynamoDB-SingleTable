@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch, MagicMock
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
