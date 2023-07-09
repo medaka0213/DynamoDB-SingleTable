@@ -85,6 +85,19 @@ class DBField:
             FieldType.BINARY_SET,
         ]
 
+    def describe(self):
+        return {
+            "type": self.type.name,
+            "nullable": self.nullable,
+            "primary_key": self.primary_key,
+            "secondary_key": self.secondary_key,
+            "unique_key": self.unique_key,
+            "search_key": self.search_key,
+            "relation": self.relation.__model_name__ if self.relation else None,
+            "reletion_by_unique": self.reletion_by_unique,
+            "ignore_case": self.ignore_case,
+        }
+
     def validate(self, value=None, skip=False):
         """
         Args:
@@ -402,7 +415,23 @@ class BaseModel:
             DBField: DBField instance.
         """
         res = self.__class__.__dict__.get(key)
-        print("__getitem__", res)
+        logger.debug(f"__getitem__ {res}")
         if isinstance(res, DBField):
             return res
         raise KeyError(f"Key {key} not found")
+
+    @classmethod
+    def describe(cls):
+        """
+        Returns:
+            dict: The description of the model.
+        """
+        fields = {}
+        for k, v in cls.__dict__.items():
+            if isinstance(v, DBField):
+                fields[k] = v.describe()
+        return {
+            "model_name": cls.__model_name__,
+            "table_name": cls.__table__.__table_name__,
+            "fields": fields,
+        }
