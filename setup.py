@@ -1,12 +1,13 @@
 import ddb_single
+import os
 from setuptools import setup
 
-with open("readme.md", "r") as fp:
-    LONG_DESCRIPTION = fp.read()
+if os.path.exists("readme.md"):
+    with open("readme.md", "r") as fp:
+        LONG_DESCRIPTION = fp.read()
 
 with open("requirements.txt", "r") as fp:
     INSTALL_REQUIRES = fp.read().splitlines()
-
 
 setup(
     name="ddb_single",
