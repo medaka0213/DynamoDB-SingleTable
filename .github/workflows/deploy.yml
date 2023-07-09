@@ -62,6 +62,7 @@ jobs:
       - name: Replace version
         run: |
           sed -i "s/__VERSION__ = '0.0.0'/__VERSION__ = '${{ env.VERSION }}'/" ddb_single/__init__.py
+          rm -rf ./tests
 
       - name: Build
         run: |
