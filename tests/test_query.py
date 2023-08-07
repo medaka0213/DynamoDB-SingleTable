@@ -40,12 +40,14 @@ class TestCRUD(unittest.TestCase):
         test1 = User(
             name="test",
             name_ignore_nase="Test",
+            email="",
             age=20,
             config={"a": 1, "b": 2},
         )
         test2 = User(
             pk="user_test2",
             name="test2",
+            email=None,
             name_ignore_nase="Test2",
         )
         test3 = User(
