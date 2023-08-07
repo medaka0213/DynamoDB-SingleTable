@@ -154,7 +154,7 @@ def serialize(value):
 
 # 同じ値のJSONか調べる
 def is_same_json(data_0, data_1):
-    if type(data_0) == dict or type(data_1) == dict:
+    if type(data_0) is dict or type(data_1) is dict:
         keys = list(set(list(data_0.keys()) + list(data_1.keys())))
         for k in keys:
             # 値がなければFalse
@@ -162,7 +162,7 @@ def is_same_json(data_0, data_1):
                 return False
             if not is_same_json(data_0.get(k), data_1.get(k)):
                 return False
-    elif type(data_0) == list and type(data_1) == list:
+    elif type(data_0) is list and type(data_1) is list:
         if len(data_0) != len(data_1):
             return False
         else:
