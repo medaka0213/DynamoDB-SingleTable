@@ -69,6 +69,13 @@ class TestSearch(unittest.TestCase):
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 3)
 
+    def test_empty(self):
+        with self.assertNoLogs(
+            logger=logging.getLogger("ddb_single.table"), level=logging.ERROR
+        ):
+            res = query.model(User).search(User.name.eq(""))
+            self.assertEqual(len(res), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
