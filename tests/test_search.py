@@ -13,8 +13,8 @@ table = Table(
     table_name="search_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
-    aws_access_key_id="ACCESS_ID",
-    aws_secret_access_key="ACCESS_KEY",
+    aws_access_key_id="fakeMyKeyId",
+    aws_secret_access_key="fakeSecretAccessKey",
 )
 table.init()
 
@@ -68,6 +68,13 @@ class TestSearch(unittest.TestCase):
     def test_begins(self):
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 3)
+
+    def test_empty(self):
+        with self.assertNoLogs(
+            logger=logging.getLogger("ddb_single.table"), level=logging.ERROR
+        ):
+            res = query.model(User).search(User.name.eq(""))
+            self.assertEqual(len(res), 0)
 
 
 if __name__ == "__main__":

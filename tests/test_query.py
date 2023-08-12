@@ -13,8 +13,8 @@ table = Table(
     table_name="query_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
-    aws_access_key_id="ACCESS_ID",
-    aws_secret_access_key="ACCESS_KEY",
+    aws_access_key_id="fakeMyKeyId",
+    aws_secret_access_key="fakeSecretAccessKey",
 )
 table.init()
 
@@ -122,10 +122,22 @@ class TestCRUD(unittest.TestCase):
     def test_03_02_update(self):
         """Update by primary key: query.model(payload).update(target)"""
         test = query.model(User).get_by_unique("test")
-        query.model(User(**test)).update({"age": 40})
+        query.model(User(**test)).update({"age": 40, "email": "test@example.com"})
         # 効果確認
         res = query.model(User).get_by_unique("test")
         self.assertEqual(res["age"], 40)
+        self.assertEqual(res["email"], "test@example.com")
+        # 二重投稿になってないか確認
+        res = query.model(User).search(User.name.eq("test"))
+        self.assertEqual(len(res), 1)
+
+    def test_03_03_update_empty(self):
+        """Update by primary key: query.model(payload).update(target)"""
+        test = query.model(User).get_by_unique("test")
+        query.model(User(**test)).update({"email": ""})
+        # 効果確認
+        res = query.model(User).get_by_unique("test")
+        self.assertEqual(res["email"], "")
         # 二重投稿になってないか確認
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)

@@ -19,10 +19,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - name: Install Python dependencies
         run: |
@@ -37,7 +37,7 @@ jobs:
 
       - name: Run unittest
         run: |
-          docker run -d -p 8000:8000 amazon/dynamodb-local:1.22.0
+          docker run -d -p 8000:8000 amazon/dynamodb-local:2.0.0
           coverage run -m unittest discover -s tests/
           coverage report
 
@@ -52,7 +52,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
