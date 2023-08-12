@@ -12,8 +12,8 @@ table = Table(
     table_name="desc_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
-    aws_access_key_id="ACCESS_ID",
-    aws_secret_access_key="ACCESS_KEY",
+    aws_access_key_id="fakeMyKeyId",
+    aws_secret_access_key="fakeSecretAccessKey",
 )
 table.init()
 
