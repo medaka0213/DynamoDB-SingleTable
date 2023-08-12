@@ -1,5 +1,7 @@
 # DynamoDB SingleTable
 
+https://pypi.org/project/ddb-single/
+
 Python DynamoDB interface, specialized in single-table design.
 DynamoDB is high-performance serverless NoSQL, but difficult to disign tables.
 
