@@ -51,14 +51,14 @@ class Query:
         return items_add, items_remove
 
     # 検索
-    def search(self, *queries, pk_only=False):
+    def search(self, *queries, pk_only=False, limit=None):
         """
         Search items.
         Args:
             queries (List[dict]): Query objects
         """
         return self.__table__.search(
-            self.__model__.__model_name__, *queries, pk_only=pk_only
+            self.__model__.__model_name__, *queries, pk_only=pk_only, limit=limit
         )
 
     # アイテムを取得

@@ -69,6 +69,10 @@ class TestSearch(unittest.TestCase):
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 3)
 
+    def test_limit(self):
+        res = query.model(User).search(limit=1)
+        self.assertEqual(len(res), 1)
+
     def test_empty(self):
         with self.assertNoLogs(
             logger=logging.getLogger("ddb_single.table"), level=logging.ERROR
