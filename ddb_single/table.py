@@ -414,7 +414,9 @@ class Table:
         if pk_only and not filter_ex:
             return list(res)
         elif not staged_ex:
-            return [r[self.__primary_key__] for r in res]
+            if pk_only:
+                return [r[self.__primary_key__] for r in res]
+            return res
         else:
             logger.debug(f"batch_get: {res}")
             res = self.batch_get_from_pks(list(res))
