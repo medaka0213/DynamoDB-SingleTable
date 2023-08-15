@@ -287,6 +287,7 @@ class Table:
     # --- 検索関連 ---
     # 関連先を検索
     def relation(self, pk, model_name="", field_name="", pk_only=False):
+        logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
         if model_name:
             KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
@@ -309,6 +310,7 @@ class Table:
 
     # 関連元を検索
     def reference(self, pk, model_name="", field_name="", pk_only=False):
+        logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.rel_key(pk))
         if field_name:
             # フィールドの指定がある場合
