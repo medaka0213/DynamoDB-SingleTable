@@ -318,11 +318,17 @@ class Table:
                 FilterExpression=Attr(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__search_index__,
             )
-        else:
+        elif model_name:
             # モデルの指定がある場合
             res = self._query(
                 KeyConditionExpression=KeyConditionExpression
                 & Key(self.__primary_key__).begins_with(model_name),
+                IndexName=self.__range_index_name__,
+            )
+        else:
+            # フィールド・モデルの指定がない場合
+            res = self._query(
+                KeyConditionExpression=KeyConditionExpression,
                 IndexName=self.__range_index_name__,
             )
         pks = [r[self.__primary_key__] for r in res]

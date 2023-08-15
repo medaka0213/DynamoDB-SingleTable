@@ -69,8 +69,7 @@ class TestRelation(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
-
-        # フィールドから検索
+        # 引数なし
         res = query.model(blogpost).get_relation()
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
@@ -83,6 +82,11 @@ class TestRelation(unittest.TestCase):
         self.assertEqual(res[0]["title"], "test")
         # フィールドから検索
         res = query.model(self.user).get_reference(field=BlogPost.author)
+        self.assertIsNotNone(res)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["title"], "test")
+        # 引数なし
+        res = query.model(self.user).get_reference()
         self.assertIsNotNone(res)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["title"], "test")
