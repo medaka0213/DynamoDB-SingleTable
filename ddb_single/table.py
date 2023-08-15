@@ -352,7 +352,7 @@ class Table:
         return res
 
     # 検索
-    def search(self, model_name, *searchEx, pk_only=False):
+    def search(self, model_name, *searchEx, pk_only=False, limit=None):
         simple_ex = [
             s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEATCH
         ]
@@ -409,12 +409,12 @@ class Table:
                     )
                     or []
                 )
-            if pk_only:
-                return [r[self.__primary_key__] for r in res]
-            else:
-                return res
+        if limit is not None:
+            res = list(res)[:limit]
         if pk_only and not filter_ex:
             return list(res)
+        elif not staged_ex:
+            return [r[self.__primary_key__] for r in res]
         else:
             logger.debug(f"batch_get: {res}")
             res = self.batch_get_from_pks(list(res))
