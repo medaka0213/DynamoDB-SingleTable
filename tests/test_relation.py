@@ -70,6 +70,12 @@ class TestRelation(unittest.TestCase):
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
 
+        # フィールドから検索
+        res = query.model(blogpost).get_relation()
+        self.assertIsNotNone(res)
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name"], "test")
+
     def test_02_0_get_ref(self):
         res = query.model(self.user).get_reference(model=BlogPost)
         self.assertIsNotNone(res)

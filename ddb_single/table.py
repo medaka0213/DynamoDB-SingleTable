@@ -193,7 +193,7 @@ class Table:
         try:
             response = self.__table__.query(**kwargs)
         except ClientError as e:
-            logger.error("ClientError: %s", e)
+            logger.error("ClientError", e)
         else:
             if len(response["Items"]):
                 res_data = response["Items"]
