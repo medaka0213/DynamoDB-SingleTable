@@ -60,18 +60,34 @@ class TestSearch(unittest.TestCase):
     def test_get_all(self):
         res = query.model(User).search()
         self.assertEqual(len(res), 3)
+        self.assertIsInstance(res[0], dict)
 
     def test_not_equal(self):
         res = query.model(User).search(User.name.ne("test1"))
         self.assertEqual(len(res), 2)
+        self.assertIsInstance(res[0], dict)
 
     def test_begins(self):
         res = query.model(User).search(User.name.begins_with("test"))
         self.assertEqual(len(res), 3)
+        self.assertIsInstance(res[0], dict)
 
     def test_limit(self):
         res = query.model(User).search(limit=1)
         self.assertEqual(len(res), 1)
+        self.assertIn(res[0]["name"], ["test1", "test2", "test3"])
+
+    def test_pk_only(self):
+        res = query.model(User).search(
+            User().get_field("name").eq("test3"), pk_only=True
+        )
+        self.assertEqual(len(res), 1)
+        self.assertIsInstance(res[0], str)
+
+    def test_pk_only_not_staged(self):
+        res = query.model(User).search(pk_only=True)
+        self.assertEqual(len(res), 3)
+        self.assertIsInstance(res[0], str)
 
     def test_empty(self):
         with self.assertNoLogs(

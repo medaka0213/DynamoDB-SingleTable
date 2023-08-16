@@ -411,21 +411,16 @@ class Table:
                 )
         if limit is not None:
             res = list(res)[:limit]
-        if pk_only and not filter_ex:
+        if pk_only and filter_ex:
             return list(res)
-        elif not staged_ex:
-            if pk_only:
-                return [r[self.__primary_key__] for r in res]
-            return res
-        else:
+        elif staged_ex:
             logger.debug(f"batch_get: {res}")
             res = self.batch_get_from_pks(list(res))
             #  filter_ex があればフィルタ
             res = self.filter(res, filter_ex)
-            if pk_only:
-                return [r[self.__primary_key__] for r in res]
-            else:
-                return res
+        if pk_only:
+            return [r[self.__primary_key__] for r in res]
+        return res
 
     # --- 更新関連 ---
     # バッチライター
