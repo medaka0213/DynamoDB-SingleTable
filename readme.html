@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable 0.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/documentation_options.js?v=7026087e"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -100,22 +102,22 @@
            <div itemprop="articleBody">
              
   <section id="dynamodb-singletable">
-<h1>DynamoDB SingleTable<a class="headerlink" href="#dynamodb-singletable" title="Permalink to this heading">¶</a></h1>
+<h1>DynamoDB SingleTable<a class="headerlink" href="#dynamodb-singletable" title="Link to this heading">¶</a></h1>
 <p>https://pypi.org/project/ddb-single/</p>
 <p>Python DynamoDB interface, specialized in single-table design.
 DynamoDB is high-performance serverless NoSQL, but difficult to disign tables.</p>
 <p>Single-table design needs only single table, and few GSIs (Global Secondary Indexes).
 It makes effective and easy to manage your whole data models for single service.</p>
 <section id="getting-started">
-<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h2>
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h2>
 <section id="install">
-<h3>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h3>
+<h3>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ddb</span><span class="o">-</span><span class="n">single</span>
 </pre></div>
 </div>
 </section>
 <section id="init-table">
-<h3>Init Table<a class="headerlink" href="#init-table" title="Permalink to this heading">¶</a></h3>
+<h3>Init Table<a class="headerlink" href="#init-table" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Table</span>
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
@@ -127,7 +129,7 @@ It makes effective and easy to manage your whole data models for single service.
 </div>
 </section>
 <section id="data-models">
-<h3>Data Models<a class="headerlink" href="#data-models" title="Permalink to this heading">¶</a></h3>
+<h3>Data Models<a class="headerlink" href="#data-models" title="Link to this heading">¶</a></h3>
 <p>Each model has al least 3 keys</p>
 <ul class="simple">
 <li><p>primary_key … Hash key for single item. default: <code class="docutils literal notranslate"><span class="pre">pk:</span> <span class="pre">{__model_name__}_{uuid}</span></code></p></li>
@@ -149,7 +151,7 @@ It makes effective and easy to manage your whole data models for single service.
 </section>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
 <p>need “Qurey” object for CRUD</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">query.model(foo).create</span></code></p></li>
@@ -163,7 +165,7 @@ It makes effective and easy to manage your whole data models for single service.
 </pre></div>
 </div>
 <section id="create-item">
-<h3>Create Item<a class="headerlink" href="#create-item" title="Permalink to this heading">¶</a></h3>
+<h3>Create Item<a class="headerlink" href="#create-item" title="Link to this heading">¶</a></h3>
 <p>If the item with same value of <code class="docutils literal notranslate"><span class="pre">unique_key</span></code> already exist, exist item is updated.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john@example.com&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
@@ -228,7 +230,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </table>
 </section>
 <section id="search-items">
-<h3>Search Items<a class="headerlink" href="#search-items" title="Permalink to this heading">¶</a></h3>
+<h3>Search Items<a class="headerlink" href="#search-items" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
 <span class="c1"># -&gt; [{&quot;pk&quot;:&quot;user_xxxx&quot;, &quot;sk&quot;:&quot;user_item&quot;, &quot;name&quot;:&quot;John&quot;, &quot;email&quot;:&quot;john@example.com&quot;}]</span>
@@ -242,7 +244,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="get-single-item">
-<h3>Get single item<a class="headerlink" href="#get-single-item" title="Permalink to this heading">¶</a></h3>
+<h3>Get single item<a class="headerlink" href="#get-single-item" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">get(pk)</span></code> to get single item.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_xxxx&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
@@ -263,7 +265,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="update-item">
-<h3>Update Item<a class="headerlink" href="#update-item" title="Permalink to this heading">¶</a></h3>
+<h3>Update Item<a class="headerlink" href="#update-item" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;john@example.com&quot;</span><span class="p">))</span>
 <span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">user</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">new_user</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;new-john@example.com&quot;</span>
@@ -312,7 +314,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </table>
 </section>
 <section id="delete-item">
-<h3>Delete Item<a class="headerlink" href="#delete-item" title="Permalink to this heading">¶</a></h3>
+<h3>Delete Item<a class="headerlink" href="#delete-item" title="Link to this heading">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="s2">&quot;new-john@example.com&quot;</span><span class="p">))</span>
 <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 </pre></div>
@@ -328,7 +330,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </section>
 </section>
 <section id="batch-writer">
-<h2>Batch Writer<a class="headerlink" href="#batch-writer" title="Permalink to this heading">¶</a></h2>
+<h2>Batch Writer<a class="headerlink" href="#batch-writer" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">table.batch_writer()</span></code> to create/update/delete multible items</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">query.model(foo).create(batch=batch)</span></code></p></li>
@@ -336,7 +338,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <li><p><code class="docutils literal notranslate"><span class="pre">query.model(foo).delete(batch=batch)</span></code></p></li>
 </ul>
 <section id="batch-create">
-<h3>Batch Create<a class="headerlink" href="#batch-create" title="Permalink to this heading">¶</a></h3>
+<h3>Batch Create<a class="headerlink" href="#batch-create" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
         <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;test</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">10</span><span class="p">)</span>
@@ -348,7 +350,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="batch-update">
-<h3>Batch Update<a class="headerlink" href="#batch-update" title="Permalink to this heading">¶</a></h3>
+<h3>Batch Update<a class="headerlink" href="#batch-update" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
         <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;test</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">20</span><span class="p">)</span>
@@ -360,7 +362,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="batch-delete">
-<h3>Batch Delete<a class="headerlink" href="#batch-delete" title="Permalink to this heading">¶</a></h3>
+<h3>Batch Delete<a class="headerlink" href="#batch-delete" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pks</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">begins_with</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">),</span> <span class="n">pk_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">table</span><span class="o">.</span><span class="n">batch_writer</span><span class="p">()</span> <span class="k">as</span> <span class="n">batch</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">pks</span><span class="p">:</span>
@@ -373,9 +375,9 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </section>
 </section>
 <section id="relationship">
-<h2>Relationship<a class="headerlink" href="#relationship" title="Permalink to this heading">¶</a></h2>
+<h2>Relationship<a class="headerlink" href="#relationship" title="Link to this heading">¶</a></h2>
 <section id="create-model">
-<h3>Create Model<a class="headerlink" href="#create-model" title="Permalink to this heading">¶</a></h3>
+<h3>Create Model<a class="headerlink" href="#create-model" title="Link to this heading">¶</a></h3>
 <p>You can sat relationns to other models
 <code class="docutils literal notranslate"><span class="pre">relation=BaseModel</span></code> to set relation.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BlogPost</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
@@ -388,7 +390,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="id1">
-<h3>Create Item<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<h3>Create Item<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span>
     <span class="n">content</span><span class="o">=</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span>
@@ -464,7 +466,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </table>
 </section>
 <section id="search-relations">
-<h3>Search Relations<a class="headerlink" href="#search-relations" title="Permalink to this heading">¶</a></h3>
+<h3>Search Relations<a class="headerlink" href="#search-relations" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">get_relation(model=Basemodel)</span></code> to search relations</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">BlogPost</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
 <span class="n">blogpost</span> <span class="o">=</span> <span class="n">BlogPost</span><span class="p">(</span><span class="o">**</span><span class="n">blogpost</span><span class="p">)</span>
@@ -482,7 +484,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="search-reference">
-<h3>Search Reference<a class="headerlink" href="#search-reference" title="Permalink to this heading">¶</a></h3>
+<h3>Search Reference<a class="headerlink" href="#search-reference" title="Link to this heading">¶</a></h3>
 <p>In this library, “reference” is antonym to relation</p>
 <p><code class="docutils literal notranslate"><span class="pre">get_reference(model=Basemodel)</span></code> to search items related to the item</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
@@ -501,7 +503,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </div>
 </section>
 <section id="update-relation">
-<h3>Update Relation<a class="headerlink" href="#update-relation" title="Permalink to this heading">¶</a></h3>
+<h3>Update Relation<a class="headerlink" href="#update-relation" title="Link to this heading">¶</a></h3>
 <p>If relation key’s value changed, relationship also changed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span>
 <span class="n">blogpost</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">BlogPost</span><span class="p">)</span><span class="o">.</span><span class="n">get_by_unique</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
@@ -576,7 +578,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 </table>
 </section>
 <section id="delete-relation">
-<h3>Delete Relation<a class="headerlink" href="#delete-relation" title="Permalink to this heading">¶</a></h3>
+<h3>Delete Relation<a class="headerlink" href="#delete-relation" title="Link to this heading">¶</a></h3>
 <p>If related item deleted, relationship also deleted</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">delete_by_unique</span><span class="p">(</span><span class="s2">&quot;Michael&quot;</span><span class="p">)</span>
 </pre></div>
