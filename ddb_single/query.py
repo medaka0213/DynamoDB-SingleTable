@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
@@ -72,17 +72,30 @@ class Query:
         return res
 
     # ユニークキーで検索
-    def get_by_unique(self, value, pk_only=False):
+    def get_by_unique(self, value, pk_only=False, keys: List[str | DBField] = []):
         """
         Get single item by unique key.
         Args:
             value: Unique key value
+            keys: Unique key. If not specified, search by all unique keys.
         """
-        res = self.search(
-            getattr(self.__model__.__class__, self.__model__.__unique_keys__[0]).eq(
-                value
-            )
-        )
+        specified_keys: List[str] = []
+        for key in keys:
+            # key が文字列ならそのまま、DBField なら name を取得
+            if isinstance(key, str):
+                specified_keys.append(key)
+            else:
+                specified_keys.append(key.name)
+
+        res = []
+        for key in self.__model__.__unique_keys__:
+            if specified_keys and key not in specified_keys:
+                # 指定されたキー以外はスキップ
+                continue
+
+            _res = self.search(getattr(self.__model__.__class__, key).eq(value))
+            logger.debug(f"get_by_unique: {key}={value} result={_res}")
+            res.extend(_res)
         if res:
             pk = res[0][self.__model__.__primary_key__]
             if pk_only:
