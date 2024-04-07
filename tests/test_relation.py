@@ -3,6 +3,7 @@ import unittest
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
+from ddb_single.error import NotFoundError
 
 import datetime
 import logging
@@ -34,6 +35,14 @@ class BlogPost(BaseModel):
     title = DBField(unique_key=True)
     content = DBField(search_key=True)
     author = DBField(reletion=User)
+
+
+class Comment(BaseModel):
+    __model_name__ = "comment"
+    __table__ = table
+    title = DBField(unique_key=True)
+    content = DBField(search_key=True)
+    author = DBField(reletion=User, relation_raise_if_not_found=True)
 
 
 print("table_name:", table.__table_name__)
@@ -92,6 +101,8 @@ class TestRelation(unittest.TestCase):
         self.assertEqual(res[0]["title"], "test")
 
     def test_03_update(self):
+        """アイテム更新 正常系"""
+
         new_user = User(name="test2", age=20)
         query.model(new_user).create()
         res = query.model(User).search(User.name.eq("test2"))
@@ -114,6 +125,34 @@ class TestRelation(unittest.TestCase):
         rel_user = query.model(blogpost).get_relation(model=User)
         self.assertEqual(len(rel_user), 1)
         self.assertEqual(rel_user[0]["name"], "test2")
+
+    def test_04_non_exist(self):
+        """アイテム更新 存在しないユーザーを指定した場合、関連が削除されることを確認するテスト"""
+
+        # MessageのUserを更新
+        blogpost = query.model(BlogPost).search(BlogPost.title.eq("test"))
+        self.assertEqual(len(blogpost), 1)
+        blogpost = blogpost[0]
+        blogpost["author"] = "user_not_exist"
+        blogpost = BlogPost(**blogpost)
+        query.model(blogpost).update()
+        # 効果確認
+        res = query.model(BlogPost).get(blogpost.data["pk"])
+        self.assertIsNotNone(res)
+        self.assertEqual(res["author"], "user_not_exist")
+        # 効果確認 (関連は削除される)
+        rel_user = query.model(blogpost).get_relation(model=User)
+        self.assertEqual(len(rel_user), 0)
+
+    def test_04_non_exist_raise(self):
+        """アイテム更新 存在しないユーザーを指定した場合、例外が発生することを確認するテスト"""
+
+        # Blo
+        with self.assertRaises(NotFoundError):
+            comment = Comment(
+                unique_key="test", content="test", author="user_not_exist"
+            )
+            query.model(comment).update()
 
 
 if __name__ == "__main__":

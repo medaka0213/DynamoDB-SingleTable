@@ -3,6 +3,7 @@ from boto3.dynamodb.conditions import Key
 
 from ddb_single.table import FieldType, Table
 import ddb_single.utils_botos as util_b
+from ddb_single.error import ValidationError
 
 import logging
 
@@ -29,6 +30,7 @@ class DBField:
         search_key=False,
         reletion=None,
         reletion_by_unique=True,
+        relation_raise_if_not_found=False,
         ignore_case=False,
         **kwargs,
     ):
@@ -46,7 +48,7 @@ class DBField:
             reletion (BaseModel): The reletion model of the field.
             reference (BaseModel): The reference model of the field.
             reletion_by_unique (bool): Whether the reletion is by unique key.
-            reference_by_unique (bool): Whether the reference is by unique key.
+            relation_raise_if_not_found (bool): Whether to raise an error if the relation is not found.
         """
         self.type = type
         self.default = default
@@ -59,6 +61,7 @@ class DBField:
         self.search_key = search_key or unique_key
         self.relation = reletion
         self.reletion_by_unique = reletion_by_unique
+        self.relation_raise_if_not_found = relation_raise_if_not_found
         self.ignore_case = ignore_case
         self.value = None
 
@@ -115,7 +118,7 @@ class DBField:
         if not skip:
             if value is None:
                 if not self.nullable:
-                    raise ValueError(f"Not nullable: {self.__class__.__name__}")
+                    raise ValidationError(f"Not nullable: {self.__class__.__name__}")
             else:
                 self._setup_relation()
                 self.value = self._validate_value(self.value)
@@ -145,7 +148,7 @@ class DBField:
     def _validate_value(self, value):
         if self.is_list():
             if not isinstance(value, list):
-                raise ValueError(f"Value {self.name} must be a list")
+                raise ValidationError(f"{self.name} must be a list")
             try:
                 if self.type == FieldType.LIST:
                     return value
@@ -158,11 +161,11 @@ class DBField:
                 return value
             except Exception as e:
                 logger.error("Error: %s", e)
-                raise ValueError(f"{self.name} must be a valid list")
+                raise ValidationError(f"{self.name} must be a valid list")
         else:
             try:
                 if isinstance(value, list):
-                    raise ValueError(f"{self.name} must not be a list")
+                    raise ValidationError(f"{self.name} must not be a list")
                 if self.type == FieldType.STRING:
                     return str(value)
                 elif self.type == FieldType.NUMBER:
@@ -174,7 +177,7 @@ class DBField:
                 return value
             except Exception as e:
                 logger.error("Error: %s", e)
-                raise ValueError(f"Value {self.name} must be a valid value")
+                raise ValidationError(f"Value {self.name} must be a valid value")
 
     def search_key_factory(self):
         """
@@ -227,7 +230,9 @@ class DBField:
         if self.ignore_case and isinstance(value, str):
             value = value.lower()
         if self.secondary_key:
-            raise ValueError(f"Secondary key can not be used as a key: {self.name}")
+            raise ValidationError(
+                f"Secondary key can not be used as a key: {self.name}"
+            )
         res = {
             "FilterMethod": util_b.attr_method(self.name, value, mode),
         }
@@ -370,13 +375,13 @@ class BaseModel:
             if isinstance(v, DBField):
                 self.data[k] = v.validate(kwargs.get(k), __skip_validation__)
                 if v.required and k not in kwargs:
-                    raise ValueError(f"Missing required field: {k}")
+                    raise ValidationError(f"Missing required field: {k}")
 
     def _setup(self):
         if not self.__table__:
-            raise ValueError("Table not set")
+            raise ValidationError("Table not set")
         if not self.__model_name__:
-            raise ValueError("Not set model name")
+            raise ValidationError("Not set model name")
         self.data = {}
         self.__search_keys__ = []
         self.__unique_keys__ = []
@@ -404,7 +409,9 @@ class BaseModel:
                 if v.relation:
                     self.__relation_keys__.append(k)
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
-            raise ValueError(f"Missing unique keys for relation: {self.__model_name__}")
+            raise ValidationError(
+                f"Missing unique keys for relation: {self.__model_name__}"
+            )
         self.__setup__ = True
 
     def get_field(self, key: str) -> DBField:

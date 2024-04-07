@@ -495,6 +495,7 @@ class Table:
 
     # バッチ処理
     def batch_delete_items(self, items, batch=None):
+        logger.debug(f"batch_delete_items: {items}")
         if batch:
             for item in items:
                 self.detele_item(item, batch)
