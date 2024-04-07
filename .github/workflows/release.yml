@@ -48,12 +48,21 @@ jobs:
           version=$(poetry version -s)
           echo "VERSION=$version" >> $GITHUB_ENV
 
-      - name: Commit and push changes
+      - name: Set up git
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -am "[skip ci] Update version to ${{ env.VERSION }}"
-          git push
+
+      - uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Bump version to ${{ env.VERSION }}
+          delete-branch: true
+          title: Bump version to ${{ env.VERSION }}
+          body: |
+            Bump version to ${{ env.VERSION }}
+            ${{ steps.tag_version.outputs.changelog }}
+          token: ${{ secrets.GH_TOKEN }}
+          reviewers: medaka0213
 
       - name: Create and push tag
         run: |
