@@ -2,6 +2,7 @@ from typing import Optional, List
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
+from ddb_single.error import ValidationError
 
 import logging
 
@@ -118,14 +119,14 @@ class Query:
         Create a new item.
         Args:
             batch: BatchWriteItem
-            raise_if_exists (bool): Throw exception if item already exists
+            raise_if_exists (bool): Throw ValidationError if item already exists
         """
         old_item = self.get_by_unique(
             self.__model__.data[self.__model__.__unique_keys__[0]]
         )
         if old_item:
             if raise_if_exists:
-                raise Exception("Item Already exists")
+                raise ValidationError("Item Already exists")
             else:
                 self._update(old_item, new_item={}, batch=batch)
         else:
@@ -200,7 +201,7 @@ class Query:
             self.delete_by_pk(target[self.__model__.__primary_key__], batch=batch)
         else:
             # 両方とも無ければエラー
-            raise Exception("Primary key or Unique key is required.")
+            raise ValidationError("Primary key or Unique key is required.")
 
     def delete_by_unique(self, value, batch=None):
         """

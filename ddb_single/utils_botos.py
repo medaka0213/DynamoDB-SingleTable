@@ -1,5 +1,6 @@
 from boto3.dynamodb.conditions import Key, Attr
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+from ddb_single.error import InvalidParameterError
 
 # クエリ設定のENUM
 from enum import Enum
@@ -64,7 +65,7 @@ def range_ex(name, value, mode):
     elif mode == QueryType.BEGINS:
         result = Key(name).begins_with(value)
     else:
-        raise Exception(f"mode={mode} is not defined.")
+        raise InvalidParameterError(f"mode={mode} is not defined.")
 
     return result
 
@@ -96,7 +97,7 @@ def attr_ex(name, value, mode):
     elif mode == QueryType.N_EX:
         result = Attr(name).not_exists()
     else:
-        raise Exception(f"mode={mode} is not defined.")
+        raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
 
@@ -126,7 +127,7 @@ def attr_method(name, value, mode):
     elif mode == QueryType.N_EX:
         result = lambda x: name not in x  # noqa: E731
     else:
-        raise Exception(f"mode={mode} is not defined.")
+        raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
 
