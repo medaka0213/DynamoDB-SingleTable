@@ -48,6 +48,14 @@ jobs:
           version=$(poetry version -s)
           echo "VERSION=$version" >> $GITHUB_ENV
 
+      - name: Publish package
+        env:
+          PYPI_LOCAL_USERNAME: __token__
+          PYPI_LOCAL_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry build
+          poetry publish -u $PYPI_LOCAL_USERNAME -p $PYPI_LOCAL_PASSWORD
+
       - name: Set up git
         run: |
           git config --local user.email "action@github.com"
@@ -77,14 +85,6 @@ jobs:
           draft: false
           prerelease: false
           body: ${{ steps.tag_version.outputs.changelog }}
-
-      - name: Publish package
-        env:
-          PYPI_LOCAL_USERNAME: __token__
-          PYPI_LOCAL_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          poetry build
-          poetry publish -u $PYPI_LOCAL_USERNAME -p $PYPI_LOCAL_PASSWORD
 
       - name: Generate docs
         run: |
