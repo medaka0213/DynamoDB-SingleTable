@@ -23,23 +23,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install Python dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install poetry
+          poetry install
 
       - name: Run flake8 linter
         run: |
-          flake8 ddb_single --max-line-length=120
-          flake8 tests --max-line-length=120
-          flake8 setup.py --max-line-length=120
+          poetry run flake8 .
 
       - name: Run unittest
         run: |
-          coverage run -m unittest discover -s tests/
-          coverage report
+          poetry run pytest --cov=ddb_single -v
+
+      - name: Test Build
+        run: |
+          poetry build
