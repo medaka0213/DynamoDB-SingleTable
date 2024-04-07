@@ -9,6 +9,7 @@ homepage = "https://medaka0213.github.io/DynamoDB-SingleTable/"
 repository = "https://github.com/medaka0213/DynamoDB-SingleTable"
 keywords = ["aws", "dynamodb", "serverless"]
 packages = [{ include = "ddb_single" }]
+readme = "readme.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
