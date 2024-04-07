@@ -62,7 +62,6 @@ jobs:
             Bump version to ${{ env.VERSION }}
             ${{ steps.tag_version.outputs.changelog }}
           token: ${{ secrets.GH_TOKEN }}
-          reviewers: medaka0213
 
       - name: Create and push tag
         run: |
