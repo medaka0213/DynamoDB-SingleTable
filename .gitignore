@@ -7,3 +7,4 @@ dist
 shared-local-instance.db
 .coverage
 docs
+poetry.lock
