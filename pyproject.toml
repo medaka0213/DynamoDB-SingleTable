@@ -1,6 +1,6 @@
 
 [tool.poetry]
-author = "medaka"
+authors = ["medaka0213"]
 name = "ddb_single"
 version = "0.4.7"
 description = "Python DynamoDB interface, specialized in single-table design."
