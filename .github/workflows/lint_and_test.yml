@@ -40,3 +40,9 @@ jobs:
       - name: Test Build
         run: |
           poetry build
+
+      - name: Test Generate docs
+        run: |
+          cp ./readme.md ./docs_src/readme.md
+          poetry run sphinx-apidoc -f -o ./docs_src ./ddb_single
+          poetry run sphinx-build ./docs_src ./docs

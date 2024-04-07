@@ -1,5 +1,7 @@
 # DynamoDB SingleTable
 
+https://pypi.org/project/ddb-single/
+
 Python DynamoDB interface, specialized in single-table design.
 DynamoDB is high-performance serverless NoSQL, but difficult to disign tables.
 
@@ -12,6 +14,12 @@ It makes effective and easy to manage your whole data models for single service.
 
 ```
 pip install ddb-single
+```
+
+### Start DynamoDB Local
+
+```
+docker run -d --rm -p 8000:8000 amazon/dynamodb-local
 ```
 
 ### Init Table
