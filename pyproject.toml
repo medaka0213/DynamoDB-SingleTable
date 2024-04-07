@@ -2,7 +2,7 @@
 [tool.poetry]
 authors = ["medaka0213"]
 name = "ddb_single"
-version = "0.4.7"
+version = "0.4.8"
 description = "Python DynamoDB interface, specialized in single-table design."
 license = "MIT"
 homepage = "https://medaka0213.github.io/DynamoDB-SingleTable/"
