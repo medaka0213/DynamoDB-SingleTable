@@ -63,7 +63,7 @@ jobs:
 
       - uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: Bump version to ${{ env.VERSION }}
+          commit-message: "[skip ci] Bump version to ${{ env.VERSION }}"
           delete-branch: true
           title: Bump version to ${{ env.VERSION }}
           branch: release/${{ env.VERSION }}
