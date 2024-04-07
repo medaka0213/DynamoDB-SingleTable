@@ -74,6 +74,33 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
+<section id="module-ddb_single.error">
+<span id="ddb-single-error-module"></span><h2>ddb_single.error module<a class="headerlink" href="#module-ddb_single.error" title="Link to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="ddb_single.error.DDBSingleError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.error.</span></span><span class="sig-name descname"><span class="pre">DDBSingleError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.error.DDBSingleError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ddb_single.error.InvalidParameterError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.error.</span></span><span class="sig-name descname"><span class="pre">InvalidParameterError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.error.InvalidParameterError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ddb_single.error.DDBSingleError" title="ddb_single.error.DDBSingleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDBSingleError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ddb_single.error.NotFoundError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.error.</span></span><span class="sig-name descname"><span class="pre">NotFoundError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.error.NotFoundError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ddb_single.error.DDBSingleError" title="ddb_single.error.DDBSingleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDBSingleError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ddb_single.error.ValidationError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ddb_single.error.</span></span><span class="sig-name descname"><span class="pre">ValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.error.ValidationError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ddb_single.error.DDBSingleError" title="ddb_single.error.DDBSingleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDBSingleError</span></code></a></p>
+</dd></dl>
+
+</section>
 <section id="module-ddb_single.model">
 <span id="ddb-single-model-module"></span><h2>ddb_single.model module<a class="headerlink" href="#module-ddb_single.model" title="Link to this heading">¶</a></h2>
 <dl class="py class">
@@ -413,7 +440,7 @@
 <span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_if_exists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddb_single.query.Query.create" title="Link to this definition">¶</a></dt>
 <dd><p>Create a new item.
 :param batch: BatchWriteItem
-:param raise_if_exists: Throw exception if item already exists
+:param raise_if_exists: Throw ValidationError if item already exists
 :type raise_if_exists: bool</p>
 </dd></dl>
 
