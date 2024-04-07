@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable v0.4.7 documentation</title>
+  <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable 0.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -13,7 +13,7 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/documentation_options.js?v=5c3f58b9"></script>
+        <script src="_static/documentation_options.js?v=7026087e"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -46,6 +46,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DynamoDB SingleTable</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#install">Install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-dynamodb-local">Start DynamoDB Local</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#init-table">Init Table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-models">Data Models</a></li>
 </ul>
@@ -113,6 +114,12 @@ It makes effective and easy to manage your whole data models for single service.
 <section id="install">
 <h3>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ddb</span><span class="o">-</span><span class="n">single</span>
+</pre></div>
+</div>
+</section>
+<section id="start-dynamodb-local">
+<h3>Start DynamoDB Local<a class="headerlink" href="#start-dynamodb-local" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">p</span> <span class="mi">8000</span><span class="p">:</span><span class="mi">8000</span> <span class="n">amazon</span><span class="o">/</span><span class="n">dynamodb</span><span class="o">-</span><span class="n">local</span>
 </pre></div>
 </div>
 </section>
