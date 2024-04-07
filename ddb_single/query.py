@@ -2,7 +2,7 @@ from typing import Optional, List
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
-from ddb_single.error import ValidationError
+from ddb_single.error import ValidationError, NotFoundError
 
 import logging
 
@@ -231,30 +231,37 @@ class Query:
         return res
 
     def _field2relation_items(self, field: DBField, value):
+        if not value:
+            # 空の場合は空リストを返す
+            return []
+
+        pks = []
+        if not field.is_list():
+            # リストでない場合はリストに変換
+            value = [value]
         if field.reletion_by_unique:
+            # Unique Key で関連付け
             rel: BaseModel = field.relation()
-            if field.is_list():
-                pks = [
-                    self._get_other_item_by_unique(rel, value, default={}).get(
-                        rel.__primary_key__
-                    )
-                    for value in value
-                ]
-            else:
-                pks = [
-                    self._get_other_item_by_unique(rel, value, default={}).get(
-                        rel.__primary_key__
-                    )
-                ]
-            pks = [pk for pk in pks if pk is not None]
+            for x in value:
+                # Unique Key で関連アイテムを取得
+                _rel_item = self._get_other_item_by_unique(rel, x, default={})
+                if _rel_item:
+                    pks.append(_rel_item.get(rel.__primary_key__))
+                elif field.relation_raise_if_not_found:
+                    # 存在しない場合はエラー
+                    raise NotFoundError(f"{rel.__model_name__}={x}")
         else:
-            if field.is_list():
-                pks = [pk for pk in pks if pk is self.get(pk)]
-            else:
-                if value is self.get(value):
-                    pks = [value]
-                else:
-                    pks = []
+            # Primary key で関連付け
+            for x in value:
+                pk = self.get(pk=x)
+                if pk:
+                    # 存在するものだけ追加
+                    pks.append(pk)
+                elif field.relation_raise_if_not_found:
+                    # 存在しない場合はエラー
+                    raise NotFoundError(f"{self.__model__.__model_name__}={x}")
+        # Primary key が None のものを除外して、関連アイテムを作成
+        pks = [pk for pk in pks if pk is not None]
         result = [self._relation_item(pk, field) for pk in pks]
         return result
 

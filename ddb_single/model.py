@@ -30,6 +30,7 @@ class DBField:
         search_key=False,
         reletion=None,
         reletion_by_unique=True,
+        relation_raise_if_not_found=False,
         ignore_case=False,
         **kwargs,
     ):
@@ -47,7 +48,7 @@ class DBField:
             reletion (BaseModel): The reletion model of the field.
             reference (BaseModel): The reference model of the field.
             reletion_by_unique (bool): Whether the reletion is by unique key.
-            reference_by_unique (bool): Whether the reference is by unique key.
+            relation_raise_if_not_found (bool): Whether to raise an error if the relation is not found.
         """
         self.type = type
         self.default = default
@@ -60,6 +61,7 @@ class DBField:
         self.search_key = search_key or unique_key
         self.relation = reletion
         self.reletion_by_unique = reletion_by_unique
+        self.relation_raise_if_not_found = relation_raise_if_not_found
         self.ignore_case = ignore_case
         self.value = None
 
