@@ -374,8 +374,6 @@ class BaseModel:
         for k, v in self.__class__.__dict__.items():
             if isinstance(v, DBField):
                 self.data[k] = v.validate(kwargs.get(k), __skip_validation__)
-                if v.required and k not in kwargs:
-                    raise ValidationError(f"Missing required field: {k}")
 
     def _setup(self):
         if not self.__table__:
