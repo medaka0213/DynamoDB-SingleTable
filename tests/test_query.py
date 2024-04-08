@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
+from ddb_single.error import ValidationError
 
 import datetime
 import logging
@@ -22,7 +23,7 @@ table.init()
 class User(BaseModel):
     __table__ = table
     __model_name__ = "user"
-    name = DBField(unique_key=True)
+    name = DBField(unique_key=True, nullable=False)
     name_ignore_nase = DBField(search_key=True, ignore_case=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
@@ -68,6 +69,21 @@ class TestCRUD(unittest.TestCase):
         self.assertEqual(res["config"]["a"], test1.data["config"]["a"])
         self.assertEqual(res["config"]["b"], test1.data["config"]["b"])
 
+    def test_01_create_validation_error(self):
+        with self.assertRaises(ValidationError):
+            test1 = User(
+                name=None,
+                name_ignore_nase="Test Valudation Error",
+                email="",
+                age=20,
+                config={"a": 1, "b": 2},
+            )
+            query.model(test1).create()
+        res = query.model(User).search(
+            User.name_ignore_nase.eq("Test Valudation Error")
+        )
+        self.assertEqual(len(res), 0)
+
     def test_02_0_search(self):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)
@@ -75,13 +91,17 @@ class TestCRUD(unittest.TestCase):
 
     def test_02_1_0_search_by_get_field(self):
         """Search by get_field"""
-        res = query.model(User).search(User().get_field("name").eq("test"))
+        res = query.model(User).search(
+            User(__skip_validation__=True).get_field("name").eq("test")
+        )
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
 
     def test_02_1_1_search_by_get_field_not_found(self):
         """Search by get_field: not found"""
-        res = query.model(User).search(User().get_field("name").eq("Test"))
+        res = query.model(User).search(
+            User(__skip_validation__=True).get_field("name").eq("Test")
+        )
         self.assertEqual(len(res), 0)
 
     def test_02_2_get_by_unique(self):
@@ -119,6 +139,14 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)
 
+    def test_03_01_update_validation_error(self):
+        """Update by primary key: query.model(payload).update() on validation error"""
+        test = query.model(User).get_by_unique("test")
+        with self.assertRaises(ValidationError):
+            test["name"] = None
+            new_test = User(**test)
+            query.model(new_test).update()
+
     def test_03_02_update(self):
         """Update by primary key: query.model(payload).update(target)"""
         test = query.model(User).get_by_unique("test")
@@ -130,6 +158,12 @@ class TestCRUD(unittest.TestCase):
         # 二重投稿になってないか確認
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)
+
+    def test_03_02_update_validation_error(self):
+        """Update by primary key: query.model(payload).update(target) on validation error"""
+        test = query.model(User).get_by_unique("test")
+        with self.assertRaises(ValidationError):
+            query.model(User(**test)).update({"name": None})
 
     def test_03_03_update_empty(self):
         """Update by primary key: query.model(payload).update(target)"""
