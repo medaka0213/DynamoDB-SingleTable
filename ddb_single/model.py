@@ -160,7 +160,7 @@ class DBField:
                     return set(map(bytes, str(value)))
                 return value
             except Exception as e:
-                logger.error("Error: %s", e)
+                logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(f"{self.name} must be a valid list")
         else:
             try:
@@ -176,7 +176,7 @@ class DBField:
                     return bool(value)
                 return value
             except Exception as e:
-                logger.error("Error: %s", e)
+                logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(f"Value {self.name} must be a valid value")
 
     def search_key_factory(self):
