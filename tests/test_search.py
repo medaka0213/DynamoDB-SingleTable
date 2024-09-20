@@ -28,6 +28,12 @@ class User(BaseModel):
     description = DBField()
 
 
+class UserNotFound(BaseModel):
+    __table__ = table
+    __model_name__ = "userNotFound"
+    name = DBField(unique_key=True)
+
+
 query = Query(table)
 
 print("table_name:", table.__table_name__)
@@ -40,6 +46,8 @@ class TestSearch(unittest.TestCase):
         test = User(name="test2", age=22)
         query.model(test).create()
         test = User(name="test3", age=23)
+        query.model(test).create()
+        test = UserNotFound(name="testNotFound")
         query.model(test).create()
 
     def test_search(self):
@@ -95,6 +103,22 @@ class TestSearch(unittest.TestCase):
         ):
             res = query.model(User).search(User.name.eq(""))
             self.assertEqual(len(res), 0)
+
+    def test_all_items(self):
+        res = table.all_items()
+        self.assertEqual(len(res), 4)
+
+    def test_list_models(self):
+        res = table.list_models()
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0], {
+            "table_name": "user",
+            "count": 3,
+        })
+        self.assertEqual(res[1], {
+            "table_name": "userNotFound",
+            "count": 1,
+        })
 
 
 if __name__ == "__main__":
