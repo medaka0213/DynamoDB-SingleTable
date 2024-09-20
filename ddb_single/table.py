@@ -387,49 +387,54 @@ class Table:
                     res &= set(_res)
                 else:
                     res = set(_res)
+
+            # filter_ex があればフィルタ
+            res = self.batch_get_from_pks(list(res))
+            if staged_ex and filter_ex:
+                logger.debug("Both staged_ex and filter_ex found. Filtering items...")
+                res = self.filter(res, filter_ex)
+            if limit is not None:
+                res = list(res)[:limit]
+            if pk_only:
+                return [r[self.__primary_key__] for r in res]
+            return res
+
+        # シンプルにクエリ検索
+        logger.debug(f"simple_ex: {simple_ex}")
+        KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
+        for ex in simple_ex:
+            KeyConditionExpression &= ex["KeyConditionExpression"]
+        if filter_ex:
+            # フィルタがあれば追加
+            FilterExpression = filter_ex[0]["FilterExpression"]
+            for ex in filter_ex[1:]:
+                FilterExpression &= ex["FilterExpression"]
+            _res = (
+                self._query(
+                    KeyConditionExpression=KeyConditionExpression,
+                    FilterExpression=FilterExpression,
+                    IndexName=self.__range_index_name__,
+                    ProjectionExpression=self.__primary_key__,
+                )
+                or []
+            )
         else:
-            # シンプルにクエリ検索
-            logger.debug(f"simple_ex: {simple_ex}")
-            KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
-            for ex in simple_ex:
-                KeyConditionExpression &= ex["KeyConditionExpression"]
-            if filter_ex:
-                # フィルタがあれば追加
-                FilterExpression = filter_ex[0]["FilterExpression"]
-                for ex in filter_ex[1:]:
-                    FilterExpression &= ex["FilterExpression"]
-                _res = (
-                    self._query(
-                        KeyConditionExpression=KeyConditionExpression,
-                        FilterExpression=FilterExpression,
-                        IndexName=self.__range_index_name__,
-                        ProjectionExpression=self.__primary_key__,
-                    )
-                    or []
+            # フィルタがなければ全件検索
+            logger.debug("FilterExpression not found")
+            _res = (
+                self._query(
+                    KeyConditionExpression=KeyConditionExpression,
+                    IndexName=self.__range_index_name__,
+                    ProjectionExpression=self.__primary_key__,
                 )
-            else:
-                # フィルタがなければ全件検索
-                logger.debug("FilterExpression not found")
-                _res = (
-                    self._query(
-                        KeyConditionExpression=KeyConditionExpression,
-                        IndexName=self.__range_index_name__,
-                        ProjectionExpression=self.__primary_key__,
-                    )
-                    or []
-                )
-            res = set([r[self.__primary_key__] for r in _res])
+                or []
+            )
+        res = set([r[self.__primary_key__] for r in _res])
         if limit is not None:
             res = list(res)[:limit]
         if pk_only:
             return list(res)
-
-        res = self.batch_get_from_pks(list(res))
-        if staged_ex and filter_ex:
-            #  filter_ex があればフィルタ
-            logger.debug("Both staged_ex and filter_ex found. Filtering items...")
-            res = self.filter(res, filter_ex)
-        return res
+        return self.batch_get_from_pks(list(res))
 
     # --- 更新関連 ---
     # バッチライター
