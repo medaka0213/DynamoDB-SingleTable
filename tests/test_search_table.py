@@ -11,7 +11,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 table = Table(
-    table_name="search_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    table_name="table_search_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
     aws_access_key_id="fakeMyKeyId",
