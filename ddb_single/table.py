@@ -357,8 +357,16 @@ class Table:
                     break
         return res
 
-    # 検索
     def search(self, model_name, *searchEx, pk_only=False, limit=None):
+        """Search items
+        Args:
+            model_name (str): model name
+            searchEx (list[dict]): search expression
+            pk_only (bool, optional): return only primary key. Defaults to False.
+            limit (int, optional): limit. Defaults to None.
+        Returns:
+            list[dict]: items
+        """
         simple_ex = [
             s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEATCH
         ]
