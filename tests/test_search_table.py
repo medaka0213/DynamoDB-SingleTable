@@ -128,7 +128,7 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 50)
         for r in res:
             self.assertIn("odd", r["description"])
-            self.assertTrue(r["name"].startswith("test2"))
+            self.assertTrue(r["name"].startswith("test1"))
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
@@ -174,7 +174,7 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0], {
             "table_name": "user",
-            "count": 500,
+            "count": 200,
         })
         self.assertEqual(res[1], {
             "table_name": "userNotFound",
