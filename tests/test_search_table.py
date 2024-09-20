@@ -42,9 +42,9 @@ print("table_name:", table.__table_name__)
 
 class TestSearchTable(unittest.TestCase):
     def setUp(self):
-        for i in range(30):
+        for i in range(500):
             test = User(
-                name=f"test{str(i).zfill(2)}",
+                name=f"test{str(i).zfill(3)}",
                 age=i,
                 description=f"test description {'odd' if i % 2 == 0 else 'even'}_{i}",)
             query.model(test).create()
@@ -56,11 +56,11 @@ class TestSearchTable(unittest.TestCase):
         searchEx = [{
             "FilterStatus": util_b.FilterStatus.STAGED,
             "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").eq("test01"),
+            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").eq("test001"),
         }]
         res = table.search("user", *searchEx)
         self.assertEqual(len(res), 1)
-        self.assertEqual(res[0]["name"], "test01")
+        self.assertEqual(res[0]["name"], "test001")
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
@@ -164,6 +164,22 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 30)
         for r in res:
             self.assertIsInstance(r, str)
+
+    def test_all_items(self):
+        res = table.all_items()
+        self.assertEqual(len(res), 500)
+
+    def test_list_models(self):
+        res = table.list_models()
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0], {
+            "table_name": "user",
+            "count": 500,
+        })
+        self.assertEqual(res[1], {
+            "table_name": "userNotFound",
+            "count": 1,
+        })
 
 
 if __name__ == "__main__":
