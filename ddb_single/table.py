@@ -1,3 +1,5 @@
+from functools import reduce
+import operator
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
@@ -413,10 +415,7 @@ class Table:
         for ex in simple_ex:
             KeyConditionExpression &= ex["KeyConditionExpression"]
         if filter_ex:
-            # フィルタがあれば追加
-            FilterExpression = filter_ex[0]["FilterExpression"]
-            for ex in filter_ex[1:]:
-                FilterExpression &= ex["FilterExpression"]
+            FilterExpression = reduce(operator.and_, (ex["FilterExpression"] for ex in filter_ex))
             _res = (
                 self._query(
                     KeyConditionExpression=KeyConditionExpression,
