@@ -119,7 +119,7 @@ class Table:
 
     def sk2model(self, sk):
         return sk[
-            len(self.__secondary_key_prefix__) : -len(  # noqa: E203
+            len(self.__secondary_key_prefix__): -len(
                 self.__secondary_key_suffix__
             )
         ]
@@ -142,7 +142,7 @@ class Table:
         return f"{self.rel_prefix()}{pk}"
 
     def rel_key2pk(self, rel_key):
-        return rel_key[len(f"{self.rel_prefix()}") :]  # noqa: E203
+        return rel_key[len(f"{self.rel_prefix()}"):]
 
     def pk2rel_key(self, pk):
         return self.rel_key(pk)
@@ -178,7 +178,7 @@ class Table:
             if len(response["Items"]):
                 res_data = response["Items"]
                 while "LastEvaluatedKey" in response and len(res_data) < limit:
-                    print(f"{len(res_data)}/{limit}")
+                    logger.debug(f"pagenation: {len(res_data)}/{limit}")
                     response = self.__table__.scan(
                         **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
                     )
@@ -203,8 +203,7 @@ class Table:
                     )
                     res_data += response["Items"]
                 return util_b.json_export(res_data)
-            else:
-                return []
+        return []
 
     # アイテムの取得
     def get_item(self, pk, sk=None):
@@ -273,7 +272,7 @@ class Table:
         MAX_LENGTH = 100
         res = []
         for i in range(0, len(keys), MAX_LENGTH):
-            res += self._batch_get_item(keys[i : i + MAX_LENGTH])  # noqa: E203
+            res += self._batch_get_item(keys[i: i + MAX_LENGTH])
         return res
 
     # pksからアイテムをバッチで取得
@@ -298,10 +297,14 @@ class Table:
             res = self._query(
                 KeyConditionExpression=KeyConditionExpression,
                 FilterExpression=Attr(self.__search_data_key__).eq(field_name),
+                ProjectionExpression=self.__secondary_key__,
             )
         else:
             # モデルの指定がある場合
-            res = self._query(KeyConditionExpression=KeyConditionExpression)
+            res = self._query(
+                KeyConditionExpression=KeyConditionExpression,
+                ProjectionExpression=self.__secondary_key__
+            )
         pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
         if pk_only:
             return pks
@@ -319,6 +322,7 @@ class Table:
                 & Key(self.__search_data_key__).eq(field_name),
                 FilterExpression=Attr(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__search_index__,
+                ProjectionExpression=self.__primary_key__,
             )
         elif model_name:
             # モデルの指定がある場合
@@ -326,12 +330,14 @@ class Table:
                 KeyConditionExpression=KeyConditionExpression
                 & Key(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__range_index_name__,
+                ProjectionExpression=self.__primary_key__,
             )
         else:
             # フィールド・モデルの指定がない場合
             res = self._query(
                 KeyConditionExpression=KeyConditionExpression,
                 IndexName=self.__range_index_name__,
+                ProjectionExpression=self.__primary_key__,
             )
         pks = [r[self.__primary_key__] for r in res]
         if pk_only:
@@ -371,6 +377,7 @@ class Table:
                     self._query(
                         KeyConditionExpression=searchEx["KeyConditionExpression"],
                         IndexName=searchEx["IndexName"],
+                        ProjectionExpression=self.__primary_key__,
                     )
                     or []
                 )
@@ -391,35 +398,37 @@ class Table:
                 FilterExpression = filter_ex[0]["FilterExpression"]
                 for ex in filter_ex[1:]:
                     FilterExpression &= ex["FilterExpression"]
-                res = (
+                _res = (
                     self._query(
                         KeyConditionExpression=KeyConditionExpression,
                         FilterExpression=FilterExpression,
                         IndexName=self.__range_index_name__,
+                        ProjectionExpression=self.__primary_key__,
                     )
                     or []
                 )
             else:
                 # フィルタがなければ全件検索
                 logger.debug("FilterExpression not found")
-                res = (
+                _res = (
                     self._query(
                         KeyConditionExpression=KeyConditionExpression,
                         IndexName=self.__range_index_name__,
+                        ProjectionExpression=self.__primary_key__,
                     )
                     or []
                 )
+            res = set([r[self.__primary_key__] for r in _res])
         if limit is not None:
             res = list(res)[:limit]
-        if pk_only and filter_ex:
-            return list(res)
-        elif staged_ex:
-            logger.debug(f"batch_get: {res}")
-            res = self.batch_get_from_pks(list(res))
-            #  filter_ex があればフィルタ
-            res = self.filter(res, filter_ex)
         if pk_only:
-            return [r[self.__primary_key__] for r in res]
+            return list(res)
+
+        res = self.batch_get_from_pks(list(res))
+        if staged_ex and filter_ex:
+            #  filter_ex があればフィルタ
+            logger.debug("Both staged_ex and filter_ex found. Filtering items...")
+            res = self.filter(res, filter_ex)
         return res
 
     # --- 更新関連 ---
@@ -526,7 +535,10 @@ class Table:
             KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
                 self.rel_prefix(model_name)
             )
-        items = self._query(KeyConditionExpression=KeyConditionExpression)
+        items = self._query(
+            KeyConditionExpression=KeyConditionExpression,
+            ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
+        )
         self.batch_delete_items(items, batch)
 
     # 参照を削除
@@ -537,6 +549,7 @@ class Table:
         items = self._query(
             KeyConditionExpression=KeyConditionExpression,
             IndexName=self.__range_index_name__,
+            ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
         )
         self.batch_delete_items(items, batch)
 
@@ -615,3 +628,36 @@ class Table:
             ],
             ProvisionedThroughput=throughput,
         )
+
+    def all_items(self, pk_only=False) -> list[dict]:
+        """dump all items in the table"""
+        res = self._scan(
+            IndexName=self.__range_index_name__,
+            ProjectionExpression=self.__primary_key__,
+            # 検索データがないものだけを取得
+            FilterExpression=Attr(self.__search_data_key__).not_exists() &
+            Attr(self.__search_data_num_key__).not_exists()
+            & Attr(self.__search_data_bin_key__).not_exists(),
+        )
+        pks = set([r[self.__primary_key__] for r in res])
+        if pk_only:
+            return list(pks)
+        return self.batch_get_from_pks(pks)
+
+    def list_models(self) -> list[dict]:
+        """Show tables in the database
+        Returns:
+            list[dict]: table information. e.g. [{"table_name": "table1", "count": 10}, ...]
+        """
+        pks = self.all_items(pk_only=True)
+        res = {}
+        for pk in pks:
+            table_name = self.pk2model(pk)
+            if table_name not in res:
+                res[table_name] = {
+                    "count": 0,
+                }
+            res[table_name]["count"] += 1
+        return [
+            {"table_name": k, **v} for k, v in sorted(res.items())
+        ]
