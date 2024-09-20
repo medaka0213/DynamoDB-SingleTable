@@ -82,7 +82,7 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 6)
         for r in res:
             self.assertLessEqual(r["age"], 15)
-            self.assertTrue(r["name"].startswith("test1"))
+            self.assertTrue(r["name"].startswith("test01"))
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
@@ -105,7 +105,7 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 3)
         for r in res:
             self.assertLessEqual(r["age"], 15)
-            self.assertTrue(r["name"].startswith("test1"))
+            self.assertTrue(r["name"].startswith("test01"))
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True, limit=3)
@@ -150,7 +150,7 @@ class TestSearchTable(unittest.TestCase):
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
-        self.assertEqual(len(res), 15)
+        self.assertEqual(len(res), 250)
         for r in res:
             self.assertIsInstance(r, str)
 
