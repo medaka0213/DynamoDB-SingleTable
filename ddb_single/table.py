@@ -171,7 +171,7 @@ class Table:
 
     # スキャン
     def _scan(self, **kwargs):
-        limit = kwargs.get("Limit")
+        limit = kwargs.get("Limit") or float("inf")
         try:
             response = self.__table__.scan(**kwargs)
         except ClientError:
@@ -191,7 +191,7 @@ class Table:
 
     # クエリ
     def _query(self, **kwargs):
-        limit = kwargs.get("Limit", float("inf"))
+        limit = kwargs.get("Limit") or float("inf")
         try:
             response = self.__table__.query(**kwargs)
         except ClientError:

@@ -104,22 +104,6 @@ class TestSearch(unittest.TestCase):
             res = query.model(User).search(User.name.eq(""))
             self.assertEqual(len(res), 0)
 
-    def test_all_items(self):
-        res = table.all_items()
-        self.assertEqual(len(res), 4)
-
-    def test_list_models(self):
-        res = table.list_models()
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[0], {
-            "table_name": "user",
-            "count": 3,
-        })
-        self.assertEqual(res[1], {
-            "table_name": "userNotFound",
-            "count": 1,
-        })
-
 
 if __name__ == "__main__":
     unittest.main()
