@@ -37,6 +37,7 @@ jobs:
 
       - name: Get Version
         run: |
+          poetry version ${{ github.event.inputs.rule }}
           version=$(poetry version -s)
           echo "VERSION=$version" >> $GITHUB_ENV
 
