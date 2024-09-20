@@ -177,7 +177,7 @@ class Table:
         except ClientError:
             logger.error("ClientError", exc_info=True)
         else:
-            if len(response["Items"]):
+            if "Items" in response:
                 res_data = response["Items"]
                 while "LastEvaluatedKey" in response and len(res_data) < limit:
                     logger.debug(f"pagenation: {len(res_data)}/{limit}")
