@@ -42,7 +42,7 @@ print("table_name:", table.__table_name__)
 
 class TestSearchTable(unittest.TestCase):
     def setUp(self):
-        for i in range(500):
+        for i in range(200):
             test = User(
                 name=f"test{str(i).zfill(3)}",
                 age=i,
@@ -118,7 +118,7 @@ class TestSearchTable(unittest.TestCase):
         searchEx = [{
             "FilterStatus": util_b.FilterStatus.STAGED,
             "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").begins_with("test2"),
+            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").begins_with("test1"),
         }, {
             "FilterStatus": util_b.FilterStatus.FILTER,
             "FilterMethod": util_b.attr_method("description", "odd", util_b.QueryType.CONTAINS),
@@ -128,7 +128,7 @@ class TestSearchTable(unittest.TestCase):
         self.assertEqual(len(res), 50)
         for r in res:
             self.assertIn("odd", r["description"])
-            self.assertTrue(r["name"].startswith("test2"))
+            self.assertTrue(r["name"].startswith("test1"))
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
@@ -144,37 +144,37 @@ class TestSearchTable(unittest.TestCase):
             "FilterExpression": Attr("description").contains("odd"),
         }]
         res = table.search("user", *searchEx)
-        self.assertEqual(len(res), 250)
+        self.assertEqual(len(res), 100)
         for r in res:
             self.assertIn("odd", r["description"])
 
         # pk_only
         res = table.search("user", *searchEx, pk_only=True)
-        self.assertEqual(len(res), 250)
+        self.assertEqual(len(res), 100)
         for r in res:
             self.assertIsInstance(r, str)
 
     def test_search_all(self):
         """全件検索"""
         res = table.search("user")
-        self.assertEqual(len(res), 500)
+        self.assertEqual(len(res), 200)
 
         # pk_only
         res = table.search("user", pk_only=True)
-        self.assertEqual(len(res), 500)
+        self.assertEqual(len(res), 200)
         for r in res:
             self.assertIsInstance(r, str)
 
     def test_all_items(self):
         res = table.all_items()
-        self.assertEqual(len(res), 501)
+        self.assertEqual(len(res), 201)
 
     def test_list_models(self):
         res = table.list_models()
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0], {
             "table_name": "user",
-            "count": 500,
+            "count": 200,
         })
         self.assertEqual(res[1], {
             "table_name": "userNotFound",

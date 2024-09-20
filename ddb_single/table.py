@@ -177,7 +177,7 @@ class Table:
         except ClientError:
             logger.error("ClientError", exc_info=True)
         else:
-            if len(response["Items"]):
+            if "Items" in response:
                 res_data = response["Items"]
                 while "LastEvaluatedKey" in response and len(res_data) < limit:
                     logger.debug(f"pagenation: {len(res_data)}/{limit}")
@@ -566,12 +566,15 @@ class Table:
         self.batch_delete_items(items, batch)
 
     # --- ここからテーブル作成 ---
-    def init(self):
+    def init(self, create_if_not_exists=True):
         self.__table__ = self.__recourse__.Table(self.__table_name__)
         try:
             self.__table__.table_status
-        except ClientError:
-            self.create_table()
+        except ClientError as e:
+            if create_if_not_exists:
+                self.create_table()
+            else:
+                raise e
 
     def create_table(self):
         # キースキーマのプリセット

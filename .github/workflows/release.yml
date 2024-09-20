@@ -35,47 +35,25 @@ jobs:
         run: |
           pip install poetry
 
+      - name: Get Version
+        run: |
+          version=$(poetry version -s)
+          echo "VERSION=$version" >> $GITHUB_ENV
+
+      - name: Create and push tag
+        run: |
+          git fetch --prune --unshallow
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
+
       - name: Get changelog
         id: tag_version
         uses: mathieudutour/github-tag-action@v5.5
         with:
           github_token: ${{ secrets.GH_TOKEN }}
+          tag_prefix: ''
+          release_branches: master
           dry_run: true
-
-      - name: Update version
-        run: |
-          poetry version ${{ github.event.inputs.rule }}
-          version=$(poetry version -s)
-          echo "VERSION=$version" >> $GITHUB_ENV
-
-      - name: Publish package
-        env:
-          PYPI_LOCAL_USERNAME: __token__
-          PYPI_LOCAL_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          poetry build
-          poetry publish -u $PYPI_LOCAL_USERNAME -p $PYPI_LOCAL_PASSWORD
-
-      - name: Set up git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: "[skip ci] Bump version to ${{ env.VERSION }}"
-          delete-branch: true
-          title: Bump version to ${{ env.VERSION }}
-          branch: release/${{ env.VERSION }}
-          body: |
-            Bump version to ${{ env.VERSION }}
-            ${{ steps.tag_version.outputs.changelog }}
-          token: ${{ secrets.GH_TOKEN }}
-
-      - name: Create and push tag
-        run: |
-          git tag v${{ env.VERSION }}
-          git push origin v${{ env.VERSION }}
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -85,3 +63,11 @@ jobs:
           draft: false
           prerelease: false
           body: ${{ steps.tag_version.outputs.changelog }}
+
+      - name: Publish package
+        env:
+          PYPI_LOCAL_USERNAME: __token__
+          PYPI_LOCAL_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry build
+          poetry publish -u "$PYPI_LOCAL_USERNAME" -p "$PYPI_LOCAL_PASSWORD"
