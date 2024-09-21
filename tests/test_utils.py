@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch
+from boto3.dynamodb.conditions import Key, Attr
 from decimal import Decimal
 from ddb_single.utils_botos import range_ex, attr_ex, attr_method, is_same_json, json_import, json_export, QueryType
 from ddb_single.error import InvalidParameterError
@@ -7,31 +8,27 @@ from ddb_single.error import InvalidParameterError
 
 class TestUtilsBotos(unittest.TestCase):
 
-    @patch('ddb_single.utils_botos.Key')
-    def test_range_ex(self, mock_key):
+    def test_range_ex(self):
         # Equal mode
-        range_ex('test', 'value', QueryType.EQ)
-        mock_key.assert_called_with('test')
-        mock_key.return_value.eq.assert_called_with('value')
+        res = range_ex('test', 'value', QueryType.EQ)
+        self.assertEqual(res, Key('test').eq('value'))
 
         # Between mode
-        range_ex('test', [1, 10], QueryType.BETWEEN)
-        mock_key.return_value.between.assert_called_with(1, 10)
+        res = range_ex('test', [1, 10], QueryType.BETWEEN)
+        self.assertEqual(res, Key('test').between(1, 10))
 
         # Invalid mode
         with self.assertRaises(InvalidParameterError):
             range_ex('test', 'value', 'INVALID_MODE')
 
-    @patch('ddb_single.utils_botos.Attr')
-    def test_attr_ex(self, mock_attr):
+    def test_attr_ex(self):
         # Contains mode
-        attr_ex('test', 'value', QueryType.CONTAINS)
-        mock_attr.assert_called_with('test')
-        mock_attr.return_value.contains.assert_called_with('value')
+        res = attr_ex('test', 'value', QueryType.CONTAINS)
+        self.assertEqual(res, Attr('test').contains('value'))
 
         # In mode
-        attr_ex('test', ['value1', 'value2'], QueryType.IN)
-        mock_attr.return_value.in_.assert_called_with(['value1', 'value2'])
+        res = attr_ex('test', ['value1', 'value2'], QueryType.IN)
+        self.assertEqual(res, Attr('test').is_in(['value1', 'value2']))
 
         # Invalid mode
         with self.assertRaises(InvalidParameterError):
@@ -47,6 +44,10 @@ class TestUtilsBotos(unittest.TestCase):
         method = attr_method('test', [1, 10], QueryType.BETWEEN)
         self.assertTrue(method({'test': 5}))
         self.assertFalse(method({'test': 11}))
+
+        # Invalid mode
+        with self.assertRaises(InvalidParameterError):
+            attr_method('test', 'value', 'INVALID_MODE')
 
     def test_is_same_json(self):
         # Same dictionaries
