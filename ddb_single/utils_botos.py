@@ -1,3 +1,4 @@
+# ddb_single/utils_botos.py
 from boto3.dynamodb.conditions import Key, Attr
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from ddb_single.error import InvalidParameterError
@@ -103,29 +104,29 @@ def attr_ex(name, value, mode):
 
 def attr_method(name, value, mode):
     if mode == QueryType.EQ:
-        result = lambda x: x.get(name) == value  # noqa: E731
+        def result(x): return x.get(name) == value
     elif mode == QueryType.BETWEEN:
-        result = lambda x: min(*value) <= x.get(name) <= max(*value)  # noqa: E731
+        def result(x): return min(*value) <= x.get(name) <= max(*value)
     elif mode == QueryType.LT:
-        result = lambda x: x.get(name) < value  # noqa: E731
+        def result(x): return x.get(name) < value
     elif mode == QueryType.LT_E:
-        result = lambda x: x.get(name) <= value  # noqa: E731
+        def result(x): return x.get(name) <= value
     elif mode == QueryType.GT:
-        result = lambda x: x.get(name) > value  # noqa: E731
+        def result(x): return x.get(name) > value
     elif mode == QueryType.GT_E:
-        result = lambda x: x.get(name) >= value  # noqa: E731
+        def result(x): return x.get(name) >= value
     elif mode == QueryType.BEGINS:
-        result = lambda x: x.get(name).startswith(value)  # noqa: E731
+        def result(x): return x.get(name).startswith(value)
     elif mode == QueryType.CONTAINS:
-        result = lambda x: value in x.get(name)  # noqa: E731
+        def result(x): return value in x.get(name)
     elif mode == QueryType.IN:
-        result = lambda x: x.get(name) in value  # noqa: E731
+        def result(x): return x.get(name) in value
     elif mode == QueryType.N_EQ:
-        result = lambda x: x.get(name) != value  # noqa: E731
+        def result(x): return x.get(name) != value
     elif mode == QueryType.EX:
-        result = lambda x: name in x  # noqa: E731
+        def result(x): return name in x
     elif mode == QueryType.N_EX:
-        result = lambda x: name not in x  # noqa: E731
+        def result(x): return name not in x
     else:
         raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
