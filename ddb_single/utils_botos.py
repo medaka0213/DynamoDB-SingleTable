@@ -62,7 +62,8 @@ def range_ex(name, value, mode):
     }
     try:
         result = func_mapping[mode](name, value)
-    except KeyError:
+    except KeyError as err:
+        raise InvalidParameterError(f"mode={mode} is not defined.") from err
         raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
