@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 from boto3.dynamodb.conditions import Key, Attr
 from decimal import Decimal
 from ddb_single.utils_botos import range_ex, attr_ex, attr_method, is_same_json, json_import, json_export, QueryType
