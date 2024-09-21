@@ -1,3 +1,4 @@
+# ddb_single/utils_botos.py
 from boto3.dynamodb.conditions import Key, Attr
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from ddb_single.error import InvalidParameterError
@@ -50,83 +51,64 @@ def is_key(mode):
 
 
 def range_ex(name, value, mode):
-    if mode == QueryType.EQ:
-        result = Key(name).eq(value)
-    elif mode == QueryType.BETWEEN:
-        result = Key(name).between(min(*value), max(*value))
-    elif mode == QueryType.LT:
-        result = Key(name).lt(value)
-    elif mode == QueryType.LT_E:
-        result = Key(name).lte(value)
-    elif mode == QueryType.GT:
-        result = Key(name).gt(value)
-    elif mode == QueryType.GT_E:
-        result = Key(name).gte(value)
-    elif mode == QueryType.BEGINS:
-        result = Key(name).begins_with(value)
-    else:
+    func_mapping = {
+        QueryType.EQ: lambda n, v: Key(n).eq(v),
+        QueryType.BETWEEN: lambda n, v: Key(n).between(min(*v), max(*v)),
+        QueryType.LT: lambda n, v: Key(n).lt(v),
+        QueryType.LT_E: lambda n, v: Key(n).lte(v),
+        QueryType.GT: lambda n, v: Key(n).gt(v),
+        QueryType.GT_E: lambda n, v: Key(n).gte(v),
+        QueryType.BEGINS: lambda n, v: Key(n).begins_with(v),
+    }
+    try:
+        result = func_mapping[mode](name, value)
+    except KeyError as err:
+        raise InvalidParameterError(f"mode={mode} is not defined.") from err
         raise InvalidParameterError(f"mode={mode} is not defined.")
-
     return result
 
 
 # その他の変数の検索フィルター
 def attr_ex(name, value, mode):
-    if mode == QueryType.EQ:
-        result = Attr(name).eq(value)
-    elif mode == QueryType.BETWEEN:
-        result = Attr(name).between(min(*value), max(*value))
-    elif mode == QueryType.LT:
-        result = Attr(name).lt(value)
-    elif mode == QueryType.LT_E:
-        result = Attr(name).lte(value)
-    elif mode == QueryType.GT:
-        result = Attr(name).gt(value)
-    elif mode == QueryType.GT_E:
-        result = Attr(name).gte(value)
-    elif mode == QueryType.BEGINS:
-        result = Attr(name).begins_with(value)
-    elif mode == QueryType.CONTAINS:
-        result = Attr(name).contains(value)
-    elif mode == QueryType.IN:
-        result = Attr(name).in_(value)
-    elif mode == QueryType.N_EQ:
-        result = Attr(name).ne(value)
-    elif mode == QueryType.EX:
-        result = Attr(name).exists()
-    elif mode == QueryType.N_EX:
-        result = Attr(name).not_exists()
-    else:
+    func_mapping = {
+        QueryType.EQ: lambda n, v: Attr(n).eq(v),
+        QueryType.BETWEEN: lambda n, v: Attr(n).between(min(*v), max(*v)),
+        QueryType.LT: lambda n, v: Attr(n).lt(v),
+        QueryType.LT_E: lambda n, v: Attr(n).lte(v),
+        QueryType.GT: lambda n, v: Attr(n).gt(v),
+        QueryType.GT_E: lambda n, v: Attr(n).gte(v),
+        QueryType.BEGINS: lambda n, v: Attr(n).begins_with(v),
+        QueryType.CONTAINS: lambda n, v: Attr(n).contains(v),
+        QueryType.IN: lambda n, v: Attr(n).is_in(v),
+        QueryType.N_EQ: lambda n, v: Attr(n).ne(v),
+        QueryType.EX: lambda n, v: Attr(n).exists(),
+        QueryType.N_EX: lambda n, v: Attr(n).not_exists(),
+    }
+    try:
+        result = func_mapping[mode](name, value)
+    except KeyError as err:
+        raise InvalidParameterError(f"mode={mode} is not defined.") from err
         raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
 
 def attr_method(name, value, mode):
-    if mode == QueryType.EQ:
-        result = lambda x: x.get(name) == value  # noqa: E731
-    elif mode == QueryType.BETWEEN:
-        result = lambda x: min(*value) <= x.get(name) <= max(*value)  # noqa: E731
-    elif mode == QueryType.LT:
-        result = lambda x: x.get(name) < value  # noqa: E731
-    elif mode == QueryType.LT_E:
-        result = lambda x: x.get(name) <= value  # noqa: E731
-    elif mode == QueryType.GT:
-        result = lambda x: x.get(name) > value  # noqa: E731
-    elif mode == QueryType.GT_E:
-        result = lambda x: x.get(name) >= value  # noqa: E731
-    elif mode == QueryType.BEGINS:
-        result = lambda x: x.get(name).startswith(value)  # noqa: E731
-    elif mode == QueryType.CONTAINS:
-        result = lambda x: value in x.get(name)  # noqa: E731
-    elif mode == QueryType.IN:
-        result = lambda x: x.get(name) in value  # noqa: E731
-    elif mode == QueryType.N_EQ:
-        result = lambda x: x.get(name) != value  # noqa: E731
-    elif mode == QueryType.EX:
-        result = lambda x: name in x  # noqa: E731
-    elif mode == QueryType.N_EX:
-        result = lambda x: name not in x  # noqa: E731
-    else:
+    func_mapping = {
+        QueryType.EQ: lambda x: x.get(name) == value,
+        QueryType.BETWEEN: lambda x: min(*value) <= x.get(name) <= max(*value),
+        QueryType.LT: lambda x: x.get(name) < value,
+        QueryType.LT_E: lambda x: x.get(name) <= value,
+        QueryType.GT: lambda x: x.get(name) > value,
+        QueryType.GT_E: lambda x: x.get(name) >= value,
+        QueryType.BEGINS: lambda x: x.get(name).startswith(value),
+        QueryType.CONTAINS: lambda x: value in x.get(name),
+        QueryType.IN: lambda x: x.get(name) in value,
+        QueryType.N_EQ: lambda x: x.get(name) != value,
+        QueryType.EX: lambda x: name in x,
+        QueryType.N_EX: lambda x: name not in x,
+    }
+    result = func_mapping.get(mode)
+    if result is None:
         raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 

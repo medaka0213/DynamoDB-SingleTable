@@ -227,6 +227,10 @@ class DBField:
         Returns:
             dict: The key expression.
         """
+        if mode == util_b.QueryType.BETWEEN:
+            value = list(map(self.validate, value))
+        else:
+            value = self.validate(value)
         if self.ignore_case and isinstance(value, str):
             value = value.lower()
         if self.secondary_key:
