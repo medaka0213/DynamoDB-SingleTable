@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DynamoDB SingleTable &mdash; DynamoDB SingleTable 0.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
@@ -125,7 +125,7 @@ It makes effective and easy to manage your whole data models for single service.
 </section>
 <section id="init-table">
 <h3>Init Table<a class="headerlink" href="#init-table" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Table</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ddb_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
 
 <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
     <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
@@ -144,9 +144,9 @@ It makes effective and easy to manage your whole data models for single service.
 <li><p>unique_key … key to identify the item is the same. Mainly used to update item.</p></li>
 </ul>
 <p>And you can set <code class="docutils literal notranslate"><span class="pre">serch_key</span></code> to enable search via GSI</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span><span class="p">,</span> <span class="n">FieldType</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ddb_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">DBField</span><span class="p">,</span> <span class="n">FieldType</span>
 
-<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">__table__</span><span class="o">=</span><span class="n">table</span>
     <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">unique_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -167,7 +167,7 @@ It makes effective and easy to manage your whole data models for single service.
 <li><p><code class="docutils literal notranslate"><span class="pre">query.model(foo).update</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">query.model(foo).delete</span></code></p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ddb_single</span> <span class="kn">import</span> <span class="n">Query</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ddb_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">Query</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -387,7 +387,7 @@ Then, <code class="docutils literal notranslate"><span class="pre">batch_get</sp
 <h3>Create Model<a class="headerlink" href="#create-model" title="Link to this heading">¶</a></h3>
 <p>You can sat relationns to other models
 <code class="docutils literal notranslate"><span class="pre">relation=BaseModel</span></code> to set relation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BlogPost</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BlogPost</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">__model_name__</span> <span class="o">=</span> <span class="s2">&quot;blogpost&quot;</span>
     <span class="n">__table__</span><span class="o">=</span><span class="n">table</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">DBField</span><span class="p">(</span><span class="n">unique_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
