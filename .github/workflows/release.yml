@@ -61,7 +61,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - uses: peter-evans/create-pull-request@v5
+      - uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "[skip ci] Bump version to ${{ env.VERSION }}"
           delete-branch: true
