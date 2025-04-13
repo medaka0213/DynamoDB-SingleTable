@@ -1,0 +1,19 @@
+language: "ja-JP"
+early_access: false
+reviews:
+  path_filters:
+    - "**/*.py"
+    - ".github/workflows/**"
+  path_instructions:
+    - path: "tests/**"
+      instructions: "テストケースが変更された場合に別のテストケースに影響が出るのを防ぐため、テストコードの重複は許容してください"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true
