@@ -37,7 +37,7 @@ jobs:
 
       - name: Get changelog
         id: tag_version
-        uses: mathieudutour/github-tag-action@v5.5
+        uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           dry_run: true
