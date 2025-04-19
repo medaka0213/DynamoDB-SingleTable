@@ -148,7 +148,9 @@ class DBField:
     def _validate_value(self, value):
         if self.is_list():
             if not isinstance(value, list):
-                raise ValidationError(f"{self.name} must be a list")
+                raise ValidationError(
+                    f"{self.name} must be a list: {self.type} != {type(value)}"
+                )
             try:
                 if self.type == FieldType.LIST:
                     return value
@@ -161,11 +163,15 @@ class DBField:
                 return value
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
-                raise ValidationError(f"{self.name} must be a valid list")
+                raise ValidationError(
+                    f"{self.name} must be a valid list: {self.type} != {type(value)}"
+                )
         else:
             try:
                 if isinstance(value, list):
-                    raise ValidationError(f"{self.name} must not be a list")
+                    raise ValidationError(
+                        f"{self.name} must not be a list: {self.type} != {type(value)}"
+                    )
                 if self.type == FieldType.STRING:
                     return str(value)
                 elif self.type == FieldType.NUMBER:
@@ -177,7 +183,9 @@ class DBField:
                 return value
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
-                raise ValidationError(f"Value {self.name} must be a valid value")
+                raise ValidationError(
+                    f"Value {self.name} must be a valid value, {self.type} != {type(value)}"
+                )
 
     def search_key_factory(self):
         """
