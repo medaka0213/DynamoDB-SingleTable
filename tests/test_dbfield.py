@@ -20,11 +20,13 @@ class TestDBFieldValidation(unittest.TestCase):
         result = field.validate("test")
         self.assertEqual(result, "test")
 
-    def test_string_field_invalid_none(self):
+    def test_string_field_invalid(self):
         field = DBField(type=FieldType.STRING, nullable=False)
         # None is not allowed for a non-nullable field.
         with self.assertRaises(ValidationError):
             field.validate(None)
+        with self.assertRaises(ValidationError):
+            field.validate([])
 
     def test_number_field_valid(self):
         field = DBField(type=FieldType.NUMBER)
@@ -46,10 +48,10 @@ class TestDBFieldValidation(unittest.TestCase):
 
     def test_list_field_valid(self):
         field = DBField(type=FieldType.LIST)
-        val = [1, 2, 3]
         # For a LIST field, valid input is a list.
-        result = field.validate(val)
-        self.assertEqual(result, val)
+        self.assertEqual(field.validate([1, 2, 3]), [1, 2, 3])
+        self.assertEqual(field.validate(["a", "b", "c"]), ["a", "b", "c"])
+        self.assertEqual(field.validate([]), [])
 
     def test_list_field_invalid(self):
         field = DBField(type=FieldType.LIST)
