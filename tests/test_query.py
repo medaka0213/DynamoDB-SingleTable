@@ -29,6 +29,7 @@ class User(BaseModel):
     age = DBField(type=FieldType.NUMBER, search_key=True)
     description = DBField()
     config = DBField(type=FieldType.MAP)
+    tag_list = DBField(type=FieldType.LIST)
 
 
 query = Query(table)
@@ -44,12 +45,14 @@ class TestCRUD(unittest.TestCase):
             email="",
             age=20,
             config={"a": 1, "b": 2},
+            tag_list=["tag1", "tag2"],
         )
         test2 = User(
             pk="user_test2",
             name="test2",
             email=None,
             name_ignore_nase="Test2",
+            tag_list=[],
         )
         test3 = User(
             pk="user_test3",
@@ -68,6 +71,7 @@ class TestCRUD(unittest.TestCase):
         self.assertEqual(res["age"], test1.data["age"])
         self.assertEqual(res["config"]["a"], test1.data["config"]["a"])
         self.assertEqual(res["config"]["b"], test1.data["config"]["b"])
+        self.assertEqual(res["tag_list"], test1.data["tag_list"])
 
     def test_01_create_validation_error(self):
         with self.assertRaises(ValidationError):
