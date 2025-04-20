@@ -146,10 +146,11 @@ class DBField:
         return self.value
 
     def _validate_value(self, value):
+        field_name = getattr(self, "name", "DBField")
         if self.is_list():
             if not isinstance(value, list):
                 raise ValidationError(
-                    f"{self.name} must be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
             try:
                 if self.type == FieldType.LIST:
@@ -164,27 +165,30 @@ class DBField:
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"{self.name} must be a valid list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a valid list: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
         else:
             try:
                 if isinstance(value, list):
                     raise ValidationError(
-                        f"{self.name} must not be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                        f"{field_name} must not be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
                     )
                 if self.type == FieldType.STRING:
                     return str(value)
                 elif self.type == FieldType.NUMBER:
                     return Decimal(str(value))
                 elif self.type == FieldType.BINARY:
-                    return bytes(value)
+                    if isinstance(value, str):
+                        return value.encode("utf-8")
+                    else:
+                        return bytes(value)
                 elif self.type == FieldType.BOOLEAN:
                     return bool(value)
                 return value
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"Value {self.name} must be a valid value, {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"Value {field_name} must be a valid value, {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
 
     def search_key_factory(self):

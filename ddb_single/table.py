@@ -121,7 +121,7 @@ class Table:
 
     def sk2model(self, sk):
         return sk[
-            len(self.__secondary_key_prefix__): -len(
+            len(self.__secondary_key_prefix__) : -len(  # noqa
                 self.__secondary_key_suffix__
             )
         ]
@@ -144,7 +144,7 @@ class Table:
         return f"{self.rel_prefix()}{pk}"
 
     def rel_key2pk(self, rel_key):
-        return rel_key[len(f"{self.rel_prefix()}"):]
+        return rel_key[len(f"{self.rel_prefix()}") :]  # noqa
 
     def pk2rel_key(self, pk):
         return self.rel_key(pk)
@@ -274,7 +274,7 @@ class Table:
         MAX_LENGTH = 100
         res = []
         for i in range(0, len(keys), MAX_LENGTH):
-            res += self._batch_get_item(keys[i: i + MAX_LENGTH])
+            res += self._batch_get_item(keys[i : i + MAX_LENGTH])  # noqa
         return res
 
     # pksからアイテムをバッチで取得
@@ -305,7 +305,7 @@ class Table:
             # モデルの指定がある場合
             res = self._query(
                 KeyConditionExpression=KeyConditionExpression,
-                ProjectionExpression=self.__secondary_key__
+                ProjectionExpression=self.__secondary_key__,
             )
         pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
         if pk_only:
@@ -415,7 +415,9 @@ class Table:
         for ex in simple_ex:
             KeyConditionExpression &= ex["KeyConditionExpression"]
         if filter_ex:
-            FilterExpression = reduce(operator.and_, (ex["FilterExpression"] for ex in filter_ex))
+            FilterExpression = reduce(
+                operator.and_, (ex["FilterExpression"] for ex in filter_ex)
+            )
             _res = (
                 self._query(
                     KeyConditionExpression=KeyConditionExpression,
@@ -650,8 +652,8 @@ class Table:
             IndexName=self.__range_index_name__,
             ProjectionExpression=self.__primary_key__,
             # 検索データがないものだけを取得
-            FilterExpression=Attr(self.__search_data_key__).not_exists() &
-            Attr(self.__search_data_num_key__).not_exists()
+            FilterExpression=Attr(self.__search_data_key__).not_exists()
+            & Attr(self.__search_data_num_key__).not_exists()
             & Attr(self.__search_data_bin_key__).not_exists(),
         )
         pks = set([r[self.__primary_key__] for r in res])
@@ -673,6 +675,4 @@ class Table:
                     "count": 0,
                 }
             res[table_name]["count"] += 1
-        return [
-            {"table_name": k, **v} for k, v in sorted(res.items())
-        ]
+        return [{"table_name": k, **v} for k, v in sorted(res.items())]
