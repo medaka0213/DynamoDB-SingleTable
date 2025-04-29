@@ -72,12 +72,7 @@ class Query:
         return res
 
     def get_by_unique(
-def get_by_unique(
-    self, value, pk_only=False, keys: List[str | DBField] = None
-):
-    if keys is None:
-        keys = []
-    # …rest of implementation…
+        self, value, pk_only=False, keys: List[str | DBField] = None
     ) -> dict:
         """
         ユニークキーで取得
@@ -85,6 +80,8 @@ def get_by_unique(
             value: Unique key value
             keys: Unique key. If not specified, search by all unique keys.
         """
+        if keys is None:
+            keys = []
         specified_keys: List[str] = []
         for key in keys:
             # key が文字列ならそのまま、DBField なら name を取得
