@@ -169,8 +169,8 @@ class Table:
         else:
             raise Exception(f"Invalid type: {type}")
 
-    # スキャン
-    def _scan(self, **kwargs):
+    def scan(self, **kwargs) -> list[dict]:
+        """スキャン"""
         limit = kwargs.get("Limit") or float("inf")
         try:
             response = self.__table__.scan(**kwargs)
@@ -189,8 +189,8 @@ class Table:
             else:
                 return []
 
-    # クエリ
-    def _query(self, **kwargs):
+    def query(self, **kwargs) -> list[dict]:
+        """クエリ"""
         limit = kwargs.get("Limit") or float("inf")
         try:
             response = self.__table__.query(**kwargs)
@@ -207,8 +207,8 @@ class Table:
                 return util_b.json_export(res_data)
         return []
 
-    # アイテムの取得
     def get_item(self, pk, sk=None):
+        """アイテムの取得"""
         sk = sk if sk else self.pk2sk(pk)
         res: dict = self.__client__.get_item(
             TableName=self.__table_name__,
@@ -224,8 +224,10 @@ class Table:
         res = util_b.json_export(res)
         return res
 
-    # アイテムをバッチで取得
-    def _batch_get_item(self, key_list: list, sleep_time=0.5, max_tries=5) -> list:
+    def _batch_get_item(
+        self, key_list: list[dict], sleep_time=0.5, max_tries=5
+    ) -> list:
+        """アイテムをバッチで取得"""
         # リストが空なら空リストを返す
         if not key_list or len(key_list) == 0:
             return []
@@ -269,16 +271,16 @@ class Table:
         res = util_b.json_export(res)
         return res
 
-    # アイテムをバッチで取得
-    def batch_get(self, keys):
+    def batch_get(self, keys: list[dict]) -> list[dict]:
+        """アイテムをバッチで取得"""
         MAX_LENGTH = 100
         res = []
         for i in range(0, len(keys), MAX_LENGTH):
             res += self._batch_get_item(keys[i : i + MAX_LENGTH])  # noqa
         return res
 
-    # pksからアイテムをバッチで取得
-    def batch_get_from_pks(self, pks: list) -> list:
+    def batch_get_from_pks(self, pks: list[str]) -> list[dict]:
+        """pksからアイテムをバッチで取得"""
         keys = [
             {self.__primary_key__: pk, self.__secondary_key__: self.pk2sk(pk)}
             for pk in pks
@@ -286,8 +288,8 @@ class Table:
         return self.batch_get(keys)
 
     # --- 検索関連 ---
-    # 関連先を検索
     def relation(self, pk, model_name="", field_name="", pk_only=False):
+        """関連先を検索"""
         logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
         if model_name:
@@ -296,14 +298,14 @@ class Table:
             )
         if field_name:
             # フィールドの指定がある場合
-            res = self._query(
+            res = self.query(
                 KeyConditionExpression=KeyConditionExpression,
                 FilterExpression=Attr(self.__search_data_key__).eq(field_name),
                 ProjectionExpression=self.__secondary_key__,
             )
         else:
             # モデルの指定がある場合
-            res = self._query(
+            res = self.query(
                 KeyConditionExpression=KeyConditionExpression,
                 ProjectionExpression=self.__secondary_key__,
             )
@@ -313,13 +315,13 @@ class Table:
         else:
             return self.batch_get_from_pks(pks)
 
-    # 関連元を検索
     def reference(self, pk, model_name="", field_name="", pk_only=False):
+        """関連元を検索"""
         logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.rel_key(pk))
         if field_name:
             # フィールドの指定がある場合
-            res = self._query(
+            res = self.query(
                 KeyConditionExpression=KeyConditionExpression
                 & Key(self.__search_data_key__).eq(field_name),
                 FilterExpression=Attr(self.__primary_key__).begins_with(model_name),
@@ -328,7 +330,7 @@ class Table:
             )
         elif model_name:
             # モデルの指定がある場合
-            res = self._query(
+            res = self.query(
                 KeyConditionExpression=KeyConditionExpression
                 & Key(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__range_index_name__,
@@ -336,7 +338,7 @@ class Table:
             )
         else:
             # フィールド・モデルの指定がない場合
-            res = self._query(
+            res = self.query(
                 KeyConditionExpression=KeyConditionExpression,
                 IndexName=self.__range_index_name__,
                 ProjectionExpression=self.__primary_key__,
@@ -347,8 +349,8 @@ class Table:
         else:
             return self.batch_get_from_pks(pks)
 
-    # フィルター
     def filter(self, items, searchExs):
+        """フィルター"""
         if not searchExs:
             return items
         res = []
@@ -384,7 +386,7 @@ class Table:
             all_items = []
             for i, searchEx in enumerate(staged_ex):
                 _res = (
-                    self._query(
+                    self.query(
                         KeyConditionExpression=searchEx["KeyConditionExpression"],
                         IndexName=searchEx["IndexName"],
                         ProjectionExpression=self.__primary_key__,
@@ -419,7 +421,7 @@ class Table:
                 operator.and_, (ex["FilterExpression"] for ex in filter_ex)
             )
             _res = (
-                self._query(
+                self.query(
                     KeyConditionExpression=KeyConditionExpression,
                     FilterExpression=FilterExpression,
                     IndexName=self.__range_index_name__,
@@ -431,7 +433,7 @@ class Table:
             # フィルタがなければ全件検索
             logger.debug("FilterExpression not found")
             _res = (
-                self._query(
+                self.query(
                     KeyConditionExpression=KeyConditionExpression,
                     IndexName=self.__range_index_name__,
                     ProjectionExpression=self.__primary_key__,
@@ -446,19 +448,19 @@ class Table:
         return self.batch_get_from_pks(list(res))
 
     # --- 更新関連 ---
-    # バッチライター
     def batch_writer(self):
+        """バッチライター"""
         return self.__table__.batch_writer()
 
-    # アイテムの作成
     def create(self, item, batch=None):
+        """アイテムの作成"""
         item = util_b.json_import(item)
         table = batch or self.__table__
         table.put_item(Item=item)
         return item
 
-    # アイテムの更新
     def update(self, item, batch=None, old_item=None):
+        """アイテムの更新"""
         is_changed = False
         item = util_b.json_import(item)
         if not old_item and not batch:
@@ -476,8 +478,8 @@ class Table:
             self.create(item, batch)
             return item, is_changed
 
-    # 作成のバッチ処理
     def batch_create(self, items, batch=None):
+        """作成のバッチ処理"""
         items = util_b.json_import(items)
         if batch:
             for item in items:
@@ -488,8 +490,8 @@ class Table:
                     batch.put_item(Item=item)
         return items
 
-    # 更新のバッチ処理
     def batch_update(self, items, batch=None):
+        """更新のバッチ処理"""
         items = util_b.json_import(items)
         old_items = self.batch_get(items)
         new_items = []
@@ -508,16 +510,16 @@ class Table:
         return new_items
 
     # --- 削除関連 ---
-    # アイテムの削除
     def delete(self, pk, sk, batch=None):
+        """アイテムの削除"""
         table = batch or self.__table__
         table.delete_item(Key={self.__primary_key__: pk, self.__secondary_key__: sk})
 
     def detele_item(self, item, batch=None):
         self.delete(item[self.__primary_key__], item[self.__secondary_key__], batch)
 
-    # バッチ処理
     def batch_delete_items(self, items, batch=None):
+        """バッチ処理"""
         logger.debug(f"batch_delete_items: {items}")
         if batch:
             for item in items:
@@ -527,14 +529,14 @@ class Table:
                 for item in items:
                     self.detele_item(item, batch)
 
-    # アイテムを全削除
     def clear_item(self, pk, batch=None):
+        """アイテムを全削除"""
         # メインアイテム・検索アイテム・関連アイテムを削除
-        items_main = self._query(
+        items_main = self.query(
             KeyConditionExpression=Key(self.__primary_key__).eq(pk),
         )
         # 参照アイテムを削除
-        items_ref = self._query(
+        items_ref = self.query(
             KeyConditionExpression=Key(self.__secondary_key__).eq(self.pk2rel_key(pk)),
             IndexName=self.__range_index_name__,
         )
@@ -542,25 +544,25 @@ class Table:
         items = items_main + items_ref
         self.batch_delete_items(items, batch)
 
-    # 関連付けを削除
     def clear_relation(self, pk, model_name="", batch=None):
+        """関連付けを削除"""
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
         if model_name:
             KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
                 self.rel_prefix(model_name)
             )
-        items = self._query(
+        items = self.query(
             KeyConditionExpression=KeyConditionExpression,
             ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
         )
         self.batch_delete_items(items, batch)
 
-    # 参照を削除
     def clear_reference(self, pk, model_name="", batch=None):
+        """参照を削除"""
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.pk2rel_key(pk))
         if model_name:
             KeyConditionExpression &= Key(self.__primary_key__).begins_with(model_name)
-        items = self._query(
+        items = self.query(
             KeyConditionExpression=KeyConditionExpression,
             IndexName=self.__range_index_name__,
             ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
@@ -579,7 +581,7 @@ class Table:
                 raise e
 
     def create_table(self):
-        # キースキーマのプリセット
+        """キースキーマのプリセット"""
         throughput = {
             "ReadCapacityUnits": self.__read_capacity_units__,
             "WriteCapacityUnits": self.__read_capacity_units__,
@@ -648,7 +650,7 @@ class Table:
 
     def all_items(self, pk_only=False) -> list[dict]:
         """dump all items in the table"""
-        res = self._scan(
+        res = self.scan(
             IndexName=self.__range_index_name__,
             ProjectionExpression=self.__primary_key__,
             # 検索データがないものだけを取得

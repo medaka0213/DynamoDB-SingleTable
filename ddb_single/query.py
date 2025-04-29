@@ -62,24 +62,26 @@ class Query:
             self.__model__.__model_name__, *queries, pk_only=pk_only, limit=limit
         )
 
-    # アイテムを取得
     def get(self, pk: str):
         """
-        Get single item.
+        アイテムを取得
         Args:
             pk: Primary key
         """
         res = self.__table__.get_item(pk)
         return res
 
-    # ユニークキーで検索
-    def get_by_unique(self, value, pk_only=False, keys: List[str | DBField] = []):
+    def get_by_unique(
+        self, value, pk_only=False, keys: List[str | DBField] = None
+    ) -> dict:
         """
-        Get single item by unique key.
+        ユニークキーで取得
         Args:
             value: Unique key value
             keys: Unique key. If not specified, search by all unique keys.
         """
+        if keys is None:
+            keys = []
         specified_keys: List[str] = []
         for key in keys:
             # key が文字列ならそのまま、DBField なら name を取得
@@ -92,31 +94,67 @@ class Query:
         for key in self.__model__.__unique_keys__:
             if specified_keys and key not in specified_keys:
                 # 指定されたキー以外はスキップ
+                logger.warning(f"get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
-
-            _res = self.search(getattr(self.__model__.__class__, key).eq(value))
+            _res = self.search(
+                getattr(self.__model__.__class__, key).eq(value), pk_only=pk_only
+            )
             logger.debug(f"get_by_unique: {key}={value} result={_res}")
             res.extend(_res)
         if res:
-            pk = res[0][self.__model__.__primary_key__]
-            if pk_only:
-                return pk
+            return res[0]
+        return None
+
+    def batch_get(self, pks: List[str]):
+        """
+        プライマリキーのリストから一括取得
+        Args:
+            pks: Primary keys
+        """
+        res = self.__table__.batch_get_from_pks(pks)
+        return res
+
+    def batch_get_by_unique(
+        self, uniques: List[str], pk_only=False, keys: List[str | DBField] = None
+    ):
+        """
+        ユニークキーのリストから一括取得
+        Args:
+            pks: Primary keys
+        """
+        if keys is None:
+            keys = []
+        specified_keys: List[str] = []
+        for key in keys:
+            # key が文字列ならそのまま、DBField なら name を取得
+            if isinstance(key, str):
+                specified_keys.append(key)
             else:
-                return self.get(pk)
+                specified_keys.append(key.name)
+        res = []
+        for key in self.__model__.__unique_keys__:
+            if specified_keys and key not in specified_keys:
+                # 指定されたキー以外はスキップ
+                logger.warning(
+                    f"batch_get_by_unique: {key} not in {specified_keys} ... skip"
+                )
+                continue
+            _res = self.search(
+                getattr(self.__model__.__class__, key).in_(uniques), pk_only=pk_only
+            )
+            logger.debug(f"batch_get_by_unique: {key} in {uniques} result={_res}")
+            res.extend(_res)
+        return res
 
-    # Create/Update関連
-
-    # ヴァリデーション
     def validate(self):
         for k, v in self.__model__.data.items():
             if k in self.__model__.__search_keys__:
                 field: DBField = self.__model__.__class__.__dict__[k]
                 field.validate(v)
 
-    # 新規作成
     def create(self, batch=None, raise_if_exists=False):
         """
-        Create a new item.
+        アイテムを新規作成
         Args:
             batch: BatchWriteItem
             raise_if_exists (bool): Throw ValidationError if item already exists
@@ -132,10 +170,9 @@ class Query:
         else:
             self._create(batch)
 
-    # 更新
     def update(self, target: dict = None, batch=None):
         """
-        Update an item.
+        アイテムを更新
         Args:
             target: Target item
             batch: BatchWriteItem
@@ -174,10 +211,9 @@ class Query:
         if not util_b.is_same_json(old_item, self.__model__.data):
             self._create(batch=batch, remove_ex_search_items=True)
 
-    # 削除
     def delete_by_pk(self, pk, batch=None):
         """
-        Delete an item by primary key.
+        プライマリキーからアイテムを削除
         Args:
             pk: Primary key
             batch: BatchWriteItem
@@ -186,7 +222,7 @@ class Query:
 
     def delete(self, target: dict = None, batch=None):
         """
-        Delete an item.
+        辞書型からアイテムを削除
         Args:
             batch: BatchWriteItem
         """
@@ -205,7 +241,7 @@ class Query:
 
     def delete_by_unique(self, value, batch=None):
         """
-        Delete an item by unique key.
+        ユニークキーからアイテムを削除
         Args:
             batch: BatchWriteItem
         """
@@ -213,8 +249,8 @@ class Query:
         pk = target.get(self.__model__.__primary_key__)
         self.delete_by_pk(pk, batch=batch)
 
-    # 関連付け
     def _relation_item(self, pk, field: DBField):
+        """関連付け"""
         return {
             self.__model__.__primary_key__: self.__model__.data[
                 self.__model__.__primary_key__
@@ -294,7 +330,6 @@ class Query:
         ]
         return items_add, items_remove
 
-    # Read
     def get_relation(self, model: BaseModel = "", field: DBField = "", pk_only=False):
         # 関連を検索
         if not isinstance(model or "", str):
