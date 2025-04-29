@@ -63,12 +63,14 @@ class TestUniqueDoubled(unittest.TestCase):
         """キーのリストから一括取得"""
         # ユニークキーから取得
         res = query.model(User).batch_get_by_unique(["test1", "test2@example.com"])
+        res.sort(key=lambda x: x["name"])
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0]["name"], "test1")
         self.assertEqual(res[1]["name"], "test2")
         # プライマリキーから取得
         res = query.model(User).batch_get([x["pk"] for x in res])
         self.assertEqual(len(res), 2)
+        res.sort(key=lambda x: x["name"])
         self.assertEqual(res[0]["name"], "test1")
         self.assertEqual(res[1]["name"], "test2")
 
