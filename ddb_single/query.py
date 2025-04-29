@@ -115,13 +115,15 @@ class Query:
         return res
 
     def batch_get_by_unique(
-        self, uniques: List[str], pk_only=False, keys: List[str | DBField] = []
+        self, uniques: List[str], pk_only=False, keys: List[str | DBField] = None
     ):
         """
         ユニークキーのリストから一括取得
         Args:
             pks: Primary keys
         """
+        if keys is None:
+            keys = []
         specified_keys: List[str] = []
         for key in keys:
             # key が文字列ならそのまま、DBField なら name を取得
