@@ -72,7 +72,12 @@ class Query:
         return res
 
     def get_by_unique(
-        self, value, pk_only=False, keys: List[str | DBField] = []
+def get_by_unique(
+    self, value, pk_only=False, keys: List[str | DBField] = None
+):
+    if keys is None:
+        keys = []
+    # …rest of implementation…
     ) -> dict:
         """
         ユニークキーで取得
