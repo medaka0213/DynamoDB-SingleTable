@@ -59,6 +59,19 @@ class TestUniqueDoubled(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(res["name"], "test1")
 
+    def test_02_get_batch(self):
+        """キーのリストから一括取得"""
+        # ユニークキーから取得
+        res = query.model(User).batch_get_by_unique(["test1", "test2@example.com"])
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0]["name"], "test1")
+        self.assertEqual(res[1]["name"], "test2")
+        # プライマリキーから取得
+        res = query.model(User).batch_get([x["pk"] for x in res])
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0]["name"], "test1")
+        self.assertEqual(res[1]["name"], "test2")
+
     def test_02_get_by_unique_keys_specified(self):
         res = query.model(User).get_by_unique("test1@example.com", keys=[User.name])
         self.assertIsNone(res)
