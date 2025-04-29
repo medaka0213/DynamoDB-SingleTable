@@ -71,7 +71,9 @@ class Query:
         res = self.__table__.get_item(pk)
         return res
 
-    def get_by_unique(self, value, pk_only=False, keys: List[str | DBField] = []):
+    def get_by_unique(
+        self, value, pk_only=False, keys: List[str | DBField] = []
+    ) -> dict:
         """
         ユニークキーで取得
         Args:
@@ -90,13 +92,16 @@ class Query:
         for key in self.__model__.__unique_keys__:
             if specified_keys and key not in specified_keys:
                 # 指定されたキー以外はスキップ
+                logger.warning(f"get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
             _res = self.search(
                 getattr(self.__model__.__class__, key).eq(value), pk_only=pk_only
             )
             logger.debug(f"get_by_unique: {key}={value} result={_res}")
             res.extend(_res)
-        return res
+        if res:
+            return res[0]
+        return None
 
     def batch_get(self, pks: List[str]):
         """
@@ -126,6 +131,9 @@ class Query:
         for key in self.__model__.__unique_keys__:
             if specified_keys and key not in specified_keys:
                 # 指定されたキー以外はスキップ
+                logger.warning(
+                    f"batch_get_by_unique: {key} not in {specified_keys} ... skip"
+                )
                 continue
             _res = self.search(
                 getattr(self.__model__.__class__, key).in_(uniques), pk_only=pk_only

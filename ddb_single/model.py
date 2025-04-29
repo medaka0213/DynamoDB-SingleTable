@@ -239,7 +239,7 @@ class DBField:
         Returns:
             dict: The key expression.
         """
-        if mode == util_b.QueryType.BETWEEN:
+        if mode in {util_b.QueryType.BETWEEN, util_b.QueryType.IN}:
             value = list(map(self.validate, value))
         else:
             value = self.validate(value)
