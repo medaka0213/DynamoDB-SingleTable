@@ -219,5 +219,28 @@ class TestCRUD(unittest.TestCase):
         mock_delete_by_unique.assert_called_once_with("test3", batch=None)
 
 
+class SimpleModel(BaseModel):
+    __table__ = table
+    __model_name__ = "simple"
+    # nullable=True, default=None, default_factory=None の場合に
+    # 前回の値が残っていないことを確認
+    name = DBField(unique_key=True, nullable=False)
+    optional_field = DBField(nullable=True)
+
+
+class TestValueReuse(unittest.TestCase):
+    def test_optional_field_not_reused_across_instances(self):
+        # 1回目は値を渡す
+        first = SimpleModel(name="test-1", optional_field="first_value")
+        self.assertEqual(first.data["optional_field"], "first_value")
+
+        # 2回目は値を渡さない → None を期待
+        second = SimpleModel(name="test-1")
+        self.assertIsNone(
+            second.data["optional_field"],
+            "optional_field が前回の 'first_value' を使い回しています",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

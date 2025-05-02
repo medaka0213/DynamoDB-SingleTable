@@ -103,18 +103,26 @@ class DBField:
 
     def validate(self, value=None, skip=False):
         """
+        値をバリデーションして、フィールドの値を設定
         Args:
             value: The value to be validated. If not provided, the value of the field will be used.
         Returns:
             The validated value.
         """
+        # 先に必ずクリア
+        self.value = None
         self.__setup__ = True
+
         if value is not None:
             self.value = value
-        elif self.default:
+        elif self.default is not None:
             self.value = self.default
         elif self.default_factory:
             self.value = self.default_factory(self.__model_cls__)
+        else:
+            # どれもなければ None を明示
+            self.value = None
+
         if not skip:
             if value is None:
                 if not self.nullable:
