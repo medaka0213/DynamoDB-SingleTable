@@ -521,6 +521,13 @@ class Table:
     def batch_delete_items(self, items, batch=None):
         """バッチ処理"""
         logger.debug(f"batch_delete_items: {items}")
+        # pk と pk が被っていたら除外 (set で重複を除外して辞書に変換)
+        items = set(
+            [(i[self.__primary_key__], i[self.__secondary_key__]) for i in items]
+        )
+        items = [
+            dict(zip([self.__primary_key__, self.__secondary_key__], i)) for i in items
+        ]
         if batch:
             for item in items:
                 self.detele_item(item, batch)
