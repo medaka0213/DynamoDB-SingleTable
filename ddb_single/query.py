@@ -246,9 +246,10 @@ class Query:
             batch: BatchWriteItem
         """
         target = self.get_by_unique(value)
-        if target is None:
+        if not target:
             # 存在しない場合はスキップ
             logger.info(f"Item not found: {value} ... skip")
+            return
         pk = target.get(self.__model__.__primary_key__)
         self.delete_by_pk(pk, batch=batch)
 
