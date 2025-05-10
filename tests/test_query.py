@@ -186,6 +186,9 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 0)
 
+        # 存在しないデータを削除しようとした場合 (エラーにならない)
+        query.model(User).delete_by_unique("test")
+
     def test_04_02_delete_by_pk(self):
         # 対象データが存在することを確認
         res = query.model(User).search(User.name.eq("test2"))
@@ -195,6 +198,9 @@ class TestCRUD(unittest.TestCase):
         # 効果確認
         res = query.model(User).search(User.name.eq("test2"))
         self.assertEqual(len(res), 0)
+
+        # 存在しないデータを削除しようとした場合 (エラーにならない)
+        query.model(User).delete_by_pk("user_test2")
 
     @patch("ddb_single.query.Query.delete_by_pk")
     def test_04_03_delete_by_pk_2(self, mock_delete_by_pk: MagicMock):
