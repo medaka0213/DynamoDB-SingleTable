@@ -372,7 +372,7 @@ class Table:
             list[dict]: items
         """
         simple_ex = [
-            s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEATCH
+            s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEARCH
         ]
         staged_ex = [
             s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.STAGED

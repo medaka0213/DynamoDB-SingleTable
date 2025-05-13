@@ -28,7 +28,7 @@ class QueryType(Enum):
 
 
 class FilterStatus(Enum):
-    SEATCH = "search"
+    SEARCH = "search"
     STAGED = "staged"
     FILTER = "filter"
 

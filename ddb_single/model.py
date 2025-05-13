@@ -265,7 +265,7 @@ class DBField:
                 return {
                     **res,
                     "KeyConditionExpression": util_b.range_ex(self.name, value, mode),
-                    "FilterStatus": util_b.FilterStatus.SEATCH,
+                    "FilterStatus": util_b.FilterStatus.SEARCH,
                 }
             elif self.search_key and value:
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
