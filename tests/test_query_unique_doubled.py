@@ -6,7 +6,7 @@ from ddb_single.query import Query
 import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 table = Table(
     table_name="query_unique_doubled_test_"
@@ -79,6 +79,16 @@ class TestUniqueDoubled(unittest.TestCase):
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0]["name"], "Test1")
         self.assertEqual(res[1]["name"], "test2")
+
+        # ユニークキーから取得 (ignore_case=True)
+        res = query.model(User).batch_get_by_unique(
+            ["test1", "test2@example.com"]  # Lowercase
+        )
+        res.sort(key=lambda x: x["name"])
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0]["name"], "Test1")
+        self.assertEqual(res[1]["name"], "test2")
+
         # プライマリキーから取得
         res = query.model(User).batch_get([x["pk"] for x in res])
         self.assertEqual(len(res), 2)

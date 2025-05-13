@@ -3,7 +3,7 @@ import operator
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
-
+from dataclasses import dataclass
 import time
 import uuid
 from enum import Enum
@@ -13,6 +13,23 @@ import ddb_single.utils_botos as util_b
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SearchExpression:
+    """
+    SearchExpression is a class that represents a search expression.
+    It is used to create a search expression for a query.
+    """
+
+    name: str = None
+    value: any = None
+    mode: util_b.QueryType = None
+    FilterStatus: util_b.FilterStatus = None
+    IndexName: str = None
+    KeyConditionExpression: any = None
+    FilterExpression: any = None
+    FilterMethod: callable = None
 
 
 def default_pk_factory(model_name):
@@ -159,7 +176,7 @@ class Table:
         else:
             raise Exception(f"Invalid type: {type}")
 
-    def serch_index(self, type: FieldType):
+    def search_index(self, type: FieldType):
         if type == FieldType.STRING:
             return self.__search_index__
         elif type == FieldType.NUMBER:
@@ -349,53 +366,83 @@ class Table:
         else:
             return self.batch_get_from_pks(pks)
 
-    def filter(self, items, searchExs):
+    def filter(self, items, searchExs: list[SearchExpression]):
         """フィルター"""
         if not searchExs:
             return items
         res = []
         for item in items:
             for searchEx in searchExs:
-                if searchEx["FilterMethod"](item):
+                if searchEx.FilterMethod(item):
                     res.append(item)
                     break
         return res
 
-    def search(self, model_name, *searchEx, pk_only=False, limit=None):
+    def search(
+        self, model_name, *searchEx: SearchExpression, pk_only=False, limit=None
+    ):
         """Search items
         Args:
             model_name (str): model name
-            searchEx (list[dict]): search expression
+            searchEx (list[SearchExpression]): search expression
             pk_only (bool, optional): return only primary key. Defaults to False.
             limit (int, optional): limit. Defaults to None.
         Returns:
             list[dict]: items
         """
-        simple_ex = [
-            s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.SEARCH
+        searchEx = [
+            # 辞書型の場合はSearchExpression に変換
+            SearchExpression(**ex) if isinstance(ex, dict) else ex
+            for ex in searchEx
         ]
-        staged_ex = [
-            s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.STAGED
+        simple_ex: list[SearchExpression] = [
+            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.SEARCH
         ]
-        filter_ex = [
-            s for s in searchEx if s["FilterStatus"] == util_b.FilterStatus.FILTER
+        staged_ex: list[SearchExpression] = [
+            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.STAGED
         ]
-        if staged_ex:
-            logger.debug(f"staged_ex: {staged_ex}")
+        filter_ex: list[SearchExpression] = [
+            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.FILTER
+        ]
+        filter_ex_staged: list[SearchExpression] = [
+            ex
+            for ex in searchEx
+            if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
+        ]
+        logger.debug(
+            f"Expressions ... simple: {simple_ex}, staged: {staged_ex}, filter: {filter_ex}, filter_staged: {filter_ex_staged}"  # noqa
+        )
+        if staged_ex + filter_ex_staged:
             res = set()
-            all_items = []
-            for i, searchEx in enumerate(staged_ex):
+            for i, ex in enumerate(staged_ex):
+                # staged_ex があればフィルタ
                 _res = (
                     self.query(
-                        KeyConditionExpression=searchEx["KeyConditionExpression"],
-                        IndexName=searchEx["IndexName"],
+                        KeyConditionExpression=ex.KeyConditionExpression,
+                        IndexName=ex.IndexName,
                         ProjectionExpression=self.__primary_key__,
                     )
                     or []
                 )
-                all_items += _res
                 _res = [r[self.__primary_key__] for r in _res]
                 if i:
+                    res &= set(_res)
+                else:
+                    res = set(_res)
+
+            for i, ex in enumerate(filter_ex_staged):
+                # filter_ex_staged があればフィルタ
+                _res = (
+                    self.query(
+                        KeyConditionExpression=ex.KeyConditionExpression,
+                        IndexName=ex.IndexName,
+                        ProjectionExpression=self.__primary_key__,
+                        FilterExpression=ex.FilterExpression,
+                    )
+                    or []
+                )
+                _res = [r[self.__primary_key__] for r in _res]
+                if i and len(res) > 0:
                     res &= set(_res)
                 else:
                     res = set(_res)
@@ -412,18 +459,16 @@ class Table:
             return res
 
         # シンプルにクエリ検索
-        logger.debug(f"simple_ex: {simple_ex}")
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
         for ex in simple_ex:
-            KeyConditionExpression &= ex["KeyConditionExpression"]
+            KeyConditionExpression &= ex.KeyConditionExpression
         if filter_ex:
-            FilterExpression = reduce(
-                operator.and_, (ex["FilterExpression"] for ex in filter_ex)
-            )
             _res = (
                 self.query(
                     KeyConditionExpression=KeyConditionExpression,
-                    FilterExpression=FilterExpression,
+                    FilterExpression=reduce(
+                        operator.and_, (ex.FilterExpression for ex in filter_ex)
+                    ),
                     IndexName=self.__range_index_name__,
                     ProjectionExpression=self.__primary_key__,
                 )

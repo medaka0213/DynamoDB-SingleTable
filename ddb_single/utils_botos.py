@@ -31,6 +31,7 @@ class FilterStatus(Enum):
     SEARCH = "search"
     STAGED = "staged"
     FILTER = "filter"
+    FILTER_STAGED = "filter_staged"
 
 
 # -------
@@ -64,7 +65,6 @@ def range_ex(name, value, mode):
         result = func_mapping[mode](name, value)
     except KeyError as err:
         raise InvalidParameterError(f"mode={mode} is not defined.") from err
-        raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
 
@@ -88,7 +88,6 @@ def attr_ex(name, value, mode):
         result = func_mapping[mode](name, value)
     except KeyError as err:
         raise InvalidParameterError(f"mode={mode} is not defined.") from err
-        raise InvalidParameterError(f"mode={mode} is not defined.")
     return result
 
 

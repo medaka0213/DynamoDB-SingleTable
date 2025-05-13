@@ -24,7 +24,7 @@ class User(BaseModel):
     __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True, nullable=False)
-    name_ignore_nase = DBField(search_key=True, ignore_case=True)
+    name_ignore_case = DBField(search_key=True, ignore_case=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
     description = DBField()
@@ -38,10 +38,10 @@ print("table_name:", table.__table_name__)
 
 
 class TestCRUD(unittest.TestCase):
-    def test_01_create(self):
+    def setUp(self):
         test1 = User(
             name="test",
-            name_ignore_nase="Test",
+            name_ignore_case="Test",
             email="",
             age=20,
             config={"a": 1, "b": 2},
@@ -51,13 +51,13 @@ class TestCRUD(unittest.TestCase):
             pk="user_test2",
             name="test2",
             email=None,
-            name_ignore_nase="Test2",
+            name_ignore_case="Test2",
             tag_list=[],
         )
         test3 = User(
             pk="user_test3",
             name="test3",
-            name_ignore_nase="Test3",
+            name_ignore_case="Test3",
         )
         query.model(test1).create()
         query.model(test2).create()
@@ -73,18 +73,20 @@ class TestCRUD(unittest.TestCase):
         self.assertEqual(res["config"]["b"], test1.data["config"]["b"])
         self.assertEqual(res["tag_list"], test1.data["tag_list"])
 
+        super().setUp()
+
     def test_01_create_validation_error(self):
         with self.assertRaises(ValidationError):
             test1 = User(
                 name=None,
-                name_ignore_nase="Test Valudation Error",
+                name_ignore_case="Test Validation Error",
                 email="",
                 age=20,
                 config={"a": 1, "b": 2},
             )
             query.model(test1).create()
         res = query.model(User).search(
-            User.name_ignore_nase.eq("Test Valudation Error")
+            User.name_ignore_case.eq("Test Validation Error")
         )
         self.assertEqual(len(res), 0)
 
@@ -115,19 +117,23 @@ class TestCRUD(unittest.TestCase):
 
     def test_02_3_0_search_ignore_case(self):
         """Search ignoring case"""
-        res = query.model(User).search(User.name_ignore_nase.eq("test"))
+        res = query.model(User).search(User.name_ignore_case.eq("test"))
         self.assertEqual(len(res), 1)
-        self.assertEqual(res[0]["name_ignore_nase"], "Test")
+        self.assertEqual(res[0]["name_ignore_case"], "Test")
+
+        res = query.model(User).search(User.name_ignore_case.in_(["test"]))
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name_ignore_case"], "Test")
 
     def test_02_3_1_search_ignore_case_found_if_uppercase(self):
         """Search ignoring case: found if uppercase"""
-        res = query.model(User).search(User.name_ignore_nase.eq("TEST"))
+        res = query.model(User).search(User.name_ignore_case.eq("TEST"))
         self.assertEqual(len(res), 1)
-        self.assertEqual(res[0]["name_ignore_nase"], "Test")
+        self.assertEqual(res[0]["name_ignore_case"], "Test")
 
     def test_02_3_2_search_ignore_case_not_found(self):
         """Search ignoring case: not found"""
-        res = query.model(User).search(User.name_ignore_nase.eq("NOTFOUND"))
+        res = query.model(User).search(User.name_ignore_case.eq("NOTFOUND"))
         self.assertEqual(len(res), 0)
 
     def test_03_01_update(self):
