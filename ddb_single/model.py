@@ -1,7 +1,7 @@
 from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 
-from ddb_single.table import FieldType, Table
+from ddb_single.table import FieldType, Table, SearchExpression
 import ddb_single.utils_botos as util_b
 from ddb_single.error import ValidationError
 
@@ -215,12 +215,12 @@ class DBField:
         """
         return self.__table__.search_data_key(self.type)
 
-    def serch_index(self):
+    def search_index(self):
         """
         Returns:
             str: The search index of the field.
         """
-        return self.__table__.serch_index(self.type)
+        return self.__table__.search_index(self.type)
 
     def search_item(self, pk):
         """
@@ -248,40 +248,70 @@ class DBField:
             dict: The key expression.
         """
         if mode in {util_b.QueryType.BETWEEN, util_b.QueryType.IN}:
-            value = list(map(self.validate, value))
+            value = [
+                (
+                    v.lower()  # 大文字小文字を無視する場合
+                    if self.ignore_case and isinstance(v, str)
+                    else v
+                )
+                for v in [self._validate_value(v) for v in value]
+            ]
         else:
-            value = self.validate(value)
-        if self.ignore_case and isinstance(value, str):
-            value = value.lower()
+            value = self._validate_value(value)
+            if self.ignore_case and isinstance(value, str):
+                # 大文字小文字を無視する場合
+                value = value.lower()
         if self.secondary_key:
             raise ValidationError(
-                f"Secondary key can not be used as a key: {self.name}"
+                f"Secondary key should not be used as a key: {self.name}"
             )
-        res = {
-            "FilterMethod": util_b.attr_method(self.name, value, mode),
-        }
+
         if util_b.is_key(mode):
             if self.primary_key:
-                return {
-                    **res,
-                    "KeyConditionExpression": util_b.range_ex(self.name, value, mode),
-                    "FilterStatus": util_b.FilterStatus.SEATCH,
-                }
+                # PKを使う場合
+                logger.debug(
+                    f"KeyConditionExpression [primary key]: {self.name} = {value}, {mode}"
+                )
+                return SearchExpression(
+                    FilterMethod=util_b.attr_method(self.name, value, mode),
+                    KeyConditionExpression=util_b.range_ex(self.name, value, mode),
+                    FilterStatus=util_b.FilterStatus.SEARCH,
+                )
             elif self.search_key and value:
+                # SearchKeyを使う場合
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
                     self.search_key_factory()
                 ) & util_b.range_ex(self.search_data_key(), value, mode)
-                return {
-                    **res,
-                    "KeyConditionExpression": KeyConditionExpression,
-                    "IndexName": self.serch_index(),
-                    "FilterStatus": util_b.FilterStatus.STAGED,
-                }
-        return {
-            **res,
-            "FilterExpression": util_b.attr_ex(self.name, value, mode),
-            "FilterStatus": util_b.FilterStatus.FILTER,
-        }
+                logger.debug(
+                    f"KeyConditionExpression [search key]: {self.search_data_key()} = {value}, {mode}"
+                )
+                return SearchExpression(
+                    FilterMethod=util_b.attr_method(self.name, value, mode),
+                    KeyConditionExpression=KeyConditionExpression,
+                    IndexName=self.search_index(),
+                    FilterStatus=util_b.FilterStatus.STAGED,
+                )
+        elif self.search_key:
+            # SearchKeyを使うが、Queryで使えない方法で検索する場合
+            logger.debug(
+                f"FilterExpression [search key]: {self.search_data_key()} = {value}, {mode}"
+            )
+            return SearchExpression(
+                FilterMethod=util_b.attr_method(self.name, value, mode),
+                KeyConditionExpression=Key(self.__table__.__secondary_key__).eq(
+                    self.search_key_factory()
+                ),
+                IndexName=self.__table__.__range_index_name__,
+                FilterExpression=util_b.attr_ex(self.search_data_key(), value, mode),
+                FilterStatus=util_b.FilterStatus.FILTER_STAGED,
+            )
+        # SearchKeyを使わない場合
+        logger.debug(f"FilterExpression: {self.name} = {value}, {mode}")
+        return SearchExpression(
+            FilterMethod=util_b.attr_method(self.name, value, mode),
+            FilterExpression=util_b.attr_ex(self.name, value, mode),
+            FilterStatus=util_b.FilterStatus.FILTER,
+        )
 
     def eq(self, value):
         """

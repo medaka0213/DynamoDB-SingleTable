@@ -1,6 +1,6 @@
 import unittest
 
-from ddb_single.table import FieldType, Table, Key, Attr
+from ddb_single.table import FieldType, Table, Key, Attr, SearchExpression
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 import ddb_single.utils_botos as util_b
@@ -46,18 +46,22 @@ class TestSearchTable(unittest.TestCase):
             test = User(
                 name=f"test{str(i).zfill(3)}",
                 age=i,
-                description=f"test description {'odd' if i % 2 == 0 else 'even'}_{i}",)
+                description=f"test description {'odd' if i % 2 == 0 else 'even'}_{i}",
+            )
             query.model(test).create()
         test = UserNotFound(name="testNotFound")
         query.model(test).create()
 
     def test_search_staged_single(self):
         """STAGED"""
-        searchEx = [{
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").eq("test001"),
-        }]
+        searchEx = [
+            {
+                "FilterStatus": util_b.FilterStatus.STAGED,
+                "IndexName": table.__search_index__,
+                "KeyConditionExpression": Key("sk").eq("search_user_name")
+                & Key("data").eq("test001"),
+            }
+        ]
         res = table.search("user", *searchEx)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test001")
@@ -69,15 +73,20 @@ class TestSearchTable(unittest.TestCase):
 
     def test_search_staged_double(self):
         """STAGED複数"""
-        searchEx = [{
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").begins_with("test01"),
-        }, {
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_num_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_age") & Key("data-n").lte(15),
-        }]
+        searchEx = [
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.STAGED,
+                IndexName=table.__search_index__,
+                KeyConditionExpression=Key("sk").eq("search_user_name")
+                & Key("data").begins_with("test01"),
+            ),
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.STAGED,
+                IndexName=table.__search_num_index__,
+                KeyConditionExpression=Key("sk").eq("search_user_age")
+                & Key("data-n").lte(15),
+            ),
+        ]
         res = table.search("user", *searchEx)
         self.assertEqual(len(res), 6)
         for r in res:
@@ -92,15 +101,20 @@ class TestSearchTable(unittest.TestCase):
 
     def test_search_staged_double_limit(self):
         """STAGED複数 + limit"""
-        searchEx = [{
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").begins_with("test01"),
-        }, {
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_num_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_age") & Key("data-n").lte(15),
-        }]
+        searchEx = [
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.STAGED,
+                IndexName=table.__search_index__,
+                KeyConditionExpression=Key("sk").eq("search_user_name")
+                & Key("data").begins_with("test01"),
+            ),
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.STAGED,
+                IndexName=table.__search_num_index__,
+                KeyConditionExpression=Key("sk").eq("search_user_age")
+                & Key("data-n").lte(15),
+            ),
+        ]
         res = table.search("user", *searchEx, limit=3)
         self.assertEqual(len(res), 3)
         for r in res:
@@ -115,15 +129,21 @@ class TestSearchTable(unittest.TestCase):
 
     def test_search_staged_filter(self):
         """STAGED + フィルタ"""
-        searchEx = [{
-            "FilterStatus": util_b.FilterStatus.STAGED,
-            "IndexName": table.__search_index__,
-            "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").begins_with("test1"),
-        }, {
-            "FilterStatus": util_b.FilterStatus.FILTER,
-            "FilterMethod": util_b.attr_method("description", "odd", util_b.QueryType.CONTAINS),
-            "FilterExpression": Attr("description").contains("odd"),
-        }]
+        searchEx = [
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.STAGED,
+                IndexName=table.__search_index__,
+                KeyConditionExpression=Key("sk").eq("search_user_name")
+                & Key("data").begins_with("test1"),
+            ),
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.FILTER,
+                FilterMethod=util_b.attr_method(
+                    "description", "odd", util_b.QueryType.CONTAINS
+                ),
+                FilterExpression=Attr("description").contains("odd"),
+            ),
+        ]
         res = table.search("user", *searchEx)
         self.assertEqual(len(res), 50)
         for r in res:
@@ -138,11 +158,15 @@ class TestSearchTable(unittest.TestCase):
 
     def test_search_filter(self):
         """フィルタ"""
-        searchEx = [{
-            "FilterStatus": util_b.FilterStatus.FILTER,
-            "FilterMethod": util_b.attr_method("description", "odd", util_b.QueryType.CONTAINS),
-            "FilterExpression": Attr("description").contains("odd"),
-        }]
+        searchEx = [
+            SearchExpression(
+                FilterStatus=util_b.FilterStatus.FILTER,
+                FilterMethod=util_b.attr_method(
+                    "description", "odd", util_b.QueryType.CONTAINS
+                ),
+                FilterExpression=Attr("description").contains("odd"),
+            ),
+        ]
         res = table.search("user", *searchEx)
         self.assertEqual(len(res), 100)
         for r in res:
@@ -172,14 +196,20 @@ class TestSearchTable(unittest.TestCase):
     def test_list_models(self):
         res = table.list_models()
         self.assertEqual(len(res), 2)
-        self.assertEqual(res[0], {
-            "table_name": "user",
-            "count": 200,
-        })
-        self.assertEqual(res[1], {
-            "table_name": "userNotFound",
-            "count": 1,
-        })
+        self.assertEqual(
+            res[0],
+            {
+                "table_name": "user",
+                "count": 200,
+            },
+        )
+        self.assertEqual(
+            res[1],
+            {
+                "table_name": "userNotFound",
+                "count": 1,
+            },
+        )
 
 
 if __name__ == "__main__":

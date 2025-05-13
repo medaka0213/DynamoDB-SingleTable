@@ -6,7 +6,7 @@ from ddb_single.query import Query
 import datetime
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 table = Table(
     table_name="query_unique_doubled_test_"
@@ -22,7 +22,7 @@ table.init()
 class User(BaseModel):
     __table__ = table
     __model_name__ = "user"
-    name = DBField(unique_key=True)
+    name = DBField(unique_key=True, ignore_case=True)
     email = DBField(unique_key=True)
     description = DBField()
 
@@ -33,9 +33,9 @@ print("table_name:", table.__table_name__)
 
 
 class TestUniqueDoubled(unittest.TestCase):
-    def test_01_create(self):
+    def setUp(self, *args, **kwargs):
         test1 = User(
-            name="test1",
+            name="Test1",
             email="test1@example.com",
         )
         test2 = User(
@@ -49,29 +49,51 @@ class TestUniqueDoubled(unittest.TestCase):
         query.model(test1).create()
         query.model(test2).create()
         query.model(test3).create()
+        super().setUp(*args, **kwargs)
 
     def test_02_get_by_unique(self):
-        res = query.model(User).get_by_unique("test1")
+        res = query.model(User).get_by_unique("Test1")
         self.assertIsNotNone(res)
-        self.assertEqual(res["name"], "test1")
+        self.assertEqual(res["name"], "Test1")
+
+        res = query.model(User).get_by_unique("test1")  # Lowercase
+        self.assertIsNotNone(res)
+        self.assertEqual(res["name"], "Test1")
+
+        res = query.model(User).get_by_unique("TEST1")  # Uppercase
+        self.assertIsNotNone(res)
+        self.assertEqual(res["name"], "Test1")
 
         res = query.model(User).get_by_unique("test1@example.com")
         self.assertIsNotNone(res)
-        self.assertEqual(res["name"], "test1")
+        self.assertEqual(res["name"], "Test1")
+
+        res = query.model(User).get_by_unique("Test1@example.com")  # Mixed case
+        self.assertIsNone(res)
 
     def test_02_get_batch(self):
         """キーのリストから一括取得"""
         # ユニークキーから取得
-        res = query.model(User).batch_get_by_unique(["test1", "test2@example.com"])
+        res = query.model(User).batch_get_by_unique(["Test1", "test2@example.com"])
         res.sort(key=lambda x: x["name"])
         self.assertEqual(len(res), 2)
-        self.assertEqual(res[0]["name"], "test1")
+        self.assertEqual(res[0]["name"], "Test1")
         self.assertEqual(res[1]["name"], "test2")
+
+        # ユニークキーから取得 (ignore_case=True)
+        res = query.model(User).batch_get_by_unique(
+            ["test1", "test2@example.com"]  # Lowercase
+        )
+        res.sort(key=lambda x: x["name"])
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0]["name"], "Test1")
+        self.assertEqual(res[1]["name"], "test2")
+
         # プライマリキーから取得
         res = query.model(User).batch_get([x["pk"] for x in res])
         self.assertEqual(len(res), 2)
         res.sort(key=lambda x: x["name"])
-        self.assertEqual(res[0]["name"], "test1")
+        self.assertEqual(res[0]["name"], "Test1")
         self.assertEqual(res[1]["name"], "test2")
 
     def test_02_get_by_unique_keys_specified(self):
@@ -80,7 +102,7 @@ class TestUniqueDoubled(unittest.TestCase):
 
         res = query.model(User).get_by_unique("test1@example.com", keys=[User.email])
         self.assertIsNotNone(res)
-        self.assertEqual(res["name"], "test1")
+        self.assertEqual(res["name"], "Test1")
 
     def test_02_get_by_unique_keys_specified_by_string(self):
         res = query.model(User).get_by_unique("test1@example.com", keys=["name"])
@@ -88,7 +110,7 @@ class TestUniqueDoubled(unittest.TestCase):
 
         res = query.model(User).get_by_unique("test1@example.com", keys=["email"])
         self.assertIsNotNone(res)
-        self.assertEqual(res["name"], "test1")
+        self.assertEqual(res["name"], "Test1")
 
 
 if __name__ == "__main__":
