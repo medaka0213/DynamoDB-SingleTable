@@ -254,10 +254,10 @@ class DBField:
                     if self.ignore_case and isinstance(v, str)
                     else v
                 )
-                for v in [self.validate(v) for v in value]
+                for v in [self._validate_value(v) for v in value]
             ]
         else:
-            value = self.validate(value)
+            value = self._validate_value(value)
             if self.ignore_case and isinstance(value, str):
                 # 大文字小文字を無視する場合
                 value = value.lower()
