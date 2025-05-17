@@ -30,6 +30,8 @@ class User(BaseModel):
     description = DBField()
     config = DBField(type=FieldType.MAP)
     tag_list = DBField(type=FieldType.LIST)
+    description = DBField(search_key=True)
+    created_at = DBField(search_key=True)
 
 
 query = Query(table)
@@ -46,6 +48,8 @@ class TestCRUD(unittest.TestCase):
             age=20,
             config={"a": 1, "b": 2},
             tag_list=["tag1", "tag2"],
+            description="test description",
+            created_at="2023-10-01T00:00:00Z",
         )
         test2 = User(
             pk="user_test2",
@@ -53,11 +57,15 @@ class TestCRUD(unittest.TestCase):
             email=None,
             name_ignore_case="Test2",
             tag_list=[],
+            description="test2 description",
+            created_at="2023-10-02T01:00:00Z",
         )
         test3 = User(
             pk="user_test3",
             name="test3",
             name_ignore_case="Test3",
+            description="description",
+            created_at="2023-10-03T01:00:00Z",
         )
         query.model(test1).create()
         query.model(test2).create()
@@ -94,6 +102,40 @@ class TestCRUD(unittest.TestCase):
         res = query.model(User).search(User.name.eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
+
+        # 存在しないデータを検索
+        res = query.model(User).search(
+            User.name.eq("test"), User.name_ignore_case.eq("Test3")
+        )
+        self.assertEqual(len(res), 0)
+
+    def test_02_0_search_mult(self):
+        """Search by multiple conditions [staged + filter]"""
+        res = query.model(User).search(
+            User.description.contains("test"), User.created_at.gte("2023-10-02")
+        )
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name"], "test2")
+
+        # 存在しないデータを検索
+        res = query.model(User).search(
+            User.description.contains("test"), User.created_at.gte("2023-10-03")
+        )
+        self.assertEqual(len(res), 0)
+
+    def test_02_0_search_mult_filter(self):
+        """Search by multiple conditions [filter * 2]"""
+        res = query.model(User).search(
+            User.description.contains("test"), User.created_at.contains("01:00:")
+        )
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name"], "test2")
+
+        # 存在しないデータを検索
+        res = query.model(User).search(
+            User.description.contains("test"), User.created_at.contains("02:00:")
+        )
+        self.assertEqual(len(res), 0)
 
     def test_02_1_0_search_by_get_field(self):
         """Search by get_field"""
