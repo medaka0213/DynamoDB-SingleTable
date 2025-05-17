@@ -409,7 +409,7 @@ class Table:
             for ex in searchEx
             if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
         ]
-        logger.info(
+        logger.debug(
             f"Expressions ... simple: {simple_ex}, staged: {staged_ex}, filter: {filter_ex}, filter_staged: {filter_ex_staged}"  # noqa
         )
         if staged_ex + filter_ex_staged:
