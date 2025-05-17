@@ -409,7 +409,7 @@ class Table:
             for ex in searchEx
             if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
         ]
-        logger.debug(
+        logger.info(
             f"Expressions ... simple: {simple_ex}, staged: {staged_ex}, filter: {filter_ex}, filter_staged: {filter_ex_staged}"  # noqa
         )
         if staged_ex + filter_ex_staged:
@@ -442,7 +442,7 @@ class Table:
                     or []
                 )
                 _res = [r[self.__primary_key__] for r in _res]
-                if i and len(res) > 0:
+                if i or staged_ex:
                     res &= set(_res)
                 else:
                     res = set(_res)
