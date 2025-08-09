@@ -134,23 +134,32 @@ def serialize(value):
     return {k: TypeSerializer().serialize(v) for k, v in value.items()}
 
 
-# 同じ値のJSONか調べる
+# 同じ値のJSONか調べる (どちらかがNoneの場合も安全に動作)
 def is_same_json(data_0, data_1):
-    if type(data_0) is dict or type(data_1) is dict:
+    """同じ値のJSONか調べる (どちらかがNoneの場合も安全に動作)"""
+    # 両方Noneなら同じ
+    if data_0 is None and data_1 is None:
+        return True
+    # 片方のみNoneなら違う
+    if data_0 is None or data_1 is None:
+        return False
+    if isinstance(data_0, dict) or isinstance(data_1, dict):
+        # 片方がdictでなければFalse
+        if not isinstance(data_0, dict) or not isinstance(data_1, dict):
+            return False
         keys = list(set(list(data_0.keys()) + list(data_1.keys())))
         for k in keys:
-            # 値がなければFalse
+            # キーが存在しない場合はFalse
             if (k not in data_1) or (k not in data_0):
                 return False
             if not is_same_json(data_0.get(k), data_1.get(k)):
                 return False
-    elif type(data_0) is list and type(data_1) is list:
+    elif isinstance(data_0, list) and isinstance(data_1, list):
         if len(data_0) != len(data_1):
             return False
-        else:
-            for v_0, v_1 in zip(data_0, data_1):
-                if not is_same_json(v_1, v_0):
-                    return False
+        for v_0, v_1 in zip(data_0, data_1):
+            if not is_same_json(v_1, v_0):
+                return False
     else:
         return data_0 == data_1
     return True

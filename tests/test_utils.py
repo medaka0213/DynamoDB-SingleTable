@@ -58,6 +58,14 @@ class TestUtilsBotos(unittest.TestCase):
         data_3 = {'key1': 'value1', 'key2': 'different_value'}
         self.assertFalse(is_same_json(data_1, data_3))
 
+        # None comparison
+        self.assertTrue(is_same_json(None, None))
+        self.assertFalse(is_same_json(data_1, None))
+        self.assertFalse(is_same_json(None, data_1))
+
+        # Different types
+        self.assertFalse(is_same_json({'key': 'value'}, ['key', 'value']))
+
     def test_json_import(self):
         data = {
             'key1': 1.23,
