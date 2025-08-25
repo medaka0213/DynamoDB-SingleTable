@@ -37,13 +37,18 @@ class Query:
         items_remove = []
         for k in self.__model__.__search_keys__:
             field: DBField = self.__model__.__class__.__dict__[k]
-            if k in self.__model__.data.keys() and field.value:
+            value = self.__model__.data.get(k)
+            if k in self.__model__.data.keys() and value:
+                # Set the field value before calling search_item
+                field.value = value
                 items_add.append(
                     field.search_item(
                         self.__model__.data[self.__model__.__primary_key__]
                     )
                 )
             else:
+                # Set None for removal
+                field.value = None
                 items_remove.append(
                     field.search_item(
                         self.__model__.data[self.__model__.__primary_key__]
