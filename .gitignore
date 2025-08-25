@@ -8,3 +8,5 @@ shared-local-instance.db
 .coverage
 docs
 poetry.lock
+.claude
+test_*.py
