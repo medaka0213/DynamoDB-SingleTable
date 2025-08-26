@@ -1,16 +1,18 @@
 import importlib
 import inspect
-from typing import Dict, Type
 
 import click
 
 from ddb_single.model import BaseModel
-from ddb_single.query import Query
+from ddb_single.query import apply_model_change_records
 from ddb_single.table import Table
 
 
-def apply_model_change_records(module_path: str) -> None:
+def apply_model_change_records_from_module(module_path: str) -> None:
     """Regenerate search records for all table items to reflect model changes.
+
+    This function loads models from a module path (legacy interface).
+    For direct use with model classes, use apply_model_change_records() instead.
 
     Args:
         module_path (str): Python module path that defines a :class:`Table` instance
@@ -27,28 +29,18 @@ def apply_model_change_records(module_path: str) -> None:
         # テーブルが見つからなかった場合はエラー
         raise ValueError("table instance not found in module")
 
-    models: Dict[str, Type[BaseModel]] = {}
+    models = []
     for obj in module.__dict__.values():
         if inspect.isclass(obj) and issubclass(obj, BaseModel):
             # 同じテーブルに属するモデルのみ収集
             if getattr(obj, "__table__", None) == table:
-                models[obj.__model_name__] = obj
+                models.append(obj)
 
-    for item in table.all_items():
-        model_name = table.pk2model(item[table.__primary_key__])
-        model_cls = models.get(model_name)
-        if model_cls is None:
-            # 対応するモデルが存在しない場合はスキップ
-            continue
-        model = model_cls(__skip_validation__=True, **item)
-        query = Query(table, model)
-        add_items, rm_items = query._search_items()
-        if add_items:
-            # 足りない検索レコードを追加
-            table.batch_create(add_items)
-        if rm_items:
-            # 不要な検索レコードを削除
-            table.batch_delete_items(rm_items)
+    if not models:
+        raise ValueError("no BaseModel classes found in module")
+
+    # Use the new function
+    apply_model_change_records(table, models)
 
 
 @click.group()
@@ -61,7 +53,7 @@ def cli() -> None:
 def apply_model_change(module: str) -> None:
     """Rebuild search records for all items after model changes."""
     try:
-        apply_model_change_records(module)
+        apply_model_change_records_from_module(module)
     except ValueError as exc:
         # エラーが発生した場合はCLIエラーとして出力
         raise click.ClickException(str(exc))

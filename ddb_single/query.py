@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Type
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
 import ddb_single.utils_botos as util_b
@@ -364,3 +364,52 @@ class Query:
             field_name=field,
             pk_only=pk_only,
         )
+
+
+def apply_model_change_records(table: Table, models: List[Type[BaseModel]]) -> None:
+    """Regenerate search records for all table items to reflect model changes.
+
+    Args:
+        table (Table): DynamoDB table instance
+        models (List[Type[BaseModel]]): List of BaseModel classes that belong to the table
+    """
+    if not isinstance(table, Table):
+        raise ValueError("table must be an instance of Table")
+
+    if not models:
+        raise ValueError("models list cannot be empty")
+
+    # Build a mapping from model names to model classes
+    model_map: Dict[str, Type[BaseModel]] = {}
+    for model_cls in models:
+        if not (isinstance(model_cls, type) and issubclass(model_cls, BaseModel)):
+            raise ValueError(f"All models must be BaseModel subclasses, got {model_cls}")
+
+        # Ensure the model belongs to the specified table
+        if getattr(model_cls, "__table__", None) != table:
+            raise ValueError(f"Model {model_cls.__name__} does not belong to the specified table")
+
+        if not hasattr(model_cls, "__model_name__"):
+            raise ValueError(f"Model {model_cls.__name__} must have __model_name__ attribute")
+
+        model_map[model_cls.__model_name__] = model_cls
+
+    # Process all items in the table
+    for item in table.all_items():
+        model_name = table.pk2model(item[table.__primary_key__])
+        model_cls = model_map.get(model_name)
+        if model_cls is None:
+            # Skip items for models not in the provided list
+            continue
+
+        # Create model instance and regenerate search items
+        model = model_cls(__skip_validation__=True, **item)
+        query = Query(table, model)
+        add_items, rm_items = query._search_items()
+
+        if add_items:
+            # Add missing search records
+            table.batch_create(add_items)
+        if rm_items:
+            # Remove unnecessary search records
+            table.batch_delete_items(rm_items)
