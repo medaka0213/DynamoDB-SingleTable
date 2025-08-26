@@ -48,7 +48,7 @@ jobs:
           poetry run sphinx-build ./docs_src ./docs
 
       - name: Upload static files as artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./docs
 
