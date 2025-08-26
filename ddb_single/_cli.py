@@ -66,5 +66,6 @@ def apply_model_change(module: str) -> None:
         # エラーが発生した場合はCLIエラーとして出力
         raise click.ClickException(str(exc))
 
+
 if __name__ == "__main__":
     cli()
