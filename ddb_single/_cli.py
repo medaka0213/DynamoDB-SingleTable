@@ -66,11 +66,5 @@ def apply_model_change(module: str) -> None:
         # エラーが発生した場合はCLIエラーとして出力
         raise click.ClickException(str(exc))
 
-
-def main() -> None:
-    """Entry point for console script."""
-    cli()
-
-
 if __name__ == "__main__":
-    main()
+    cli()
