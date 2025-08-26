@@ -8,7 +8,7 @@ from ddb_single.query import apply_model_change_records
 from ddb_single.table import Table
 
 
-def apply_model_change_records_from_module(module_path: str) -> None:
+def _apply_model_change_records_from_path(module_path: str) -> None:
     """Regenerate search records for all table items to reflect model changes.
 
     This function loads models from a module path (legacy interface).
@@ -53,7 +53,7 @@ def cli() -> None:
 def apply_model_change(module: str) -> None:
     """Rebuild search records for all items after model changes."""
     try:
-        apply_model_change_records_from_module(module)
+        _apply_model_change_records_from_path(module)
     except ValueError as exc:
         # エラーが発生した場合はCLIエラーとして出力
         raise click.ClickException(str(exc))

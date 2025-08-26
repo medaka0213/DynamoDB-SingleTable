@@ -383,14 +383,20 @@ def apply_model_change_records(table: Table, models: List[Type[BaseModel]]) -> N
     model_map: Dict[str, Type[BaseModel]] = {}
     for model_cls in models:
         if not (isinstance(model_cls, type) and issubclass(model_cls, BaseModel)):
-            raise ValueError(f"All models must be BaseModel subclasses, got {model_cls}")
+            raise ValueError(
+                f"All models must be BaseModel subclasses, got {model_cls}"
+            )
 
         # Ensure the model belongs to the specified table
         if getattr(model_cls, "__table__", None) != table:
-            raise ValueError(f"Model {model_cls.__name__} does not belong to the specified table")
+            raise ValueError(
+                f"Model {model_cls.__name__} does not belong to the specified table"
+            )
 
         if not hasattr(model_cls, "__model_name__"):
-            raise ValueError(f"Model {model_cls.__name__} must have __model_name__ attribute")
+            raise ValueError(
+                f"Model {model_cls.__name__} must have __model_name__ attribute"
+            )
 
         model_map[model_cls.__model_name__] = model_cls
 
