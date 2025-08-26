@@ -408,8 +408,8 @@ def apply_model_change_records(table: Table, models: List[Type[BaseModel]]) -> N
         add_items, rm_items = query._search_items()
 
         if add_items:
-            # Add missing search records
-            table.batch_create(add_items)
+            # Upsert missing/changed search records
+            table.batch_update(add_items)
         if rm_items:
             # Remove unnecessary search records
             table.batch_delete_items(rm_items)
