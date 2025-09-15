@@ -2,7 +2,7 @@ version: "3.8"
 services:
   dynamodb-local:
     command: "-jar DynamoDBLocal.jar -sharedDb"
-    image: "amazon/dynamodb-local:3.0.0"
+    image: "amazon/dynamodb-local:3.1.0"
     ports:
       - "8000:8000"
   dynamodb-admin:
