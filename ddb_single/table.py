@@ -93,6 +93,8 @@ class Table:
         search_num_index="NumDataSearchIndex",
         search_data_bin_key="data-b",
         search_bin_index="BinDataSearchIndex",
+        search_key_max_bytes=1000,
+        search_key_chunk_size=900,
         ReadCapacityUnits=1,
         WriteCapacityUnits=1,
         **table_kwargs,
@@ -122,6 +124,8 @@ class Table:
         self.__search_num_index__ = search_num_index
         self.__search_data_bin_key__ = search_data_bin_key
         self.__search_bin_index__ = search_bin_index
+        self.__search_key_max_bytes__ = search_key_max_bytes
+        self.__search_key_chunk_size__ = search_key_chunk_size
         self.__read_capacity_units__ = ReadCapacityUnits
         self.__write_capacity_units__ = WriteCapacityUnits
 
@@ -154,6 +158,11 @@ class Table:
     def search_key_factory(self, model_name, search_key):
         return f"{self.__search_prefix__}{model_name}_{search_key}"
 
+    def search_chunk_key_factory(self, model_name, search_key, chunk_index: int):
+        """検索キーのチャンクを生成"""
+        # チャンク番号を付与してユニークなSKにする
+        return f"{self.search_key_factory(model_name, search_key)}#chunk#{chunk_index:04d}"
+
     def rel_prefix(self, model_name=""):
         return f"{self.__relation_prefix__}{self.__relation_joint__}{model_name}"
 
@@ -185,6 +194,16 @@ class Table:
             return self.__search_bin_index__
         else:
             raise Exception(f"Invalid type: {type}")
+
+    @property
+    def search_key_max_bytes(self) -> int:
+        """検索キーの最大バイト数を返却"""
+        return self.__search_key_max_bytes__
+
+    @property
+    def search_key_chunk_size(self) -> int:
+        """検索キーを分割する際の1チャンクあたりのバイト数"""
+        return self.__search_key_chunk_size__
 
     def scan(self, **kwargs) -> list[dict]:
         """スキャン"""
