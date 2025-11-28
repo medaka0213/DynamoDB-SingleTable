@@ -98,6 +98,19 @@ Then, `batch_get` items by pk.
 |search_user_name|John|user_xxxx|
 |search_user_email|new-john@example.com|user_xxxx|
 
+### Large search-key values
+
+When the `search_key` field value is extremely large (for example, thousands of characters), the library stores the search metadata as multiple chunks to avoid DynamoDB index size limits. The search item keeps a hashed digest in the main search record and splits the raw value into chunk records:
+
+|pk|sk|data|chunked|chunk_count|chunk_index|
+|-|-|-|-|-|-|
+|user_xxxx|search_user_email|`<sha256 digest>`|True|3|None|
+|user_xxxx|search_user_email#chunk#0000|`<first 900-byte chunk>`|||
+|user_xxxx|search_user_email#chunk#0001|`<second 900-byte chunk>`|||
+|user_xxxx|search_user_email#chunk#0002|`<rest of the value>`|||
+
+You can still search with the original value (`User.email.eq(<very-long-string>)`), and the library will resolve the digest internally while keeping the full value across the chunk records.
+
 ### Search Items
 
 ```python

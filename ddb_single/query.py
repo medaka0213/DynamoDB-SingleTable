@@ -32,7 +32,7 @@ class Query:
     def get_unique(self):
         return self.__model__.data[self.__model__.__unique_keys__[0]]
 
-    def _search_items(self):
+    def _search_items(self, previous_data: Optional[dict] = None):
         items_add = []
         items_remove = []
         for k in self.__model__.__search_keys__:
@@ -41,7 +41,7 @@ class Query:
             if k in self.__model__.data.keys() and value:
                 # Set the field value before calling search_item
                 field.value = value
-                items_add.append(
+                items_add.extend(
                     field.search_item(
                         self.__model__.data[self.__model__.__primary_key__]
                     )
@@ -49,11 +49,22 @@ class Query:
             else:
                 # Set None for removal
                 field.value = None
-                items_remove.append(
+                items_remove.extend(
                     field.search_item(
                         self.__model__.data[self.__model__.__primary_key__]
                     )
                 )
+
+            if previous_data is not None:
+                prev_value = previous_data.get(k)
+                # 以前の値と異なる場合は過去の検索アイテムを削除対象に追加する
+                if prev_value and prev_value != value:
+                    field.value = prev_value
+                    items_remove.extend(
+                        field.search_item(
+                            self.__model__.data[self.__model__.__primary_key__]
+                        )
+                    )
         return items_add, items_remove
 
     # 検索
@@ -190,9 +201,9 @@ class Query:
         else:
             self._create(batch=batch)
 
-    def _create(self, batch=None, remove_ex_search_items=False):
+    def _create(self, batch=None, remove_ex_search_items=False, previous_data=None):
         self.validate()
-        search_items_add, search_items_rm = self._search_items()
+        search_items_add, search_items_rm = self._search_items(previous_data)
         rel_items_add, rel_items_rm = self._relation_items()
 
         items_add = search_items_add + rel_items_add
@@ -206,6 +217,7 @@ class Query:
             self.__table__.batch_create(items_add, batch=batch)
 
     def _update(self, old_item, new_item, batch=None):
+        previous_data = old_item.copy()
         self.__model__.data = {**old_item, **self.__model__.data, **new_item}
         self.__model__.data[self.__model__.__primary_key__] = old_item[
             self.__model__.__primary_key__
@@ -214,7 +226,11 @@ class Query:
             self.__model__.__secondary_key__
         ]
         if not util_b.is_same_json(old_item, self.__model__.data):
-            self._create(batch=batch, remove_ex_search_items=True)
+            self._create(
+                batch=batch,
+                remove_ex_search_items=True,
+                previous_data=previous_data,
+            )
 
     def delete_by_pk(self, pk, batch=None):
         """

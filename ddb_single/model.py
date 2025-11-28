@@ -1,5 +1,6 @@
 from decimal import Decimal
 from boto3.dynamodb.conditions import Key
+import hashlib
 
 from ddb_single.table import FieldType, Table, SearchExpression
 import ddb_single.utils_botos as util_b
@@ -227,17 +228,89 @@ class DBField:
         Args:
             pk: The primary key of the item.
         Returns:
-            dict: The search item.
+            list[dict]: The search items.
         """
         _value = self.value
         if self.ignore_case and isinstance(_value, str):
             # lower case if self.ignore_case = True
             _value = _value.lower()
-        return {
+        return self._build_search_items(pk, _value)
+
+    def _build_search_items(self, pk, value):
+        """Build search items, chunking large search keys when necessary."""
+        # 文字列が大きすぎる場合はチャンク保存に切り替える
+        if (
+            isinstance(value, str)
+            and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes
+        ):
+            return self._chunked_search_items(pk, value)
+
+        return [
+            {
+                self.__table__.__primary_key__: pk,
+                self.__table__.__secondary_key__: self.search_key_factory(),
+                self.search_data_key(): value,
+            }
+        ]
+
+    def _chunked_search_items(self, pk, value: str) -> list[dict]:
+        """Create search items for long string values by chunking."""
+
+        def _split_chunks(text: str) -> list[str]:
+            """Split text into byte-size chunks respecting UTF-8 boundaries."""
+
+            chunks: list[str] = []
+            current: list[str] = []
+            current_bytes = 0
+            for char in text:
+                encoded = char.encode("utf-8")
+                # 1チャンクの最大サイズを超える場合は新しいチャンクを作る
+                if (
+                    current_bytes + len(encoded)
+                    > self.__table__.search_key_chunk_size
+                ):
+                    chunks.append("".join(current))
+                    current = [char]
+                    current_bytes = len(encoded)
+                else:
+                    current.append(char)
+                    current_bytes += len(encoded)
+            if current:
+                chunks.append("".join(current))
+            return chunks
+
+        chunks = _split_chunks(value)
+        digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+        base_item = {
             self.__table__.__primary_key__: pk,
             self.__table__.__secondary_key__: self.search_key_factory(),
-            self.search_data_key(): _value,
+            self.search_data_key(): digest,
+            "chunked": True,
+            "chunk_count": len(chunks),
         }
+        items = [base_item]
+        for idx, chunk in enumerate(chunks):
+            items.append(
+                {
+                    self.__table__.__primary_key__: pk,
+                    self.__table__.__secondary_key__: self.__table__.search_chunk_key_factory(
+                        self.__model_cls__.__model_name__, self.name, idx
+                    ),
+                    self.search_data_key(): chunk,
+                    "chunk_index": idx,
+                }
+            )
+        return items
+
+    def _normalize_search_value(self, value):
+        """Normalize search value, hashing long strings for index storage."""
+        if (
+            isinstance(value, str)
+            and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes
+        ):
+            # 長い文字列はハッシュ化してインデックスに保存する
+            return hashlib.sha256(value.encode("utf-8")).hexdigest()
+        return value
 
     def key_ex(self, value, mode):
         """
@@ -261,6 +334,7 @@ class DBField:
             if self.ignore_case and isinstance(value, str):
                 # 大文字小文字を無視する場合
                 value = value.lower()
+        normalized_value = self._normalize_search_value(value)
         if self.secondary_key:
             raise ValidationError(
                 f"Secondary key should not be used as a key: {self.name}"
@@ -281,7 +355,7 @@ class DBField:
                 # SearchKeyを使う場合
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
                     self.search_key_factory()
-                ) & util_b.range_ex(self.search_data_key(), value, mode)
+                ) & util_b.range_ex(self.search_data_key(), normalized_value, mode)
                 logger.debug(
                     f"KeyConditionExpression [search key]: {self.search_data_key()} = {value}, {mode}"
                 )
@@ -302,7 +376,9 @@ class DBField:
                     self.search_key_factory()
                 ),
                 IndexName=self.__table__.__range_index_name__,
-                FilterExpression=util_b.attr_ex(self.search_data_key(), value, mode),
+                FilterExpression=util_b.attr_ex(
+                    self.search_data_key(), normalized_value, mode
+                ),
                 FilterStatus=util_b.FilterStatus.FILTER_STAGED,
             )
         # SearchKeyを使わない場合
