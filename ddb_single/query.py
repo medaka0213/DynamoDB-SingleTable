@@ -211,8 +211,25 @@ class Query:
 
         self.__table__.create(self.__model__.data, batch=batch)
         if remove_ex_search_items:
-            self.__table__.batch_update(items_add, batch=batch)
+            add_pairs = {
+                (
+                    item[self.__model__.__primary_key__],
+                    item[self.__model__.__secondary_key__],
+                )
+                for item in items_add
+            }
+            # 更新後すぐに削除されないように、追加対象と同一のPK/SKを削除リストから除外する
+            items_remove = [
+                item
+                for item in items_remove
+                if (
+                    item[self.__model__.__primary_key__],
+                    item[self.__model__.__secondary_key__],
+                )
+                not in add_pairs
+            ]
             self.__table__.batch_delete_items(items_remove, batch=batch)
+            self.__table__.batch_update(items_add, batch=batch)
         else:
             self.__table__.batch_create(items_add, batch=batch)
 
