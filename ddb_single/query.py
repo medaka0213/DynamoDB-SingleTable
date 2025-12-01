@@ -229,7 +229,7 @@ class Query:
                 not in add_pairs
             ]
             self.__table__.batch_delete_items(items_remove, batch=batch)
-            self.__table__.batch_update(items_add, batch=batch)
+            self.__table__.batch_create(items_add, batch=batch)
         else:
             self.__table__.batch_create(items_add, batch=batch)
 
