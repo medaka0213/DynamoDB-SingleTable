@@ -41,7 +41,10 @@ def default_sk_factory(model_name, prefix="", suffix="_item"):
 
 
 def default_pk2model(pk):
-    return pk.split("_", 1)[0]
+    if "_" in pk:
+        # PK末尾のUUID部分を除外してモデル名を復元する
+        return pk.rsplit("_", 1)[0]
+    return pk
 
 
 PROJECTION_ALL = {"ProjectionType": "ALL"}
