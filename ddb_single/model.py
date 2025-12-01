@@ -352,18 +352,21 @@ class DBField:
                     FilterStatus=util_b.FilterStatus.SEARCH,
                 )
             elif self.search_key and value:
-                # SearchKeyを使う場合
+                # SearchKeyを使う場合はレンジインデックス＋フィルターに切り替えて、データ検索用GSIが返さない場合のフォールバックとする
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
                     self.search_key_factory()
-                ) & util_b.range_ex(self.search_data_key(), normalized_value, mode)
+                )
                 logger.debug(
                     f"KeyConditionExpression [search key]: {self.search_data_key()} = {value}, {mode}"
                 )
                 return SearchExpression(
                     FilterMethod=util_b.attr_method(self.name, value, mode),
                     KeyConditionExpression=KeyConditionExpression,
-                    IndexName=self.search_index(),
-                    FilterStatus=util_b.FilterStatus.STAGED,
+                    IndexName=self.__table__.__range_index_name__,
+                    FilterExpression=util_b.attr_ex(
+                        self.search_data_key(), normalized_value, mode
+                    ),
+                    FilterStatus=util_b.FilterStatus.FILTER_STAGED,
                 )
         elif self.search_key:
             # SearchKeyを使うが、Queryで使えない方法で検索する場合
