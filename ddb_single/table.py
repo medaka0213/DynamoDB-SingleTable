@@ -9,6 +9,11 @@ import uuid
 from enum import Enum
 
 import ddb_single.utils_botos as util_b
+from ddb_single.error import InvalidParameterError
+from ddb_single.key_condition_util import (
+    iter_key_attributes_used_in_key_condition,
+    validate_single_condition_per_key,
+)
 
 import logging
 
@@ -38,6 +43,18 @@ def default_pk_factory(model_name):
 
 def default_sk_factory(model_name, prefix="", suffix="_item"):
     return f"{prefix}{model_name}{suffix}"
+
+
+def _coerce_search_expression_filter_status(ex: "SearchExpression") -> None:
+    """Normalize string FilterStatus values into enum members."""
+    fs = ex.FilterStatus
+    if fs is None or isinstance(fs, util_b.FilterStatus):
+        return
+    if isinstance(fs, str):
+        for member in util_b.FilterStatus:
+            if member.value == fs or member.name == fs:
+                ex.FilterStatus = member
+                return
 
 
 def default_pk2model(pk):
@@ -213,37 +230,74 @@ class Table:
         limit = kwargs.get("Limit") or float("inf")
         try:
             response = self.__table__.scan(**kwargs)
-        except ClientError:
-            logger.error("ClientError", exc_info=True)
-        else:
-            if "Items" in response:
-                res_data = response["Items"]
-                while "LastEvaluatedKey" in response and len(res_data) < limit:
-                    logger.debug(f"pagenation: {len(res_data)}/{limit}")
-                    response = self.__table__.scan(
-                        **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
-                    )
-                    res_data += response["Items"]
-                return util_b.json_export(res_data)
-            else:
-                return []
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_msg = e.response.get("Error", {}).get("Message", "No message")
+            logger.error(
+                f"DynamoDB Scan failed with {error_code}: {error_msg}",
+                extra={
+                    "error_code": error_code,
+                    "error_message": error_msg,
+                    "index_name": kwargs.get("IndexName"),
+                    "filter_expression": str(kwargs.get("FilterExpression"))
+                    if kwargs.get("FilterExpression")
+                    else None,
+                },
+                exc_info=True,
+            )
+            if error_code == "ValidationException":
+                raise
+            return []
+
+        if "Items" in response:
+            res_data = response["Items"]
+            while "LastEvaluatedKey" in response and len(res_data) < limit:
+                logger.debug(f"pagination: {len(res_data)}/{limit}")
+                response = self.__table__.scan(
+                    **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
+                )
+                res_data += response["Items"]
+            return util_b.json_export(res_data)
+        return []
 
     def query(self, **kwargs) -> list[dict]:
         """クエリ"""
         limit = kwargs.get("Limit") or float("inf")
+        kce = kwargs.get("KeyConditionExpression")
+        if kce is not None:
+            validate_single_condition_per_key(kce)
         try:
             response = self.__table__.query(**kwargs)
-        except ClientError:
-            logger.error("ClientError", exc_info=True)
-        else:
-            if len(response["Items"]):
-                res_data = response["Items"]
-                while "LastEvaluatedKey" in response and len(res_data) < limit:
-                    response = self.__table__.query(
-                        **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
-                    )
-                    res_data += response["Items"]
-                return util_b.json_export(res_data)
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_msg = e.response.get("Error", {}).get("Message", "No message")
+            logger.error(
+                f"DynamoDB Query failed with {error_code}: {error_msg}",
+                extra={
+                    "error_code": error_code,
+                    "error_message": error_msg,
+                    "index_name": kwargs.get("IndexName"),
+                    "key_condition_expression": str(kwargs.get("KeyConditionExpression"))
+                    if kwargs.get("KeyConditionExpression")
+                    else None,
+                    "filter_expression": str(kwargs.get("FilterExpression"))
+                    if kwargs.get("FilterExpression")
+                    else None,
+                },
+                exc_info=True,
+            )
+            if error_code == "ValidationException":
+                raise
+            return []
+
+        if len(response["Items"]):
+            res_data = response["Items"]
+            while "LastEvaluatedKey" in response and len(res_data) < limit:
+                response = self.__table__.query(
+                    **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
+                )
+                res_data += response["Items"]
+            return util_b.json_export(res_data)
         return []
 
     def get_item(self, pk, sk=None):
@@ -331,10 +385,9 @@ class Table:
         """関連先を検索"""
         logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
-        if model_name:
-            KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
-                self.rel_prefix(model_name)
-            )
+        KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
+            self.rel_prefix(model_name)
+        )
         if field_name:
             # フィールドの指定がある場合
             res = self.query(
@@ -394,10 +447,8 @@ class Table:
             return items
         res = []
         for item in items:
-            for searchEx in searchExs:
-                if searchEx.FilterMethod(item):
-                    res.append(item)
-                    break
+            if all(searchEx.FilterMethod(item) for searchEx in searchExs):
+                res.append(item)
         return res
 
     def search(
@@ -417,6 +468,8 @@ class Table:
             SearchExpression(**ex) if isinstance(ex, dict) else ex
             for ex in searchEx
         ]
+        for ex in searchEx:
+            _coerce_search_expression_filter_status(ex)
         simple_ex: list[SearchExpression] = [
             ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.SEARCH
         ]
@@ -431,6 +484,14 @@ class Table:
             for ex in searchEx
             if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
         ]
+        bucketed_ids = {id(ex) for ex in simple_ex + staged_ex + filter_ex + filter_ex_staged}
+        orphan = [ex for ex in searchEx if id(ex) not in bucketed_ids]
+        if orphan:
+            logger.warning(
+                "Ignored %d search expression(s) with unrecognized FilterStatus: %s",
+                len(orphan),
+                [ex.FilterStatus for ex in orphan],
+            )
         logger.debug(
             f"Expressions ... simple: {simple_ex}, staged: {staged_ex}, filter: {filter_ex}, filter_staged: {filter_ex_staged}"  # noqa
         )
@@ -471,8 +532,7 @@ class Table:
 
             # filter_ex があればフィルタ
             res = self.batch_get_from_pks(list(res))
-            if staged_ex and filter_ex:
-                logger.debug("Both staged_ex and filter_ex found. Filtering items...")
+            if filter_ex:
                 res = self.filter(res, filter_ex)
             if limit is not None:
                 res = list(res)[:limit]
@@ -483,7 +543,17 @@ class Table:
         # シンプルにクエリ検索
         KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
         for ex in simple_ex:
-            KeyConditionExpression &= ex.KeyConditionExpression
+            sub_kce = ex.KeyConditionExpression
+            if sub_kce is None:
+                continue
+            sub_names = set(iter_key_attributes_used_in_key_condition(sub_kce))
+            if not sub_names.issubset({self.__primary_key__}):
+                raise InvalidParameterError(
+                    "SEARCH KeyConditionExpression must reference only the primary key attribute %r; got %s"
+                    % (self.__primary_key__, sorted(sub_names))
+                )
+            KeyConditionExpression &= sub_kce
+        validate_single_condition_per_key(KeyConditionExpression)
         if filter_ex:
             _res = (
                 self.query(
