@@ -9,4 +9,4 @@ shared-local-instance.db
 docs
 poetry.lock
 .claude
-test_*.py
+/test_*.py
