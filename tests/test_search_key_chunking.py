@@ -2,6 +2,7 @@ import datetime
 import unittest
 
 from boto3.dynamodb.conditions import Key
+
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 from ddb_single.table import FieldType, Table

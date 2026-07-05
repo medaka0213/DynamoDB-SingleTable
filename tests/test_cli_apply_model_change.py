@@ -1,12 +1,12 @@
 import unittest
 
-import ddb_single._cli as cli_mod
-import ddb_single.utils_botos as util_b
 from boto3.dynamodb.conditions import Key
 from click.testing import CliRunner
+
+import ddb_single._cli as cli_mod
+import ddb_single.utils_botos as util_b
 from ddb_single.query import Query
 from ddb_single.table import SearchExpression
-
 from tests.models_for_cli import User, table  # noqa: I001
 
 

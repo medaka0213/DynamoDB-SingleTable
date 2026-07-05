@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from botocore.exceptions import ClientError
+
 from ddb_single.error import InvalidParameterError
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table

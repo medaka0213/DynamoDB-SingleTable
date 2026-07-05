@@ -7,6 +7,8 @@ dist
 shared-local-instance.db
 .coverage
 docs
-poetry.lock
+.venv
+.ruff_cache
+.pytest_cache
 .claude
 /test_*.py
