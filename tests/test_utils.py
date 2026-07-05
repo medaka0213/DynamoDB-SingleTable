@@ -2,6 +2,7 @@ import unittest
 from decimal import Decimal
 
 from boto3.dynamodb.conditions import Attr, Key
+
 from ddb_single.error import InvalidParameterError
 from ddb_single.utils_botos import QueryType, attr_ex, attr_method, is_same_json, json_export, json_import, range_ex
 

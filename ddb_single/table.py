@@ -490,6 +490,27 @@ class Table:
             items = self.batch_get_from_pks(candidate_pks)
             return [it[self.__primary_key__] for it in items if ex.FilterMethod(it)]
 
+    def _simple_key_condition(self, model_name, simple_ex):
+        """Build the KeyConditionExpression for SEARCH (simple) expressions.
+
+        SEARCH conditions may only reference the primary key; they are ANDed onto
+        the ``sk == {model}_item`` main-index condition.
+        """
+        KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
+        for ex in simple_ex:
+            sub_kce = ex.KeyConditionExpression
+            if sub_kce is None:
+                continue
+            sub_names = set(iter_key_attributes_used_in_key_condition(sub_kce))
+            if not sub_names.issubset({self.__primary_key__}):
+                raise InvalidParameterError(
+                    "SEARCH KeyConditionExpression must reference only the primary key attribute %r; got %s"
+                    % (self.__primary_key__, sorted(sub_names))
+                )
+            KeyConditionExpression &= sub_kce
+        validate_single_condition_per_key(KeyConditionExpression)
+        return KeyConditionExpression
+
     def search(self, model_name, *searchEx: SearchExpression, pk_only=False, limit=None):
         """Search items
         Args:
@@ -555,6 +576,18 @@ class Table:
                 else:
                     res = set(_res)
 
+            # simple_ex (主キーに対する SEARCH 条件) も staged 候補集合に交差させる
+            if simple_ex:
+                _simple = (
+                    self.query(
+                        KeyConditionExpression=self._simple_key_condition(model_name, simple_ex),
+                        IndexName=self.__range_index_name__,
+                        ProjectionExpression=self.__primary_key__,
+                    )
+                    or []
+                )
+                res &= set(r[self.__primary_key__] for r in _simple)
+
             # filter_ex があればフィルタ
             if not res:
                 return []
@@ -568,19 +601,7 @@ class Table:
             return res
 
         # シンプルにクエリ検索
-        KeyConditionExpression = Key(self.__secondary_key__).eq(self.sk(model_name))
-        for ex in simple_ex:
-            sub_kce = ex.KeyConditionExpression
-            if sub_kce is None:
-                continue
-            sub_names = set(iter_key_attributes_used_in_key_condition(sub_kce))
-            if not sub_names.issubset({self.__primary_key__}):
-                raise InvalidParameterError(
-                    "SEARCH KeyConditionExpression must reference only the primary key attribute %r; got %s"
-                    % (self.__primary_key__, sorted(sub_names))
-                )
-            KeyConditionExpression &= sub_kce
-        validate_single_condition_per_key(KeyConditionExpression)
+        KeyConditionExpression = self._simple_key_condition(model_name, simple_ex)
         if filter_ex:
             _res = (
                 self.query(
@@ -741,7 +762,7 @@ class Table:
         """キースキーマのプリセット"""
         throughput = {
             "ReadCapacityUnits": self.__read_capacity_units__,
-            "WriteCapacityUnits": self.__read_capacity_units__,
+            "WriteCapacityUnits": self.__write_capacity_units__,
         }
 
         # スライド関連のテーブル

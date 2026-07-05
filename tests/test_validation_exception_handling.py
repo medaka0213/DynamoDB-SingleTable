@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from botocore.exceptions import ClientError
+
 from ddb_single.table import Table
 
 logging.basicConfig(level=logging.INFO)

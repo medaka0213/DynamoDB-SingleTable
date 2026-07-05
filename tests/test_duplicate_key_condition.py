@@ -10,6 +10,7 @@ import logging
 import unittest
 
 from boto3.dynamodb.conditions import Key
+
 from ddb_single.error import InvalidParameterError
 from ddb_single.table import Table
 

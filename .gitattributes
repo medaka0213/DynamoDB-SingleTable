@@ -1,0 +1,29 @@
+# Normalize line endings to LF on checkout and commit.
+* text=auto eol=lf
+
+# Explicitly LF for common text/source files.
+*.py    text eol=lf
+*.pyi   text eol=lf
+*.toml  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.md    text eol=lf
+*.rst   text eol=lf
+*.txt   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.lock  text eol=lf
+*.sh    text eol=lf
+*.bat   text eol=crlf
+Makefile text eol=lf
+
+# Treat binaries as binary (no EOL conversion).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.gz    binary
+*.zip   binary
+*.db    binary

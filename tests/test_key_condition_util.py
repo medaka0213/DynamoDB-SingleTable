@@ -3,6 +3,7 @@
 import unittest
 
 from boto3.dynamodb.conditions import Key
+
 from ddb_single import utils_botos as util_b
 from ddb_single.error import InvalidParameterError
 from ddb_single.key_condition_util import (
