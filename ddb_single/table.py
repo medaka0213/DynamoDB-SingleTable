@@ -294,7 +294,9 @@ class Table:
         if response is None:
             return []
 
-        if len(response["Items"]):
+        if "Items" in response:
+            # FilterExpression 付き Query は 1 ページ目が 0 件でも LastEvaluatedKey を返す
+            # ことがあるため、scan() と同様に LastEvaluatedKey ベースでページを辿る。
             res_data = response["Items"]
             while "LastEvaluatedKey" in response and len(res_data) < limit:
                 response = self._execute_boto_op(
