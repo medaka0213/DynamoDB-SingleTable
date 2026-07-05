@@ -39,8 +39,10 @@ jobs:
           dry_run: true
 
       - name: Update version
+        env:
+          BUMP_RULE: ${{ github.event.inputs.rule }}
         run: |
-          uv version --bump ${{ github.event.inputs.rule }}
+          uv version --bump "$BUMP_RULE"
           version=$(uv version --short)
           echo "VERSION=$version" >> $GITHUB_ENV
 
