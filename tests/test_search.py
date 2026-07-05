@@ -156,6 +156,28 @@ class TestSearch(unittest.TestCase):
             query.model(test1).delete()
             query.model(test2).delete()
 
+    def test_staged_combined_with_primary_key(self):
+        """A staged (search_key) condition combined with a primary-key (SEARCH)
+        condition must intersect both: the pk condition has to narrow the staged
+        candidate set, not be dropped."""
+        userA = User(name="staged_pk_A", age=77)
+        query.model(userA).create()
+        userB = User(name="staged_pk_B", age=77)
+        query.model(userB).create()
+        pk_a = userA.data[table.__primary_key__]
+        pk_field = User(__skip_validation__=True).get_field(table.__primary_key__)
+
+        try:
+            # age.eq(77) is STAGED (both users match); pk_field.eq(pk_a) is a
+            # SEARCH condition that must restrict the result to userA only.
+            res = query.model(User).search(User.age.eq(77), pk_field.eq(pk_a))
+            self.assertEqual(len(res), 1)
+            self.assertEqual(res[0]["name"], "staged_pk_A")
+            self.assertEqual(res[0][table.__primary_key__], pk_a)
+        finally:
+            query.model(userA).delete()
+            query.model(userB).delete()
+
 
 if __name__ == "__main__":
     unittest.main()
