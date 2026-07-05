@@ -1,12 +1,13 @@
-from decimal import Decimal
-from boto3.dynamodb.conditions import Key
 import hashlib
+import logging
+import warnings
+from decimal import Decimal
 
-from ddb_single.table import FieldType, Table, SearchExpression
+from boto3.dynamodb.conditions import Key
+
 import ddb_single.utils_botos as util_b
 from ddb_single.error import ValidationError
-
-import logging
+from ddb_single.table import FieldType, SearchExpression, Table
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,8 @@ class DBField:
         secondary_key=False,
         unique_key=False,
         search_key=False,
-        reletion=None,
-        reletion_by_unique=True,
+        relation=None,
+        relation_by_unique=True,
         relation_raise_if_not_found=False,
         ignore_case=False,
         **kwargs,
@@ -46,11 +47,29 @@ class DBField:
             secondary_key (bool): Whether the field is a secondary key.
             unique_key (bool): Whether the field is a unique key.
             search_key (bool): Whether the field is a search key.
-            reletion (BaseModel): The reletion model of the field.
+            relation (BaseModel): The relation model of the field.
             reference (BaseModel): The reference model of the field.
-            reletion_by_unique (bool): Whether the reletion is by unique key.
+            relation_by_unique (bool): Whether the relation is by unique key.
             relation_raise_if_not_found (bool): Whether to raise an error if the relation is not found.
         """
+        # 後方互換: 綴り違いの ``reletion`` / ``reletion_by_unique`` を受け付ける (deprecated)。
+        # 明示された正しい引数が優先される。
+        if "reletion" in kwargs:
+            warnings.warn(
+                "DBField(reletion=...) is deprecated; use relation=... instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            legacy_relation = kwargs.pop("reletion")
+            if relation is None:
+                relation = legacy_relation
+        if "reletion_by_unique" in kwargs:
+            warnings.warn(
+                "DBField(reletion_by_unique=...) is deprecated; use relation_by_unique=... instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            relation_by_unique = kwargs.pop("reletion_by_unique")
         self.type = type
         self.default = default
         self.default_factory = default_factory
@@ -60,11 +79,10 @@ class DBField:
         self.secondary_key = secondary_key
         self.unique_key = unique_key
         self.search_key = search_key or unique_key
-        self.relation = reletion
-        self.reletion_by_unique = reletion_by_unique
+        self.relation = relation
+        self.relation_by_unique = relation_by_unique
         self.relation_raise_if_not_found = relation_raise_if_not_found
         self.ignore_case = ignore_case
-        self.value = None
 
     def setup(self, name, model_cls):
         self.__model_cls__ = model_cls
@@ -98,7 +116,7 @@ class DBField:
             "unique_key": self.unique_key,
             "search_key": self.search_key,
             "relation": self.relation.__model_name__ if self.relation else None,
-            "reletion_by_unique": self.reletion_by_unique,
+            "relation_by_unique": self.relation_by_unique,
             "ignore_case": self.ignore_case,
         }
 
@@ -110,49 +128,45 @@ class DBField:
         Returns:
             The validated value.
         """
-        # 先に必ずクリア
-        self.value = None
         self.__setup__ = True
 
         if value is not None:
-            self.value = value
+            val = value
         elif self.default is not None:
-            self.value = self.default
+            val = self.default
         elif self.default_factory:
-            self.value = self.default_factory(self.__model_cls__)
+            val = self.default_factory(self.__model_cls__)
         else:
             # どれもなければ None を明示
-            self.value = None
+            val = None
 
         if not skip:
-            if value is None:
+            if val is None:
                 if not self.nullable:
                     raise ValidationError(f"Not nullable: {self.__class__.__name__}")
             else:
-                self._setup_relation()
-                self.value = self._validate_value(self.value)
-        return self.value
+                val = self._setup_relation(val)
+                val = self._validate_value(val)
+        return val
 
-    def _setup_relation(self):
+    def _setup_relation(self, val):
         def extract_value(v, by_unique):
             types = str, bytes, int, float, Decimal, bool
             if not [t for t in types if isinstance(v, t)]:
                 if by_unique:
-                    return v.data[self.value.__unique_keys__[0]]
+                    return v.data[v.__unique_keys__[0]]
                 else:
-                    return v.data[self.value.__primary_key__]
+                    return v.data[v.__primary_key__]
             else:
                 return v
 
         if not self.is_list():
             if self.relation:
-                self.value = extract_value(self.value, self.reletion_by_unique)
+                val = extract_value(val, self.relation_by_unique)
         else:
             if self.relation:
-                self.value = [
-                    extract_value(v, self.reletion_by_unique) for v in self.value
-                ]
-        return self.value
+                val = [extract_value(v, self.relation_by_unique) for v in val]
+        return val
 
     def _validate_value(self, value):
         field_name = getattr(self, "name", "DBField")
@@ -205,9 +219,7 @@ class DBField:
         Returns:
             str: The search key of the field.
         """
-        return self.__table__.search_key_factory(
-            self.__model_cls__.__model_name__, self.name
-        )
+        return self.__table__.search_key_factory(self.__model_cls__.__model_name__, self.name)
 
     def search_data_key(self):
         """
@@ -223,14 +235,15 @@ class DBField:
         """
         return self.__table__.search_index(self.type)
 
-    def search_item(self, pk):
+    def search_item(self, pk, value):
         """
         Args:
             pk: The primary key of the item.
+            value: The value to generate search items for.
         Returns:
             list[dict]: The search items.
         """
-        _value = self.value
+        _value = value
         if self.ignore_case and isinstance(_value, str):
             # lower case if self.ignore_case = True
             _value = _value.lower()
@@ -239,10 +252,7 @@ class DBField:
     def _build_search_items(self, pk, value):
         """Build search items, chunking large search keys when necessary."""
         # 文字列が大きすぎる場合はチャンク保存に切り替える
-        if (
-            isinstance(value, str)
-            and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes
-        ):
+        if isinstance(value, str) and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes:
             return self._chunked_search_items(pk, value)
 
         return [
@@ -265,10 +275,7 @@ class DBField:
             for char in text:
                 encoded = char.encode("utf-8")
                 # 1チャンクの最大サイズを超える場合は新しいチャンクを作る
-                if (
-                    current_bytes + len(encoded)
-                    > self.__table__.search_key_chunk_size
-                ):
+                if current_bytes + len(encoded) > self.__table__.search_key_chunk_size:
                     chunks.append("".join(current))
                     current = [char]
                     current_bytes = len(encoded)
@@ -304,10 +311,7 @@ class DBField:
 
     def _normalize_search_value(self, value):
         """Normalize search value, hashing long strings for index storage."""
-        if (
-            isinstance(value, str)
-            and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes
-        ):
+        if isinstance(value, str) and len(value.encode("utf-8")) > self.__table__.search_key_max_bytes:
             # 長い文字列はハッシュ化してインデックスに保存する
             return hashlib.sha256(value.encode("utf-8")).hexdigest()
         return value
@@ -336,55 +340,82 @@ class DBField:
                 value = value.lower()
         normalized_value = self._normalize_search_value(value)
         if self.secondary_key:
-            raise ValidationError(
-                f"Secondary key should not be used as a key: {self.name}"
-            )
+            raise ValidationError(f"Secondary key should not be used as a key: {self.name}")
+
+        def _filter_method():
+            # NOTE: DynamoDB 側の検索では ignore_case を index 側の正規化で吸収しているが、
+            # フォールバック（in-memory filter）でも同じ判定になるようにする。
+            if self.ignore_case and isinstance(value, str):
+                target = value
+
+                def _m(x):
+                    got = x.get(self.name)
+                    if isinstance(got, str):
+                        got = got.lower()
+                    return util_b.attr_method(self.name, target, mode)({**x, self.name: got})
+
+                return _m
+            if self.ignore_case and isinstance(value, list):
+                target = value
+
+                def _m(x):
+                    got = x.get(self.name)
+                    if isinstance(got, str):
+                        got = got.lower()
+                    return util_b.attr_method(self.name, target, mode)({**x, self.name: got})
+
+                return _m
+            return util_b.attr_method(self.name, value, mode)
+
+        filter_method = _filter_method()
 
         if util_b.is_key(mode):
             if self.primary_key:
                 # PKを使う場合
-                logger.debug(
-                    f"KeyConditionExpression [primary key]: {self.name} = {value}, {mode}"
-                )
+                logger.debug(f"KeyConditionExpression [primary key]: {self.name} = {value}, {mode}")
                 return SearchExpression(
-                    FilterMethod=util_b.attr_method(self.name, value, mode),
+                    name=self.name,
+                    value=value,
+                    mode=mode,
+                    FilterMethod=filter_method,
                     KeyConditionExpression=util_b.range_ex(self.name, value, mode),
                     FilterStatus=util_b.FilterStatus.SEARCH,
                 )
-            elif self.search_key and value:
+            elif self.search_key and value is not None and not (isinstance(value, (str, bytes)) and len(value) == 0):
                 # SearchKey を使う場合は検索用 GSI を活用し、ユニーク検索が確実にヒットするようにする
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
                     self.search_key_factory()
                 ) & util_b.range_ex(self.search_data_key(), normalized_value, mode)
-                logger.debug(
-                    f"KeyConditionExpression [search key]: {self.search_data_key()} = {value}, {mode}"
-                )
+                logger.debug(f"KeyConditionExpression [search key]: {self.search_data_key()} = {value}, {mode}")
                 return SearchExpression(
-                    FilterMethod=util_b.attr_method(self.name, value, mode),
+                    name=self.name,
+                    value=value,
+                    mode=mode,
+                    FilterMethod=filter_method,
                     KeyConditionExpression=KeyConditionExpression,
                     IndexName=self.search_index(),
                     FilterStatus=util_b.FilterStatus.STAGED,
                 )
         elif self.search_key:
             # SearchKeyを使うが、Queryで使えない方法で検索する場合
-            logger.debug(
-                f"FilterExpression [search key]: {self.search_data_key()} = {value}, {mode}"
-            )
+            logger.debug(f"FilterExpression [search key]: {self.search_data_key()} = {value}, {mode}")
             return SearchExpression(
-                FilterMethod=util_b.attr_method(self.name, value, mode),
-                KeyConditionExpression=Key(self.__table__.__secondary_key__).eq(
-                    self.search_key_factory()
-                ),
+                name=self.name,
+                value=value,
+                mode=mode,
+                FilterMethod=filter_method,
+                KeyConditionExpression=Key(self.__table__.__secondary_key__).eq(self.search_key_factory()),
                 IndexName=self.__table__.__range_index_name__,
-                FilterExpression=util_b.attr_ex(
-                    self.search_data_key(), normalized_value, mode
-                ),
+                FilterExpression=util_b.attr_ex(self.search_data_key(), normalized_value, mode),
                 FilterStatus=util_b.FilterStatus.FILTER_STAGED,
             )
         # SearchKeyを使わない場合
         logger.debug(f"FilterExpression: {self.name} = {value}, {mode}")
         return SearchExpression(
-            FilterMethod=util_b.attr_method(self.name, value, mode),
+            name=self.name,
+            value=value,
+            mode=mode,
+            FilterMethod=filter_method,
             FilterExpression=util_b.attr_ex(self.name, value, mode),
             FilterStatus=util_b.FilterStatus.FILTER,
         )
@@ -537,9 +568,7 @@ class BaseModel:
                 if v.relation:
                     self.__relation_keys__.append(k)
         if not self.__unique_keys__ and self.__use_unique_for_relations__:
-            raise ValidationError(
-                f"Missing unique keys for relation: {self.__model_name__}"
-            )
+            raise ValidationError(f"Missing unique keys for relation: {self.__model_name__}")
         self.__setup__ = True
 
     def get_field(self, key: str) -> DBField:

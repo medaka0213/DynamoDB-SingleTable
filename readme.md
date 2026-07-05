@@ -255,7 +255,7 @@ class BlogPost(BaseModel):
     __table__=table
     name = DBField(unique_key=True)
     content = DBField()
-    author = DBField(reletion=User)
+    author = DBField(relation=User)
 ```
 
 ### Create Item
@@ -270,7 +270,7 @@ blogpost = BlogPost(
 query.model(blogpost).create()
 ```
 
-Then, tha value "reletion item" added
+Then, the value "relation item" added
 
 |pk|sk|data|name|author|content|
 |-|-|-|-|-|-|
@@ -345,7 +345,7 @@ blogpost = BlogPost(**blogpost)
 query.model(blogpost).update()
 ```
 
-Then, "reletion item" changed
+Then, "relation item" changed
 
 |pk|sk|data|name|author|content|
 |-|-|-|-|-|-|
@@ -364,7 +364,7 @@ If related item deleted, relationship also deleted
 query.model(user).delete_by_unique("Michael")
 ```
 
-Then, "reletion item" deleted.
+Then, "relation item" deleted.
 But main item's value is not chenged.
 
 |pk|sk|data|name|author|content|

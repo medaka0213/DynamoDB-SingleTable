@@ -1,11 +1,10 @@
-import unittest
-
-from ddb_single.table import FieldType, Table
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-
 import datetime
 import logging
+import unittest
+
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import FieldType, Table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -115,9 +114,7 @@ class TestSearch(unittest.TestCase):
         self.assertIn(res[0]["name"], ["test1", "test2", "test3", "123"])
 
     def test_pk_only(self):
-        res = query.model(User).search(
-            User().get_field("name").eq("test3"), pk_only=True
-        )
+        res = query.model(User).search(User().get_field("name").eq("test3"), pk_only=True)
         self.assertEqual(len(res), 1)
         self.assertIsInstance(res[0], str)
 
@@ -127,11 +124,37 @@ class TestSearch(unittest.TestCase):
         self.assertIsInstance(res[0], str)
 
     def test_empty(self):
-        with self.assertNoLogs(
-            logger=logging.getLogger("ddb_single.table"), level=logging.ERROR
-        ):
+        with self.assertNoLogs(logger=logging.getLogger("ddb_single.table"), level=logging.ERROR):
             res = query.model(User).search(User.name.eq(""))
             self.assertEqual(len(res), 0)
+
+    def test_combined_begins_and_not_equal(self):
+        """Test combining BEGINS and N_EQ filters (AND condition)"""
+        res = query.model(User).search(User.name.begins_with("test"), User.name.ne("test1"))
+        self.assertEqual(len(res), 2)
+        names = [r["name"] for r in res]
+        self.assertIn("test2", names)
+        self.assertIn("test3", names)
+        self.assertNotIn("test1", names)
+
+    def test_combined_filters_with_description(self):
+        """Test combining search_key field and non-search_key field filters"""
+        test1 = User(name="special1", age=30, description="Special item - apple")
+        query.model(test1).create()
+        test2 = User(name="special2", age=31, description="Special item - banana")
+        query.model(test2).create()
+
+        try:
+            res = query.model(User).search(
+                User.name.begins_with("special"), User.description.ne("Special item - apple")
+            )
+            self.assertEqual(len(res), 1)
+            self.assertEqual(res[0]["name"], "special2")
+            self.assertEqual(res[0]["description"], "Special item - banana")
+        finally:
+            # Clean up created items to avoid affecting other tests
+            query.model(test1).delete()
+            query.model(test2).delete()
 
 
 if __name__ == "__main__":

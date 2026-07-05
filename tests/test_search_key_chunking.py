@@ -1,7 +1,7 @@
 import datetime
 import unittest
-from boto3.dynamodb.conditions import Key
 
+from boto3.dynamodb.conditions import Key
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
 from ddb_single.table import FieldType, Table
@@ -46,11 +46,7 @@ class TestSearchKeyChunking(unittest.TestCase):
         self.assertEqual(len(base_items), 1)
         self.assertEqual(len(base_items[0][data_key]), 64)
 
-        chunk_items = [
-            i
-            for i in items
-            if i[self.table.__secondary_key__].startswith(f"{base_sk}#chunk#")
-        ]
+        chunk_items = [i for i in items if i[self.table.__secondary_key__].startswith(f"{base_sk}#chunk#")]
         self.assertGreater(len(chunk_items), 1)
 
         chunk_items = sorted(chunk_items, key=lambda i: i.get("chunk_index", 0))

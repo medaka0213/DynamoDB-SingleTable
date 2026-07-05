@@ -1,13 +1,10 @@
+import datetime
+import logging
 import unittest
 
-from ddb_single.table import FieldType, Table
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
-
-import datetime
-
-
-import logging
+from ddb_single.table import FieldType, Table
 
 logging.basicConfig(level=logging.INFO)
 

@@ -1,11 +1,15 @@
 import importlib
 import inspect
+import re
 
 import click
 
 from ddb_single.model import BaseModel
 from ddb_single.query import apply_model_change_records
 from ddb_single.table import Table
+
+# Python のモジュールパスとして妥当な形式のみ許可する（任意コード実行の防止） (#399)
+_MODULE_PATH_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
 
 
 def _apply_model_change_records_from_path(module_path: str) -> None:
@@ -18,6 +22,10 @@ def _apply_model_change_records_from_path(module_path: str) -> None:
         module_path (str): Python module path that defines a :class:`Table` instance
             named ``table`` and the corresponding :class:`BaseModel` classes.
     """
+    if not _MODULE_PATH_PATTERN.fullmatch(module_path):
+        # 英数・アンダースコア・ドット区切り以外のパスは import しない
+        raise ValueError("invalid module path")
+
     try:
         module = importlib.import_module(module_path)
     except ModuleNotFoundError as exc:

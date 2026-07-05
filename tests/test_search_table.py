@@ -1,12 +1,11 @@
-import unittest
-
-from ddb_single.table import FieldType, Table, Key, Attr, SearchExpression
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-import ddb_single.utils_botos as util_b
-
 import datetime
 import logging
+import unittest
+
+import ddb_single.utils_botos as util_b
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import Attr, FieldType, Key, SearchExpression, Table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,8 +57,7 @@ class TestSearchTable(unittest.TestCase):
             {
                 "FilterStatus": util_b.FilterStatus.STAGED,
                 "IndexName": table.__search_index__,
-                "KeyConditionExpression": Key("sk").eq("search_user_name")
-                & Key("data").eq("test001"),
+                "KeyConditionExpression": Key("sk").eq("search_user_name") & Key("data").eq("test001"),
             }
         ]
         res = table.search("user", *searchEx)
@@ -77,14 +75,12 @@ class TestSearchTable(unittest.TestCase):
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.STAGED,
                 IndexName=table.__search_index__,
-                KeyConditionExpression=Key("sk").eq("search_user_name")
-                & Key("data").begins_with("test01"),
+                KeyConditionExpression=Key("sk").eq("search_user_name") & Key("data").begins_with("test01"),
             ),
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.STAGED,
                 IndexName=table.__search_num_index__,
-                KeyConditionExpression=Key("sk").eq("search_user_age")
-                & Key("data-n").lte(15),
+                KeyConditionExpression=Key("sk").eq("search_user_age") & Key("data-n").lte(15),
             ),
         ]
         res = table.search("user", *searchEx)
@@ -105,14 +101,12 @@ class TestSearchTable(unittest.TestCase):
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.STAGED,
                 IndexName=table.__search_index__,
-                KeyConditionExpression=Key("sk").eq("search_user_name")
-                & Key("data").begins_with("test01"),
+                KeyConditionExpression=Key("sk").eq("search_user_name") & Key("data").begins_with("test01"),
             ),
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.STAGED,
                 IndexName=table.__search_num_index__,
-                KeyConditionExpression=Key("sk").eq("search_user_age")
-                & Key("data-n").lte(15),
+                KeyConditionExpression=Key("sk").eq("search_user_age") & Key("data-n").lte(15),
             ),
         ]
         res = table.search("user", *searchEx, limit=3)
@@ -133,14 +127,11 @@ class TestSearchTable(unittest.TestCase):
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.STAGED,
                 IndexName=table.__search_index__,
-                KeyConditionExpression=Key("sk").eq("search_user_name")
-                & Key("data").begins_with("test1"),
+                KeyConditionExpression=Key("sk").eq("search_user_name") & Key("data").begins_with("test1"),
             ),
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.FILTER,
-                FilterMethod=util_b.attr_method(
-                    "description", "odd", util_b.QueryType.CONTAINS
-                ),
+                FilterMethod=util_b.attr_method("description", "odd", util_b.QueryType.CONTAINS),
                 FilterExpression=Attr("description").contains("odd"),
             ),
         ]
@@ -161,9 +152,7 @@ class TestSearchTable(unittest.TestCase):
         searchEx = [
             SearchExpression(
                 FilterStatus=util_b.FilterStatus.FILTER,
-                FilterMethod=util_b.attr_method(
-                    "description", "odd", util_b.QueryType.CONTAINS
-                ),
+                FilterMethod=util_b.attr_method("description", "odd", util_b.QueryType.CONTAINS),
                 FilterExpression=Attr("description").contains("odd"),
             ),
         ]

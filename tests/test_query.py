@@ -1,12 +1,12 @@
-import unittest
-from unittest.mock import patch, MagicMock
-from ddb_single.table import FieldType, Table
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-from ddb_single.error import ValidationError
-
 import datetime
 import logging
+import unittest
+from unittest.mock import MagicMock, patch
+
+from ddb_single.error import ValidationError
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import FieldType, Table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +27,6 @@ class User(BaseModel):
     name_ignore_case = DBField(search_key=True, ignore_case=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
-    description = DBField()
     config = DBField(type=FieldType.MAP)
     tag_list = DBField(type=FieldType.LIST)
     description = DBField(search_key=True)
@@ -93,9 +92,7 @@ class TestCRUD(unittest.TestCase):
                 config={"a": 1, "b": 2},
             )
             query.model(test1).create()
-        res = query.model(User).search(
-            User.name_ignore_case.eq("Test Validation Error")
-        )
+        res = query.model(User).search(User.name_ignore_case.eq("Test Validation Error"))
         self.assertEqual(len(res), 0)
 
     def test_02_0_search(self):
@@ -104,52 +101,38 @@ class TestCRUD(unittest.TestCase):
         self.assertEqual(res[0]["name"], "test")
 
         # 存在しないデータを検索
-        res = query.model(User).search(
-            User.name.eq("test"), User.name_ignore_case.eq("Test3")
-        )
+        res = query.model(User).search(User.name.eq("test"), User.name_ignore_case.eq("Test3"))
         self.assertEqual(len(res), 0)
 
     def test_02_0_search_mult(self):
         """Search by multiple conditions [staged + filter]"""
-        res = query.model(User).search(
-            User.description.contains("test"), User.created_at.gte("2023-10-02")
-        )
+        res = query.model(User).search(User.description.contains("test"), User.created_at.gte("2023-10-02"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test2")
 
         # 存在しないデータを検索
-        res = query.model(User).search(
-            User.description.contains("test"), User.created_at.gte("2023-10-03")
-        )
+        res = query.model(User).search(User.description.contains("test"), User.created_at.gte("2023-10-03"))
         self.assertEqual(len(res), 0)
 
     def test_02_0_search_mult_filter(self):
         """Search by multiple conditions [filter * 2]"""
-        res = query.model(User).search(
-            User.description.contains("test"), User.created_at.contains("01:00:")
-        )
+        res = query.model(User).search(User.description.contains("test"), User.created_at.contains("01:00:"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test2")
 
         # 存在しないデータを検索
-        res = query.model(User).search(
-            User.description.contains("test"), User.created_at.contains("02:00:")
-        )
+        res = query.model(User).search(User.description.contains("test"), User.created_at.contains("02:00:"))
         self.assertEqual(len(res), 0)
 
     def test_02_1_0_search_by_get_field(self):
         """Search by get_field"""
-        res = query.model(User).search(
-            User(__skip_validation__=True).get_field("name").eq("test")
-        )
+        res = query.model(User).search(User(__skip_validation__=True).get_field("name").eq("test"))
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0]["name"], "test")
 
     def test_02_1_1_search_by_get_field_not_found(self):
         """Search by get_field: not found"""
-        res = query.model(User).search(
-            User(__skip_validation__=True).get_field("name").eq("Test")
-        )
+        res = query.model(User).search(User(__skip_validation__=True).get_field("name").eq("Test"))
         self.assertEqual(len(res), 0)
 
     def test_02_2_get_by_unique(self):

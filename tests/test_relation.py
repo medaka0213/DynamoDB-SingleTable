@@ -1,12 +1,11 @@
-import unittest
-
-from ddb_single.table import FieldType, Table
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-from ddb_single.error import NotFoundError
-
 import datetime
 import logging
+import unittest
+
+from ddb_single.error import NotFoundError
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import FieldType, Table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,12 +28,29 @@ class User(BaseModel):
     description = DBField()
 
 
+class Image(BaseModel):
+    __table__ = table
+    __model_name__ = "image"
+    unique = DBField(unique_key=True)
+    title = DBField(search_key=True)
+
+
+class Slide(BaseModel):
+    __table__ = table
+    __model_name__ = "slide"
+    unique = DBField(unique_key=True)
+    name = DBField(search_key=True)
+    user = DBField(relation=User, search_key=True)
+    pdf = DBField(relation=Image, search_key=True)
+    markdown = DBField(relation=Image, search_key=True)
+
+
 class BlogPost(BaseModel):
     __model_name__ = "blogpost"
     __table__ = table
     title = DBField(unique_key=True)
     content = DBField(search_key=True)
-    author = DBField(reletion=User)
+    author = DBField(relation=User)
 
 
 class Comment(BaseModel):
@@ -42,7 +58,7 @@ class Comment(BaseModel):
     __table__ = table
     title = DBField(unique_key=True)
     content = DBField(search_key=True)
-    author = DBField(reletion=User, relation_raise_if_not_found=True)
+    author = DBField(relation=User, relation_raise_if_not_found=True)
 
 
 print("table_name:", table.__table_name__)
@@ -149,10 +165,62 @@ class TestRelation(unittest.TestCase):
 
         # Blo
         with self.assertRaises(NotFoundError):
-            comment = Comment(
-                unique_key="test", content="test", author="user_not_exist"
-            )
+            comment = Comment(unique_key="test", content="test", author="user_not_exist")
             query.model(comment).update()
+
+    def test_05_multiple_relations(self):
+        """複数の関連フィールドを持つモデルのテスト - Slideモデルのような複雑なケース"""
+
+        # Create related items
+        user = User(name="slide_user", age=25)
+        query.model(user).create()
+
+        pdf_image = Image(unique="pdf-image-1", title="PDF Image")
+        query.model(pdf_image).create()
+
+        markdown_image = Image(unique="markdown-image-1", title="Markdown Image")
+        query.model(markdown_image).create()
+
+        # Create slide with multiple relations
+        slide = Slide(
+            unique="test-slide-1",
+            name="Test Slide",
+            user=user,
+            pdf=pdf_image,
+            markdown=markdown_image,
+        )
+        query.model(slide).create()
+
+        # Verify slide was created
+        res = query.model(Slide).get(slide.data["pk"])
+        self.assertIsNotNone(res)
+        self.assertEqual(res["unique"], "test-slide-1")
+        self.assertEqual(res["user"], "slide_user")
+        self.assertEqual(res["pdf"], "pdf-image-1")
+        self.assertEqual(res["markdown"], "markdown-image-1")
+
+        # Verify relations were created - User relation
+        user_relations = query.model(slide).get_relation(model=User)
+        self.assertEqual(len(user_relations), 1, "Should have 1 User relation")
+        self.assertEqual(user_relations[0]["name"], "slide_user")
+
+        # Verify relations were created - Image relations
+        image_relations = query.model(slide).get_relation(model=Image)
+        self.assertEqual(len(image_relations), 2, "Should have 2 Image relations (pdf + markdown)")
+
+        # Verify we can find the slide from the user
+        user_refs = query.model(user).get_reference(model=Slide)
+        self.assertEqual(len(user_refs), 1, "User should reference 1 Slide")
+        self.assertEqual(user_refs[0]["unique"], "test-slide-1")
+
+        # Verify we can find the slide from the images
+        pdf_refs = query.model(pdf_image).get_reference(model=Slide)
+        self.assertEqual(len(pdf_refs), 1, "PDF Image should reference 1 Slide")
+        self.assertEqual(pdf_refs[0]["unique"], "test-slide-1")
+
+        markdown_refs = query.model(markdown_image).get_reference(model=Slide)
+        self.assertEqual(len(markdown_refs), 1, "Markdown Image should reference 1 Slide")
+        self.assertEqual(markdown_refs[0]["unique"], "test-slide-1")
 
 
 if __name__ == "__main__":

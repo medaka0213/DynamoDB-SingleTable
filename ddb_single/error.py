@@ -1,5 +1,4 @@
 class DDBSingleError(Exception):
-
     def __init__(self, message):
         self.message = message
 
@@ -8,19 +7,16 @@ class DDBSingleError(Exception):
 
 
 class ValidationError(DDBSingleError):
-
     def __str__(self):
-        return f"Falied to validate: {self.message}"
+        return f"Failed to validate: {self.message}"
 
 
 class InvalidParameterError(DDBSingleError):
-
     def __str__(self):
         return f"Invalid parameter: {self.message}"
 
 
 class NotFoundError(DDBSingleError):
-
     def __init__(self, message):
         super().__init__(message)
 
