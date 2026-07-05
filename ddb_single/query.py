@@ -305,7 +305,7 @@ class Query:
                     pks.append(x)
                 elif field.relation_raise_if_not_found:
                     # 存在しない場合はエラー
-                    raise NotFoundError(f"{self.__model__.__model_name__}={x}")
+                    raise NotFoundError(f"{field.relation.__model_name__}={x}")
         # Primary key が None のものを除外して、関連アイテムを作成
         pks = [pk for pk in pks if pk is not None]
         result = [self._relation_item(pk, field) for pk in pks]

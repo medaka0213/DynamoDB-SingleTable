@@ -121,7 +121,7 @@ class Table:
         **table_kwargs,
     ):
         env_url = os.environ.get("DYNAMODB_ENDPOINT_URL")
-        if env_url:
+        if env_url and "endpoint_url" not in table_kwargs:
             table_kwargs["endpoint_url"] = env_url
         self.__recourse__ = boto3.resource("dynamodb", **table_kwargs)
         self.__client__ = boto3.client("dynamodb", **table_kwargs)
@@ -227,62 +227,22 @@ class Table:
         """検索キーを分割する際の1チャンクあたりのバイト数"""
         return self.__search_key_chunk_size__
 
-    def scan(self, **kwargs) -> list[dict]:
-        """スキャン"""
-        limit = kwargs.get("Limit") or float("inf")
+    def _execute_boto_op(self, op, label, **kwargs):
+        """boto3 の scan/query を実行し、ページネーションを含めて統一的にエラーハンドリングする。
+
+        成功時はレスポンス(dict)を返す。ValidationException はクエリ自体の問題なので
+        呼び出し側で扱えるよう再送出し、それ以外の ClientError はログ出力のうえ None を返す
+        （= 呼び出し側は空扱いにする）。
+        """
         try:
-            response = self.__table__.scan(**kwargs)
+            return op(**kwargs)
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             error_msg = e.response.get("Error", {}).get("Message", "No message")
 
-            # Log detailed information about the scan that failed
+            # 失敗したリクエストの詳細をログに残す
             logger.error(
-                f"DynamoDB Scan failed with {error_code}: {error_msg}",
-                extra={
-                    "error_code": error_code,
-                    "error_message": error_msg,
-                    "index_name": kwargs.get("IndexName"),
-                    "filter_expression": str(kwargs.get("FilterExpression"))
-                    if kwargs.get("FilterExpression")
-                    else None,
-                },
-                exc_info=True,
-            )
-
-            # ValidationException indicates a problem with the scan parameters,
-            # Re-raise it so the caller can handle it appropriately.
-            if error_code == "ValidationException":
-                raise
-
-            # For other errors, return empty list (existing behavior)
-            return []
-
-        # Process successful scan response
-        if "Items" in response:
-            res_data = response["Items"]
-            while "LastEvaluatedKey" in response and len(res_data) < limit:
-                logger.debug(f"pagination: {len(res_data)}/{limit}")
-                response = self.__table__.scan(**kwargs, ExclusiveStartKey=response["LastEvaluatedKey"])
-                res_data += response["Items"]
-            return util_b.json_export(res_data)
-        return []
-
-    def query(self, **kwargs) -> list[dict]:
-        """クエリ"""
-        limit = kwargs.get("Limit") or float("inf")
-        kce = kwargs.get("KeyConditionExpression")
-        if kce is not None:
-            validate_single_condition_per_key(kce)
-        try:
-            response = self.__table__.query(**kwargs)
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "Unknown")
-            error_msg = e.response.get("Error", {}).get("Message", "No message")
-
-            # Log detailed information about the query that failed
-            logger.error(
-                f"DynamoDB Query failed with {error_code}: {error_msg}",
+                f"DynamoDB {label} failed with {error_code}: {error_msg}",
                 extra={
                     "error_code": error_code,
                     "error_message": error_msg,
@@ -297,19 +257,51 @@ class Table:
                 exc_info=True,
             )
 
-            # ValidationException indicates a problem with the query structure itself,
-            # not just "no data found". Re-raise it so the caller can handle it appropriately.
+            # ValidationException は「データが無い」ではなくリクエスト構造の問題なので再送出する
             if error_code == "ValidationException":
                 raise
 
-            # For other errors, return empty list (existing behavior)
+            # その他のエラーは空扱い（既存挙動）
+            return None
+
+    def scan(self, **kwargs) -> list[dict]:
+        """スキャン"""
+        limit = kwargs.get("Limit") or float("inf")
+        response = self._execute_boto_op(self.__table__.scan, "Scan", **kwargs)
+        if response is None:
             return []
 
-        # Process successful query response
+        if "Items" in response:
+            res_data = response["Items"]
+            while "LastEvaluatedKey" in response and len(res_data) < limit:
+                logger.debug(f"pagination: {len(res_data)}/{limit}")
+                response = self._execute_boto_op(
+                    self.__table__.scan, "Scan", **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
+                )
+                if response is None:
+                    break
+                res_data += response["Items"]
+            return util_b.json_export(res_data)
+        return []
+
+    def query(self, **kwargs) -> list[dict]:
+        """クエリ"""
+        limit = kwargs.get("Limit") or float("inf")
+        kce = kwargs.get("KeyConditionExpression")
+        if kce is not None:
+            validate_single_condition_per_key(kce)
+        response = self._execute_boto_op(self.__table__.query, "Query", **kwargs)
+        if response is None:
+            return []
+
         if len(response["Items"]):
             res_data = response["Items"]
             while "LastEvaluatedKey" in response and len(res_data) < limit:
-                response = self.__table__.query(**kwargs, ExclusiveStartKey=response["LastEvaluatedKey"])
+                response = self._execute_boto_op(
+                    self.__table__.query, "Query", **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
+                )
+                if response is None:
+                    break
                 res_data += response["Items"]
             return util_b.json_export(res_data)
         return []

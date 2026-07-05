@@ -66,6 +66,11 @@ class TestDBFieldValidation(unittest.TestCase):
         with self.assertRaises(ValidationError):
             field.validate(["not", "a", "string"])
 
+    def test_default_value_is_validated(self):
+        # A default supplied when no value is given must still be type-validated.
+        field = DBField(type=FieldType.NUMBER, default=5)
+        self.assertEqual(field.validate(None), Decimal("5"))
+
 
 class TestDBFieldRelationBackwardCompat(unittest.TestCase):
     """The misspelled ``reletion`` kwargs are deprecated but still accepted."""

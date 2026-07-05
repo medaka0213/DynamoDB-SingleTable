@@ -141,7 +141,7 @@ class DBField:
             val = None
 
         if not skip:
-            if value is None:
+            if val is None:
                 if not self.nullable:
                     raise ValidationError(f"Not nullable: {self.__class__.__name__}")
             else:
@@ -381,7 +381,7 @@ class DBField:
                     KeyConditionExpression=util_b.range_ex(self.name, value, mode),
                     FilterStatus=util_b.FilterStatus.SEARCH,
                 )
-            elif self.search_key and value:
+            elif self.search_key and value is not None and not (isinstance(value, (str, bytes)) and len(value) == 0):
                 # SearchKey を使う場合は検索用 GSI を活用し、ユニーク検索が確実にヒットするようにする
                 KeyConditionExpression = Key(self.__table__.__secondary_key__).eq(
                     self.search_key_factory()
