@@ -7,6 +7,7 @@ from typing import Iterable
 
 from ddb_single.error import InvalidParameterError
 
+# boto3 uses *Equals suffix for lte/gte (not *OrEqualTo). Include both spellings for compatibility.
 _LEAF_TYPES = frozenset(
     {
         "Equals",
@@ -27,19 +28,22 @@ def _condition_subnodes(condition) -> tuple:
     values = getattr(condition, "_values", None)
     if values is None:
         raise InvalidParameterError(
-            "Unsupported KeyConditionExpression node (missing _values): %s"
-            % type(condition).__name__
+            "Unsupported KeyConditionExpression node (missing _values): %s" % type(condition).__name__
         )
     if not isinstance(values, tuple):
         raise InvalidParameterError(
-            "Unsupported KeyConditionExpression node (_values is not a tuple): %s"
-            % type(condition).__name__
+            "Unsupported KeyConditionExpression node (_values is not a tuple): %s" % type(condition).__name__
         )
     return values
 
 
 def iter_key_attributes_used_in_key_condition(condition) -> Iterable[str]:
-    """Yield key attribute names referenced in a boto3 KeyConditionExpression tree."""
+    """Yield attribute names referenced by Key() leaves in a condition tree.
+
+    DynamoDB requires at most one condition function per key attribute in
+    KeyConditionExpression. This iterator collects names so callers can detect
+    duplicates before calling ``Query``.
+    """
     if condition is None:
         return
     cls_name = condition.__class__.__name__
@@ -55,27 +59,21 @@ def iter_key_attributes_used_in_key_condition(condition) -> Iterable[str]:
     if cls_name in _LEAF_TYPES:
         values = getattr(condition, "_values", None)
         if values is None or len(values) == 0:
-            raise InvalidParameterError(
-                "Unsupported KeyConditionExpression leaf (missing _values): %s"
-                % cls_name
-            )
+            raise InvalidParameterError("Unsupported KeyConditionExpression leaf (missing _values): %s" % cls_name)
         key_or_attr = values[0]
         name = getattr(key_or_attr, "name", None)
         if name is not None:
             yield name
         return
-    raise InvalidParameterError(
-        "Unsupported KeyConditionExpression node type: %s" % cls_name
-    )
+    raise InvalidParameterError("Unsupported KeyConditionExpression node type: %s" % cls_name)
 
 
 def validate_single_condition_per_key(condition) -> None:
-    """Raise when the same key attribute is constrained more than once."""
+    """Raise InvalidParameterError if the same key attribute appears more than once."""
     names = list(iter_key_attributes_used_in_key_condition(condition))
     counts = Counter(names)
     dups = sorted(k for k, v in counts.items() if v > 1)
     if dups:
         raise InvalidParameterError(
-            "KeyConditionExpression uses multiple conditions for the same key attribute(s): %s"
-            % ", ".join(dups)
+            "KeyConditionExpression uses multiple conditions for the same key attribute(s): %s" % ", ".join(dups)
         )

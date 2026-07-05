@@ -1,7 +1,9 @@
 import unittest
+import warnings
 from decimal import Decimal
-from ddb_single.model import DBField
+
 from ddb_single.error import ValidationError
+from ddb_single.model import DBField
 from ddb_single.table import FieldType
 
 
@@ -13,7 +15,6 @@ class DummyRelation:
 
 
 class TestDBFieldValidation(unittest.TestCase):
-
     def test_string_field_valid(self):
         field = DBField(type=FieldType.STRING, nullable=False)
         # Valid string input: returns the string as is.
@@ -64,6 +65,38 @@ class TestDBFieldValidation(unittest.TestCase):
         # A field that is not a list should not accept a list input.
         with self.assertRaises(ValidationError):
             field.validate(["not", "a", "string"])
+
+
+class TestDBFieldRelationBackwardCompat(unittest.TestCase):
+    """The misspelled ``reletion`` kwargs are deprecated but still accepted."""
+
+    def test_reletion_alias_maps_to_relation(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            field = DBField(reletion=DummyRelation)
+        self.assertIs(field.relation, DummyRelation)
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
+
+    def test_reletion_by_unique_alias_maps_to_relation_by_unique(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            field = DBField(relation=DummyRelation, reletion_by_unique=False)
+        self.assertFalse(field.relation_by_unique)
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
+
+    def test_relation_takes_precedence_over_reletion(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            field = DBField(relation=DummyRelation, reletion=None)
+        self.assertIs(field.relation, DummyRelation)
+
+    def test_new_relation_kwarg_no_warning(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            field = DBField(relation=DummyRelation, relation_by_unique=True)
+        self.assertIs(field.relation, DummyRelation)
+        self.assertTrue(field.relation_by_unique)
+        self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
 
 
 if __name__ == "__main__":

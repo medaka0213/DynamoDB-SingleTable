@@ -1,16 +1,15 @@
-import unittest
-from ddb_single.table import Table
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-
 import datetime
 import logging
+import unittest
+
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import Table
 
 logging.basicConfig(level=logging.DEBUG)
 
 table = Table(
-    table_name="query_unique_doubled_test_"
-    + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    table_name="query_unique_doubled_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
     aws_access_key_id="fakeMyKeyId",

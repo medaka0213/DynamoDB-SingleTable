@@ -1,11 +1,13 @@
 # ddb_single/utils_botos.py
-from boto3.dynamodb.conditions import Key, Attr
-from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from ddb_single.error import InvalidParameterError
+from decimal import Decimal
 
 # クエリ設定のENUM
 from enum import Enum
-from decimal import Decimal
+
+from boto3.dynamodb.conditions import Attr, Key
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+
+from ddb_single.error import InvalidParameterError
 
 
 class QueryType(Enum):
@@ -99,8 +101,8 @@ def attr_method(name, value, mode):
         QueryType.LT_E: lambda x: x.get(name) <= value,
         QueryType.GT: lambda x: x.get(name) > value,
         QueryType.GT_E: lambda x: x.get(name) >= value,
-        QueryType.BEGINS: lambda x: x.get(name).startswith(value),
-        QueryType.CONTAINS: lambda x: value in x.get(name),
+        QueryType.BEGINS: lambda x: x.get(name) is not None and x.get(name).startswith(value),
+        QueryType.CONTAINS: lambda x: x.get(name) is not None and value in x.get(name),
         QueryType.IN: lambda x: x.get(name) in value,
         QueryType.N_EQ: lambda x: x.get(name) != value,
         QueryType.EX: lambda x: name in x,

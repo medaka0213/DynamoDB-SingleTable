@@ -1,10 +1,10 @@
-from typing import Optional, List, Dict, Type
+import logging
+from typing import Dict, List, Optional, Type
+
+import ddb_single.utils_botos as util_b
+from ddb_single.error import NotFoundError, ValidationError
 from ddb_single.model import BaseModel, DBField
 from ddb_single.table import Table
-import ddb_single.utils_botos as util_b
-from ddb_single.error import ValidationError, NotFoundError
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -39,31 +39,16 @@ class Query:
             field: DBField = self.__model__.__class__.__dict__[k]
             value = self.__model__.data.get(k)
             if k in self.__model__.data.keys() and value:
-                # Set the field value before calling search_item
-                field.value = value
-                items_add.extend(
-                    field.search_item(
-                        self.__model__.data[self.__model__.__primary_key__]
-                    )
-                )
+                items_add.extend(field.search_item(self.__model__.data[self.__model__.__primary_key__], value))
             else:
-                # Set None for removal
-                field.value = None
-                items_remove.extend(
-                    field.search_item(
-                        self.__model__.data[self.__model__.__primary_key__]
-                    )
-                )
+                items_remove.extend(field.search_item(self.__model__.data[self.__model__.__primary_key__], None))
 
             if previous_data is not None:
                 prev_value = previous_data.get(k)
                 # 以前の値と異なる場合は過去の検索アイテムを削除対象に追加する
                 if prev_value and prev_value != value:
-                    field.value = prev_value
                     items_remove.extend(
-                        field.search_item(
-                            self.__model__.data[self.__model__.__primary_key__]
-                        )
+                        field.search_item(self.__model__.data[self.__model__.__primary_key__], prev_value)
                     )
         return items_add, items_remove
 
@@ -74,9 +59,7 @@ class Query:
         Args:
             queries (List[dict]): Query objects
         """
-        return self.__table__.search(
-            self.__model__.__model_name__, *queries, pk_only=pk_only, limit=limit
-        )
+        return self.__table__.search(self.__model__.__model_name__, *queries, pk_only=pk_only, limit=limit)
 
     def get(self, pk: str):
         """
@@ -87,9 +70,7 @@ class Query:
         res = self.__table__.get_item(pk)
         return res
 
-    def get_by_unique(
-        self, value, pk_only=False, keys: List[str | DBField] = None
-    ) -> dict:
+    def get_by_unique(self, value, pk_only=False, keys: List[str | DBField] = None) -> dict:
         """
         ユニークキーで取得
         Args:
@@ -112,9 +93,7 @@ class Query:
                 # 指定されたキー以外はスキップ
                 logger.warning(f"get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
-            _res = self.search(
-                getattr(self.__model__.__class__, key).eq(value), pk_only=pk_only
-            )
+            _res = self.search(getattr(self.__model__.__class__, key).eq(value), pk_only=pk_only)
             logger.debug(f"get_by_unique: {key}={value} result={_res}")
             res.extend(_res)
         if res:
@@ -130,9 +109,7 @@ class Query:
         res = self.__table__.batch_get_from_pks(pks)
         return res
 
-    def batch_get_by_unique(
-        self, uniques: List[str], pk_only=False, keys: List[str | DBField] = None
-    ):
+    def batch_get_by_unique(self, uniques: List[str], pk_only=False, keys: List[str | DBField] = None):
         """
         ユニークキーのリストから一括取得
         Args:
@@ -151,13 +128,9 @@ class Query:
         for key in self.__model__.__unique_keys__:
             if specified_keys and key not in specified_keys:
                 # 指定されたキー以外はスキップ
-                logger.warning(
-                    f"batch_get_by_unique: {key} not in {specified_keys} ... skip"
-                )
+                logger.warning(f"batch_get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
-            _res = self.search(
-                getattr(self.__model__.__class__, key).in_(uniques), pk_only=pk_only
-            )
+            _res = self.search(getattr(self.__model__.__class__, key).in_(uniques), pk_only=pk_only)
             logger.debug(f"batch_get_by_unique: {key} in {uniques} result={_res}")
             res.extend(_res)
         return res
@@ -175,9 +148,7 @@ class Query:
             batch: BatchWriteItem
             raise_if_exists (bool): Throw ValidationError if item already exists
         """
-        old_item = self.get_by_unique(
-            self.__model__.data[self.__model__.__unique_keys__[0]]
-        )
+        old_item = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
         if old_item:
             if raise_if_exists:
                 raise ValidationError("Item Already exists")
@@ -193,9 +164,7 @@ class Query:
             target: Target item
             batch: BatchWriteItem
         """
-        payload = self.get_by_unique(
-            self.__model__.data[self.__model__.__unique_keys__[0]]
-        )
+        payload = self.get_by_unique(self.__model__.data[self.__model__.__unique_keys__[0]])
         if payload:
             self._update(payload, target or {}, batch=batch)
         else:
@@ -236,12 +205,8 @@ class Query:
     def _update(self, old_item, new_item, batch=None):
         previous_data = old_item.copy()
         self.__model__.data = {**old_item, **self.__model__.data, **new_item}
-        self.__model__.data[self.__model__.__primary_key__] = old_item[
-            self.__model__.__primary_key__
-        ]
-        self.__model__.data[self.__model__.__secondary_key__] = old_item[
-            self.__model__.__secondary_key__
-        ]
+        self.__model__.data[self.__model__.__primary_key__] = old_item[self.__model__.__primary_key__]
+        self.__model__.data[self.__model__.__secondary_key__] = old_item[self.__model__.__secondary_key__]
         if not util_b.is_same_json(old_item, self.__model__.data):
             self._create(
                 batch=batch,
@@ -267,9 +232,7 @@ class Query:
         target = target or self.__model__.data
         if target.get(self.__model__.__unique_keys__[0]):
             # unique があれば unique で削除
-            self.delete_by_unique(
-                target[self.__model__.__unique_keys__[0]], batch=batch
-            )
+            self.delete_by_unique(target[self.__model__.__unique_keys__[0]], batch=batch)
         elif target.get(self.__model__.__primary_key__):
             # pk があれば pk で削除
             self.delete_by_pk(target[self.__model__.__primary_key__], batch=batch)
@@ -294,16 +257,12 @@ class Query:
     def _relation_item(self, pk, field: DBField):
         """関連付け"""
         return {
-            self.__model__.__primary_key__: self.__model__.data[
-                self.__model__.__primary_key__
-            ],
+            self.__model__.__primary_key__: self.__model__.data[self.__model__.__primary_key__],
             self.__model__.__secondary_key__: self.__table__.rel_key(pk),
             self.__table__.__search_data_key__: field.name,
         }
 
-    def _get_other_item_by_unique(
-        self, target: BaseModel, value, table=None, default=None
-    ):
+    def _get_other_item_by_unique(self, target: BaseModel, value, table=None, default=None):
         q = Query(table or self.__table__, target)
         res = q.get_by_unique(value)
         return res
@@ -311,30 +270,39 @@ class Query:
     def _field2relation_items(self, field: DBField, value):
         if not value:
             # 空の場合は空リストを返す
+            logger.info(f"_field2relation_items: field={field.name}, value is empty")
             return []
 
         pks = []
         if not field.is_list():
             # リストでない場合はリストに変換
             value = [value]
-        if field.reletion_by_unique:
+        if field.relation_by_unique:
             # Unique Key で関連付け
             rel: BaseModel = field.relation()
+            logger.info(f"_field2relation_items: field={field.name}, relation={rel.__model_name__}, values={value}")
             for x in value:
                 # Unique Key で関連アイテムを取得
                 _rel_item = self._get_other_item_by_unique(rel, x, default={})
                 if _rel_item:
-                    pks.append(_rel_item.get(rel.__primary_key__))
-                elif field.relation_raise_if_not_found:
-                    # 存在しない場合はエラー
-                    raise NotFoundError(f"{rel.__model_name__}={x}")
+                    pk = _rel_item.get(rel.__primary_key__)
+                    logger.info(f"_field2relation_items: Found relation item for {x}: pk={pk}")
+                    pks.append(pk)
+                else:
+                    logger.warning(
+                        f"_field2relation_items: Relation item NOT FOUND for {field.name}={x} (model={rel.__model_name__})"
+                    )
+                    if field.relation_raise_if_not_found:
+                        # 存在しない場合はエラー
+                        raise NotFoundError(f"{rel.__model_name__}={x}")
         else:
             # Primary key で関連付け
             for x in value:
-                pk = self.get(pk=x)
-                if pk:
+                # x is already a PK, just verify it exists
+                item = self.get(pk=x)
+                if item:
                     # 存在するものだけ追加
-                    pks.append(pk)
+                    pks.append(x)
                 elif field.relation_raise_if_not_found:
                     # 存在しない場合はエラー
                     raise NotFoundError(f"{self.__model__.__model_name__}={x}")
@@ -346,30 +314,34 @@ class Query:
     def _relation_items(self):
         items_add = []
         items_exist = []
+        # 関連キー(スキーマ上のフィールド名)はデバッグ用途のみ DEBUG で出力する。
+        # 実データ値は PII を含む恐れがあるためログに出さない。
+        logger.debug(
+            "_relation_items CALLED: model=%s, relation_keys_count=%d, relation_keys=%s",
+            self.__model__.__model_name__,
+            len(self.__model__.__relation_keys__),
+            self.__model__.__relation_keys__,
+        )
         for k in self.__model__.__relation_keys__:
             field: DBField = self.__model__.__class__.__dict__[k]
             rel: BaseModel = field.relation
+            logger.debug("_relation_items: Processing field=%s, relation=%s", k, rel.__model_name__)
             _items_exist = self.__table__.relation(
                 self.__model__.data[self.__model__.__primary_key__], rel.__model_name__
             )
-            _items_exist = [
-                self._relation_item(i[self.__table__.__primary_key__], field)
-                for i in _items_exist
-            ]
+            logger.debug("_relation_items: Found %d existing relation items for %s", len(_items_exist), k)
+            _items_exist = [self._relation_item(i[self.__table__.__primary_key__], field) for i in _items_exist]
             if k in self.__model__.data.keys():
                 _items_add = self._field2relation_items(field, self.__model__.data[k])
+                logger.debug("_relation_items: Created %d new relation items for %s", len(_items_add), k)
                 items_add.extend(_items_add)
             items_exist.extend(_items_exist)
         sk_add = [item[self.__model__.__secondary_key__] for item in items_add]
         sk_exist = [item[self.__model__.__secondary_key__] for item in items_exist]
         # 削除 .. 既存のリストから追加リストを引く
-        items_remove = [
-            i for i in items_exist if i[self.__model__.__secondary_key__] not in sk_add
-        ]
+        items_remove = [i for i in items_exist if i[self.__model__.__secondary_key__] not in sk_add]
         # 追加 .. 追加リストから既存のリストを引く
-        items_add = [
-            i for i in items_add if i[self.__model__.__secondary_key__] not in sk_exist
-        ]
+        items_add = [i for i in items_add if i[self.__model__.__secondary_key__] not in sk_exist]
         return items_add, items_remove
 
     def get_relation(self, model: BaseModel = "", field: DBField = "", pk_only=False):
@@ -416,20 +388,14 @@ def apply_model_change_records(table: Table, models: List[Type[BaseModel]]) -> N
     model_map: Dict[str, Type[BaseModel]] = {}
     for model_cls in models:
         if not (isinstance(model_cls, type) and issubclass(model_cls, BaseModel)):
-            raise ValueError(
-                f"All models must be BaseModel subclasses, got {model_cls}"
-            )
+            raise ValueError(f"All models must be BaseModel subclasses, got {model_cls}")
 
         # Ensure the model belongs to the specified table
         if getattr(model_cls, "__table__", None) != table:
-            raise ValueError(
-                f"Model {model_cls.__name__} does not belong to the specified table"
-            )
+            raise ValueError(f"Model {model_cls.__name__} does not belong to the specified table")
 
         if not hasattr(model_cls, "__model_name__"):
-            raise ValueError(
-                f"Model {model_cls.__name__} must have __model_name__ attribute"
-            )
+            raise ValueError(f"Model {model_cls.__name__} must have __model_name__ attribute")
 
         model_map[model_cls.__model_name__] = model_cls
 

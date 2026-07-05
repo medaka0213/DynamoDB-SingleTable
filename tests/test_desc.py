@@ -1,10 +1,10 @@
-import unittest
-from ddb_single.table import FieldType, Table
-from ddb_single.model import BaseModel, DBField
-from ddb_single.query import Query
-
 import datetime
 import logging
+import unittest
+
+from ddb_single.model import BaseModel, DBField
+from ddb_single.query import Query
+from ddb_single.table import FieldType, Table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,7 +22,7 @@ class User(BaseModel):
     __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
-    name_ignore_nase = DBField(search_key=True, ignore_case=True)
+    name_ignore_case = DBField(search_key=True, ignore_case=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
     description = DBField()
@@ -34,7 +34,7 @@ class BlogPost(BaseModel):
     __table__ = table
     title = DBField(unique_key=True)
     content = DBField(search_key=True)
-    author = DBField(reletion=User)
+    author = DBField(relation=User)
 
 
 query = Query(table)
@@ -59,10 +59,10 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": True,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
-                    "name_ignore_nase": {
+                    "name_ignore_case": {
                         "type": "STRING",
                         "nullable": True,
                         "primary_key": False,
@@ -70,7 +70,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": True,
                     },
                     "email": {
@@ -81,7 +81,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                     "age": {
@@ -92,7 +92,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                     "description": {
@@ -103,7 +103,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": False,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                     "config": {
@@ -114,7 +114,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": False,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                 },
@@ -137,7 +137,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": True,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                     "content": {
@@ -148,7 +148,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": True,
                         "relation": None,
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                     "author": {
@@ -159,7 +159,7 @@ class TestCRUD(unittest.TestCase):
                         "unique_key": False,
                         "search_key": False,
                         "relation": "user",
-                        "reletion_by_unique": True,
+                        "relation_by_unique": True,
                         "ignore_case": False,
                     },
                 },

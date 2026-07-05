@@ -1,12 +1,15 @@
-from functools import reduce
+import logging
 import operator
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
-from botocore.exceptions import ClientError
-from dataclasses import dataclass
+import os
 import time
 import uuid
+from dataclasses import dataclass
 from enum import Enum
+from functools import reduce
+
+import boto3
+from boto3.dynamodb.conditions import Attr, Key
+from botocore.exceptions import ClientError
 
 import ddb_single.utils_botos as util_b
 from ddb_single.error import InvalidParameterError
@@ -14,8 +17,6 @@ from ddb_single.key_condition_util import (
     iter_key_attributes_used_in_key_condition,
     validate_single_condition_per_key,
 )
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +46,8 @@ def default_sk_factory(model_name, prefix="", suffix="_item"):
     return f"{prefix}{model_name}{suffix}"
 
 
-def _coerce_search_expression_filter_status(ex: "SearchExpression") -> None:
-    """Normalize string FilterStatus values into enum members."""
+def _coerce_search_expression_filter_status(ex: SearchExpression) -> None:
+    """Normalize FilterStatus when callers pass a plain string instead of FilterStatus enum."""
     fs = ex.FilterStatus
     if fs is None or isinstance(fs, util_b.FilterStatus):
         return
@@ -119,6 +120,9 @@ class Table:
         WriteCapacityUnits=1,
         **table_kwargs,
     ):
+        env_url = os.environ.get("DYNAMODB_ENDPOINT_URL")
+        if env_url:
+            table_kwargs["endpoint_url"] = env_url
         self.__recourse__ = boto3.resource("dynamodb", **table_kwargs)
         self.__client__ = boto3.client("dynamodb", **table_kwargs)
         self.__table_name__ = table_name
@@ -156,9 +160,7 @@ class Table:
         return self.__primary_key2model__(pk)
 
     def sk(self, model_name):
-        return self.__secondary_key_factory__(
-            model_name, self.__secondary_key_prefix__, self.__secondary_key_suffix__
-        )
+        return self.__secondary_key_factory__(model_name, self.__secondary_key_prefix__, self.__secondary_key_suffix__)
 
     def sk2model(self, sk):
         return sk[
@@ -233,6 +235,8 @@ class Table:
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             error_msg = e.response.get("Error", {}).get("Message", "No message")
+
+            # Log detailed information about the scan that failed
             logger.error(
                 f"DynamoDB Scan failed with {error_code}: {error_msg}",
                 extra={
@@ -245,17 +249,21 @@ class Table:
                 },
                 exc_info=True,
             )
+
+            # ValidationException indicates a problem with the scan parameters,
+            # Re-raise it so the caller can handle it appropriately.
             if error_code == "ValidationException":
                 raise
+
+            # For other errors, return empty list (existing behavior)
             return []
 
+        # Process successful scan response
         if "Items" in response:
             res_data = response["Items"]
             while "LastEvaluatedKey" in response and len(res_data) < limit:
                 logger.debug(f"pagination: {len(res_data)}/{limit}")
-                response = self.__table__.scan(
-                    **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
-                )
+                response = self.__table__.scan(**kwargs, ExclusiveStartKey=response["LastEvaluatedKey"])
                 res_data += response["Items"]
             return util_b.json_export(res_data)
         return []
@@ -271,6 +279,8 @@ class Table:
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             error_msg = e.response.get("Error", {}).get("Message", "No message")
+
+            # Log detailed information about the query that failed
             logger.error(
                 f"DynamoDB Query failed with {error_code}: {error_msg}",
                 extra={
@@ -286,16 +296,20 @@ class Table:
                 },
                 exc_info=True,
             )
+
+            # ValidationException indicates a problem with the query structure itself,
+            # not just "no data found". Re-raise it so the caller can handle it appropriately.
             if error_code == "ValidationException":
                 raise
+
+            # For other errors, return empty list (existing behavior)
             return []
 
+        # Process successful query response
         if len(response["Items"]):
             res_data = response["Items"]
             while "LastEvaluatedKey" in response and len(res_data) < limit:
-                response = self.__table__.query(
-                    **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
-                )
+                response = self.__table__.query(**kwargs, ExclusiveStartKey=response["LastEvaluatedKey"])
                 res_data += response["Items"]
             return util_b.json_export(res_data)
         return []
@@ -317,9 +331,7 @@ class Table:
         res = util_b.json_export(res)
         return res
 
-    def _batch_get_item(
-        self, key_list: list[dict], sleep_time=0.5, max_tries=5
-    ) -> list:
+    def _batch_get_item(self, key_list: list[dict], sleep_time=0.5, max_tries=5) -> list:
         """アイテムをバッチで取得"""
         # リストが空なら空リストを返す
         if not key_list or len(key_list) == 0:
@@ -328,12 +340,8 @@ class Table:
         table_name = self.__table_name__
         key_list = [
             {
-                self.__primary_key__: {
-                    self.__primary_key_type__: k[self.__primary_key__]
-                },
-                self.__secondary_key__: {
-                    self.__secondary_key_type__: k[self.__secondary_key__]
-                },
+                self.__primary_key__: {self.__primary_key_type__: k[self.__primary_key__]},
+                self.__secondary_key__: {self.__secondary_key_type__: k[self.__secondary_key__]},
             }
             for k in key_list
         ]
@@ -343,12 +351,8 @@ class Table:
         batch_keys = {table_name: {"Keys": key_list}}
 
         while tries < max_tries:
-            batch_get_item_response = self.__client__.batch_get_item(
-                RequestItems=batch_keys
-            )
-            dynamo_table_data += batch_get_item_response["Responses"].get(
-                table_name, []
-            )
+            batch_get_item_response = self.__client__.batch_get_item(RequestItems=batch_keys)
+            dynamo_table_data += batch_get_item_response["Responses"].get(table_name, [])
             unprocessed_key = batch_get_item_response["UnprocessedKeys"]
             if unprocessed_key:
                 batch_keys = unprocessed_key
@@ -374,10 +378,7 @@ class Table:
 
     def batch_get_from_pks(self, pks: list[str]) -> list[dict]:
         """pksからアイテムをバッチで取得"""
-        keys = [
-            {self.__primary_key__: pk, self.__secondary_key__: self.pk2sk(pk)}
-            for pk in pks
-        ]
+        keys = [{self.__primary_key__: pk, self.__secondary_key__: self.pk2sk(pk)} for pk in pks]
         return self.batch_get(keys)
 
     # --- 検索関連 ---
@@ -385,9 +386,8 @@ class Table:
         """関連先を検索"""
         logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
-        KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
-            self.rel_prefix(model_name)
-        )
+        # Always apply prefix filter
+        KeyConditionExpression &= Key(self.__secondary_key__).begins_with(self.rel_prefix(model_name))
         if field_name:
             # フィールドの指定がある場合
             res = self.query(
@@ -414,8 +414,7 @@ class Table:
         if field_name:
             # フィールドの指定がある場合
             res = self.query(
-                KeyConditionExpression=KeyConditionExpression
-                & Key(self.__search_data_key__).eq(field_name),
+                KeyConditionExpression=KeyConditionExpression & Key(self.__search_data_key__).eq(field_name),
                 FilterExpression=Attr(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__search_index__,
                 ProjectionExpression=self.__primary_key__,
@@ -423,8 +422,7 @@ class Table:
         elif model_name:
             # モデルの指定がある場合
             res = self.query(
-                KeyConditionExpression=KeyConditionExpression
-                & Key(self.__primary_key__).begins_with(model_name),
+                KeyConditionExpression=KeyConditionExpression & Key(self.__primary_key__).begins_with(model_name),
                 IndexName=self.__range_index_name__,
                 ProjectionExpression=self.__primary_key__,
             )
@@ -451,9 +449,54 @@ class Table:
                 res.append(item)
         return res
 
-    def search(
-        self, model_name, *searchEx: SearchExpression, pk_only=False, limit=None
-    ):
+    def _query_staged_pks(self, ex: SearchExpression, model_name):
+        """staged 検索を実行して対象の primary key リストを返す。
+
+        一部の環境で SearchIndex (DataSearchIndex) クエリが
+        ValidationException: "KeyConditionExpressions must only contain one condition per key"
+        になる事象が報告されている。その場合は RangeIndex でモデルの候補を引き、
+        in-memory filter にフォールバックする。
+        """
+        try:
+            _res = (
+                self.query(
+                    KeyConditionExpression=ex.KeyConditionExpression,
+                    IndexName=ex.IndexName,
+                    ProjectionExpression=self.__primary_key__,
+                )
+                or []
+            )
+            return [r[self.__primary_key__] for r in _res]
+        except (InvalidParameterError, ClientError) as e:
+            error_code = ""
+            if isinstance(e, ClientError):
+                error_code = e.response.get("Error", {}).get("Code", "")
+            if not (isinstance(e, InvalidParameterError) or error_code == "ValidationException"):
+                raise
+            logger.warning(
+                "SearchIndex query failed; falling back to in-memory filter. model=%s field=%s mode=%s",
+                model_name,
+                getattr(ex, "name", None),
+                getattr(ex, "mode", None),
+                exc_info=True,
+            )
+            candidates = (
+                self.query(
+                    KeyConditionExpression=Key(self.__secondary_key__).eq(self.sk(model_name)),
+                    IndexName=self.__range_index_name__,
+                    ProjectionExpression=self.__primary_key__,
+                )
+                or []
+            )
+            candidate_pks = [r[self.__primary_key__] for r in candidates]
+            if not candidate_pks:
+                return []
+            if ex.FilterMethod is None:
+                return candidate_pks
+            items = self.batch_get_from_pks(candidate_pks)
+            return [it[self.__primary_key__] for it in items if ex.FilterMethod(it)]
+
+    def search(self, model_name, *searchEx: SearchExpression, pk_only=False, limit=None):
         """Search items
         Args:
             model_name (str): model name
@@ -470,19 +513,11 @@ class Table:
         ]
         for ex in searchEx:
             _coerce_search_expression_filter_status(ex)
-        simple_ex: list[SearchExpression] = [
-            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.SEARCH
-        ]
-        staged_ex: list[SearchExpression] = [
-            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.STAGED
-        ]
-        filter_ex: list[SearchExpression] = [
-            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.FILTER
-        ]
+        simple_ex: list[SearchExpression] = [ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.SEARCH]
+        staged_ex: list[SearchExpression] = [ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.STAGED]
+        filter_ex: list[SearchExpression] = [ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.FILTER]
         filter_ex_staged: list[SearchExpression] = [
-            ex
-            for ex in searchEx
-            if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
+            ex for ex in searchEx if ex.FilterStatus == util_b.FilterStatus.FILTER_STAGED
         ]
         bucketed_ids = {id(ex) for ex in simple_ex + staged_ex + filter_ex + filter_ex_staged}
         orphan = [ex for ex in searchEx if id(ex) not in bucketed_ids]
@@ -493,21 +528,17 @@ class Table:
                 [ex.FilterStatus for ex in orphan],
             )
         logger.debug(
-            f"Expressions ... simple: {simple_ex}, staged: {staged_ex}, filter: {filter_ex}, filter_staged: {filter_ex_staged}"  # noqa
+            "Expressions ... simple: %s, staged: %s, filter: %s, filter_staged: %s",
+            simple_ex,
+            staged_ex,
+            filter_ex,
+            filter_ex_staged,
         )
         if staged_ex + filter_ex_staged:
             res = set()
             for i, ex in enumerate(staged_ex):
                 # staged_ex があればフィルタ
-                _res = (
-                    self.query(
-                        KeyConditionExpression=ex.KeyConditionExpression,
-                        IndexName=ex.IndexName,
-                        ProjectionExpression=self.__primary_key__,
-                    )
-                    or []
-                )
-                _res = [r[self.__primary_key__] for r in _res]
+                _res = self._query_staged_pks(ex, model_name)
                 if i:
                     res &= set(_res)
                 else:
@@ -531,6 +562,8 @@ class Table:
                     res = set(_res)
 
             # filter_ex があればフィルタ
+            if not res:
+                return []
             res = self.batch_get_from_pks(list(res))
             if filter_ex:
                 res = self.filter(res, filter_ex)
@@ -558,9 +591,7 @@ class Table:
             _res = (
                 self.query(
                     KeyConditionExpression=KeyConditionExpression,
-                    FilterExpression=reduce(
-                        operator.and_, (ex.FilterExpression for ex in filter_ex)
-                    ),
+                    FilterExpression=reduce(operator.and_, (ex.FilterExpression for ex in filter_ex)),
                     IndexName=self.__range_index_name__,
                     ProjectionExpression=self.__primary_key__,
                 )
@@ -602,9 +633,7 @@ class Table:
         item = util_b.json_import(item)
         if not old_item and not batch:
             # 単一の処理で、既存のアイテムがない場合は、既存のアイテムを取得する
-            old_item = self.get_item(
-                item[self.__primary_key__], item[self.__secondary_key__]
-            )
+            old_item = self.get_item(item[self.__primary_key__], item[self.__secondary_key__])
         if old_item:
             new_item = {**old_item, **item}
             if not util_b.is_same_json(old_item, new_item):
@@ -633,11 +662,7 @@ class Table:
         old_items = self.batch_get(items)
         new_items = []
         for item in items:
-            old_item = [
-                i
-                for i in old_items
-                if i[self.__primary_key__] == item[self.__primary_key__]
-            ]
+            old_item = [i for i in old_items if i[self.__primary_key__] == item[self.__primary_key__]]
             if old_item:
                 old_item = old_item[0]
                 new_item = {**old_item, **item} if old_item else item
@@ -659,12 +684,8 @@ class Table:
         """バッチ処理"""
         logger.debug(f"batch_delete_items: {items}")
         # pk と pk が被っていたら除外 (set で重複を除外して辞書に変換)
-        items = set(
-            [(i[self.__primary_key__], i[self.__secondary_key__]) for i in items]
-        )
-        items = [
-            dict(zip([self.__primary_key__, self.__secondary_key__], i)) for i in items
-        ]
+        items = set([(i[self.__primary_key__], i[self.__secondary_key__]) for i in items])
+        items = [dict(zip([self.__primary_key__, self.__secondary_key__], i)) for i in items]
         if batch:
             for item in items:
                 self.detele_item(item, batch)
@@ -692,9 +713,7 @@ class Table:
         """関連付けを削除"""
         KeyConditionExpression = Key(self.__primary_key__).eq(pk)
         if model_name:
-            KeyConditionExpression &= Key(self.__secondary_key__).begins_with(
-                self.rel_prefix(model_name)
-            )
+            KeyConditionExpression &= Key(self.__secondary_key__).begins_with(self.rel_prefix(model_name))
         items = self.query(
             KeyConditionExpression=KeyConditionExpression,
             ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
