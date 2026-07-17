@@ -173,9 +173,10 @@ class DBField:
         if self.is_list():
             # LIST fields require an actual list; set fields also accept other collections.
             allowed_types = list if self.type == FieldType.LIST else (list, set, tuple, frozenset)
+            expected = "list" if self.type == FieldType.LIST else "collection (list, set, tuple, or frozenset)"
             if not isinstance(value, allowed_types):
                 raise ValidationError(
-                    f"{field_name} must be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
             try:
                 if self.type == FieldType.LIST:
@@ -190,7 +191,7 @@ class DBField:
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"{field_name} must be a valid list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a valid {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
         else:
             try:
