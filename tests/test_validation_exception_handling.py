@@ -3,26 +3,14 @@ Test that ValidationException is properly re-raised instead of being silently ca
 """
 
 import logging
-import time
 import unittest
 from unittest.mock import MagicMock
 
 from botocore.exceptions import ClientError
 
-from ddb_single.table import Table
+from tests.conftest import make_table
 
 logging.basicConfig(level=logging.INFO)
-
-
-def _make_table() -> Table:
-    """Build a Table with a unique name (never connects to DynamoDB in these tests)."""
-    return Table(
-        table_name=f"test_{time.time_ns()}",
-        endpoint_url="http://localhost:8000",
-        region_name="us-west-2",
-        aws_access_key_id="fakeMyKeyId",
-        aws_secret_access_key="fakeSecretAccessKey",
-    )
 
 
 class TestValidationExceptionHandling(unittest.TestCase):
@@ -34,7 +22,7 @@ class TestValidationExceptionHandling(unittest.TestCase):
         it is re-raised instead of being caught and returning empty list.
         """
         # Create a table without actually connecting to DynamoDB
-        table = _make_table()
+        table = make_table("test_")
 
         # Create a mock table
         mock_boto_table = MagicMock()
@@ -65,7 +53,7 @@ class TestValidationExceptionHandling(unittest.TestCase):
         With ``fail_on_second_page=True``, the first call returns a page with a
         ``LastEvaluatedKey`` and the error is raised on the pagination call.
         """
-        table = _make_table()
+        table = make_table("test_")
         mock_boto_table = MagicMock()
         error_response = {
             "Error": {"Code": error_code, "Message": error_message},
@@ -170,7 +158,7 @@ class TestValidationExceptionHandling(unittest.TestCase):
         Test that ValidationException in scan() is also re-raised.
         """
         # Create a table without actually connecting to DynamoDB
-        table = _make_table()
+        table = make_table("test_")
 
         # Create a mock table
         mock_boto_table = MagicMock()

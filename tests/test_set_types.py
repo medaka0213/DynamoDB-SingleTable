@@ -6,24 +6,18 @@ types unusable. These tests verify that set-type fields validate element-wise
 and round-trip through DynamoDB Local.
 """
 
-import datetime
 import logging
 import unittest
 from decimal import Decimal
 
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
-from ddb_single.table import FieldType, Table
+from ddb_single.table import FieldType
+from tests.conftest import make_table
 
 logging.basicConfig(level=logging.INFO)
 
-table = Table(
-    table_name="set_types_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-    endpoint_url="http://localhost:8000",
-    region_name="us-west-2",
-    aws_access_key_id="fakeMyKeyId",
-    aws_secret_access_key="fakeSecretAccessKey",
-)
+table = make_table("set_types_test_")
 table.init()
 
 

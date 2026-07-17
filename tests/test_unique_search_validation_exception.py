@@ -6,23 +6,17 @@ This test reproduces the issue where searching by unique key causes:
  KeyConditionExpressions must only contain one condition per key"
 """
 
-import datetime
 import logging
 import unittest
 
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
-from ddb_single.table import FieldType, Table
+from ddb_single.table import FieldType
+from tests.conftest import make_table
 
 logging.basicConfig(level=logging.DEBUG)
 
-table = Table(
-    table_name="unique_search_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-    endpoint_url="http://localhost:8000",
-    region_name="us-west-2",
-    aws_access_key_id="fakeMyKeyId",
-    aws_secret_access_key="fakeSecretAccessKey",
-)
+table = make_table("unique_search_test_")
 table.init()
 
 

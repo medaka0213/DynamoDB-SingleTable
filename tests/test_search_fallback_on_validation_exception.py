@@ -5,8 +5,8 @@ from botocore.exceptions import ClientError
 
 from ddb_single.error import InvalidParameterError
 from ddb_single.model import BaseModel, DBField
-from ddb_single.table import Table
 from ddb_single.utils_botos import FilterStatus
+from tests.conftest import make_table
 
 
 def _validation_exception(message: str) -> ClientError:
@@ -34,12 +34,7 @@ def _client_error(code: str, message: str) -> ClientError:
 
 
 class Rocket(BaseModel):
-    __table__ = Table(
-        table_name="dummy",
-        region_name="us-west-2",
-        aws_access_key_id="dummy",
-        aws_secret_access_key="dummy",
-    )
+    __table__ = make_table("dummy", timestamp=False)
     __model_name__ = "rocket"
     name = DBField(unique_key=True, ignore_case=True)
 
