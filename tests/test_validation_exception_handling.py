@@ -53,12 +53,8 @@ class TestValidationExceptionHandling(unittest.TestCase):
         # Verify it's a ValidationException
         self.assertEqual(context.exception.response["Error"]["Code"], "ValidationException")
 
-    def test_query_other_client_errors_return_empty_list(self):
-        """
-        Test that other ClientErrors (not ValidationException)
-        still return empty list as before.
-        """
-        # Create a table without actually connecting to DynamoDB
+    def _table_with_error(self, operation, error_code, error_message):
+        """Build a Table whose boto3 table raises the given ClientError."""
         table = Table(
             table_name="test_table",
             endpoint_url="http://localhost:8000",
@@ -66,26 +62,60 @@ class TestValidationExceptionHandling(unittest.TestCase):
             aws_access_key_id="fakeMyKeyId",
             aws_secret_access_key="fakeSecretAccessKey",
         )
-
-        # Create a mock table
         mock_boto_table = MagicMock()
-
-        # Create a mock ProvisionedThroughputExceededException
         error_response = {
-            "Error": {
-                "Code": "ProvisionedThroughputExceededException",
-                "Message": "The level of configured provisioned throughput for the table was exceeded",
-            },
+            "Error": {"Code": error_code, "Message": error_message},
             "ResponseMetadata": {"RequestId": "test-request-id"},
         }
-        mock_boto_table.query.side_effect = ClientError(error_response, "Query")
-
+        getattr(mock_boto_table, operation.lower()).side_effect = ClientError(error_response, operation)
         # Set the mock table directly (bypassing init())
         table.__table__ = mock_boto_table
+        return table
 
-        # Other errors should still return empty list
-        result = table.query()
-        self.assertEqual(result, [])
+    def test_query_other_client_errors_are_reraised(self):
+        """
+        Test that other ClientErrors (not ValidationException) propagate
+        instead of being converted into an empty result (fail-open).
+        """
+        table = self._table_with_error(
+            "Query",
+            "ProvisionedThroughputExceededException",
+            "The level of configured provisioned throughput for the table was exceeded",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.query()
+
+        self.assertEqual(
+            context.exception.response["Error"]["Code"],
+            "ProvisionedThroughputExceededException",
+        )
+
+    def test_query_access_denied_is_reraised(self):
+        """AccessDeniedException in query() must propagate, not become an empty result."""
+        table = self._table_with_error(
+            "Query",
+            "AccessDeniedException",
+            "User is not authorized to perform: dynamodb:Query",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.query()
+
+        self.assertEqual(context.exception.response["Error"]["Code"], "AccessDeniedException")
+
+    def test_scan_other_client_errors_are_reraised(self):
+        """ResourceNotFoundException in scan() must propagate, not become an empty result."""
+        table = self._table_with_error(
+            "Scan",
+            "ResourceNotFoundException",
+            "Requested resource not found",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.scan()
+
+        self.assertEqual(context.exception.response["Error"]["Code"], "ResourceNotFoundException")
 
     def test_scan_validation_exception_is_reraised(self):
         """
