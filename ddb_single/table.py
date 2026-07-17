@@ -230,9 +230,12 @@ class Table:
     def _execute_boto_op(self, op, label, **kwargs):
         """boto3 の scan/query を実行し、ページネーションを含めて統一的にエラーハンドリングする。
 
-        成功時はレスポンス(dict)を返す。ValidationException はクエリ自体の問題なので
-        呼び出し側で扱えるよう再送出し、それ以外の ClientError はログ出力のうえ None を返す
-        （= 呼び出し側は空扱いにする）。
+        成功時はレスポンス(dict)を返す。ClientError は詳細をログ出力したうえで必ず再送出する。
+        AccessDenied やスロットリング等を「該当データなし（空結果）」に変換すると、
+        get_by_unique 経由の create/update/delete で重複作成・削除漏れなど
+        データ整合性を破壊し得るため、fail-open にはしない。
+        ValidationException は search-index フォールバック用に呼び出し側
+        (`_query_staged_pks`) が捕捉して処理する。
         """
         try:
             return op(**kwargs)
@@ -256,21 +259,12 @@ class Table:
                 },
                 exc_info=True,
             )
-
-            # ValidationException は「データが無い」ではなくリクエスト構造の問題なので再送出する
-            if error_code == "ValidationException":
-                raise
-
-            # その他のエラーは空扱い（既存挙動）
-            return None
+            raise
 
     def scan(self, **kwargs) -> list[dict]:
         """スキャン"""
         limit = kwargs.get("Limit") or float("inf")
         response = self._execute_boto_op(self.__table__.scan, "Scan", **kwargs)
-        if response is None:
-            return []
-
         if "Items" in response:
             res_data = response["Items"]
             while "LastEvaluatedKey" in response and len(res_data) < limit:
@@ -278,8 +272,6 @@ class Table:
                 response = self._execute_boto_op(
                     self.__table__.scan, "Scan", **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
                 )
-                if response is None:
-                    break
                 res_data += response["Items"]
             return util_b.json_export(res_data)
         return []
@@ -291,9 +283,6 @@ class Table:
         if kce is not None:
             validate_single_condition_per_key(kce)
         response = self._execute_boto_op(self.__table__.query, "Query", **kwargs)
-        if response is None:
-            return []
-
         if "Items" in response:
             # FilterExpression 付き Query は 1 ページ目が 0 件でも LastEvaluatedKey を返す
             # ことがあるため、scan() と同様に LastEvaluatedKey ベースでページを辿る。
@@ -302,8 +291,6 @@ class Table:
                 response = self._execute_boto_op(
                     self.__table__.query, "Query", **kwargs, ExclusiveStartKey=response["LastEvaluatedKey"]
                 )
-                if response is None:
-                    break
                 res_data += response["Items"]
             return util_b.json_export(res_data)
         return []

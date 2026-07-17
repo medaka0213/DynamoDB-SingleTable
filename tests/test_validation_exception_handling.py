@@ -3,6 +3,7 @@ Test that ValidationException is properly re-raised instead of being silently ca
 """
 
 import logging
+import time
 import unittest
 from unittest.mock import MagicMock
 
@@ -11,6 +12,17 @@ from botocore.exceptions import ClientError
 from ddb_single.table import Table
 
 logging.basicConfig(level=logging.INFO)
+
+
+def _make_table() -> Table:
+    """Build a Table with a unique name (never connects to DynamoDB in these tests)."""
+    return Table(
+        table_name=f"test_{time.time_ns()}",
+        endpoint_url="http://localhost:8000",
+        region_name="us-west-2",
+        aws_access_key_id="fakeMyKeyId",
+        aws_secret_access_key="fakeSecretAccessKey",
+    )
 
 
 class TestValidationExceptionHandling(unittest.TestCase):
@@ -22,13 +34,7 @@ class TestValidationExceptionHandling(unittest.TestCase):
         it is re-raised instead of being caught and returning empty list.
         """
         # Create a table without actually connecting to DynamoDB
-        table = Table(
-            table_name="test_table",
-            endpoint_url="http://localhost:8000",
-            region_name="us-west-2",
-            aws_access_key_id="fakeMyKeyId",
-            aws_secret_access_key="fakeSecretAccessKey",
-        )
+        table = _make_table()
 
         # Create a mock table
         mock_boto_table = MagicMock()
@@ -53,52 +59,118 @@ class TestValidationExceptionHandling(unittest.TestCase):
         # Verify it's a ValidationException
         self.assertEqual(context.exception.response["Error"]["Code"], "ValidationException")
 
-    def test_query_other_client_errors_return_empty_list(self):
-        """
-        Test that other ClientErrors (not ValidationException)
-        still return empty list as before.
-        """
-        # Create a table without actually connecting to DynamoDB
-        table = Table(
-            table_name="test_table",
-            endpoint_url="http://localhost:8000",
-            region_name="us-west-2",
-            aws_access_key_id="fakeMyKeyId",
-            aws_secret_access_key="fakeSecretAccessKey",
-        )
+    def _table_with_error(self, operation, error_code, error_message, fail_on_second_page=False):
+        """Build a Table whose boto3 table raises the given ClientError.
 
-        # Create a mock table
+        With ``fail_on_second_page=True``, the first call returns a page with a
+        ``LastEvaluatedKey`` and the error is raised on the pagination call.
+        """
+        table = _make_table()
         mock_boto_table = MagicMock()
-
-        # Create a mock ProvisionedThroughputExceededException
         error_response = {
-            "Error": {
-                "Code": "ProvisionedThroughputExceededException",
-                "Message": "The level of configured provisioned throughput for the table was exceeded",
-            },
+            "Error": {"Code": error_code, "Message": error_message},
             "ResponseMetadata": {"RequestId": "test-request-id"},
         }
-        mock_boto_table.query.side_effect = ClientError(error_response, "Query")
-
+        error = ClientError(error_response, operation)
+        if fail_on_second_page:
+            first_page = {
+                "Items": [{"pk": "test_item_1", "sk": "test_item"}],
+                "LastEvaluatedKey": {"pk": "test_item_1", "sk": "test_item"},
+            }
+            side_effect = [first_page, error]
+        else:
+            side_effect = error
+        getattr(mock_boto_table, operation.lower()).side_effect = side_effect
         # Set the mock table directly (bypassing init())
         table.__table__ = mock_boto_table
+        return table
 
-        # Other errors should still return empty list
-        result = table.query()
-        self.assertEqual(result, [])
+    def test_query_other_client_errors_are_reraised(self):
+        """
+        Test that other ClientErrors (not ValidationException) propagate
+        instead of being converted into an empty result (fail-open).
+        """
+        table = self._table_with_error(
+            "Query",
+            "ProvisionedThroughputExceededException",
+            "The level of configured provisioned throughput for the table was exceeded",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.query()
+
+        self.assertEqual(
+            context.exception.response["Error"]["Code"],
+            "ProvisionedThroughputExceededException",
+        )
+
+    def test_query_access_denied_is_reraised(self):
+        """AccessDeniedException in query() must propagate, not become an empty result."""
+        table = self._table_with_error(
+            "Query",
+            "AccessDeniedException",
+            "User is not authorized to perform: dynamodb:Query",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.query()
+
+        self.assertEqual(context.exception.response["Error"]["Code"], "AccessDeniedException")
+
+    def test_scan_other_client_errors_are_reraised(self):
+        """ResourceNotFoundException in scan() must propagate, not become an empty result."""
+        table = self._table_with_error(
+            "Scan",
+            "ResourceNotFoundException",
+            "Requested resource not found",
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.scan()
+
+        self.assertEqual(context.exception.response["Error"]["Code"], "ResourceNotFoundException")
+
+    def test_query_client_error_during_pagination_is_reraised(self):
+        """A ClientError raised while fetching the second page of query() must propagate."""
+        table = self._table_with_error(
+            "Query",
+            "ProvisionedThroughputExceededException",
+            "The level of configured provisioned throughput for the table was exceeded",
+            fail_on_second_page=True,
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.query()
+
+        self.assertEqual(
+            context.exception.response["Error"]["Code"],
+            "ProvisionedThroughputExceededException",
+        )
+        # Both the first page and the failing pagination call must have been made
+        self.assertEqual(table.__table__.query.call_count, 2)
+
+    def test_scan_client_error_during_pagination_is_reraised(self):
+        """A ClientError raised while fetching the second page of scan() must propagate."""
+        table = self._table_with_error(
+            "Scan",
+            "ResourceNotFoundException",
+            "Requested resource not found",
+            fail_on_second_page=True,
+        )
+
+        with self.assertRaises(ClientError) as context:
+            table.scan()
+
+        self.assertEqual(context.exception.response["Error"]["Code"], "ResourceNotFoundException")
+        # Both the first page and the failing pagination call must have been made
+        self.assertEqual(table.__table__.scan.call_count, 2)
 
     def test_scan_validation_exception_is_reraised(self):
         """
         Test that ValidationException in scan() is also re-raised.
         """
         # Create a table without actually connecting to DynamoDB
-        table = Table(
-            table_name="test_table",
-            endpoint_url="http://localhost:8000",
-            region_name="us-west-2",
-            aws_access_key_id="fakeMyKeyId",
-            aws_secret_access_key="fakeSecretAccessKey",
-        )
+        table = _make_table()
 
         # Create a mock table
         mock_boto_table = MagicMock()
