@@ -1,4 +1,5 @@
 # ddb_single/utils_botos.py
+import logging
 from decimal import Decimal
 
 # クエリ設定のENUM
@@ -8,6 +9,8 @@ from boto3.dynamodb.conditions import Attr, Key
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 from ddb_single.error import InvalidParameterError
+
+logger = logging.getLogger(__name__)
 
 
 class QueryType(Enum):
@@ -123,7 +126,15 @@ def deserialize(value):
         if isinstance(v, dict):
             try:
                 result[k] = TypeDeserializer().deserialize(v)
-            except Exception:
+            except (TypeError, AttributeError, KeyError) as err:
+                # DynamoDB 型付き dict でない普通の dict は TypeDeserializer が
+                # TypeError 等を送出するため、意図的に再帰フォールバックする。
+                # ポリシー上、実データ値はログに出さない(キー名と例外型のみ)。
+                logger.debug(
+                    "deserialize: TypeDeserializer failed for key=%s (%s); falling back to plain-dict recursion",
+                    k,
+                    type(err).__name__,
+                )
                 result[k] = deserialize(v)
         else:
             result[k] = v

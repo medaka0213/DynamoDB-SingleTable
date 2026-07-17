@@ -244,18 +244,16 @@ class Table:
             error_msg = e.response.get("Error", {}).get("Message", "No message")
 
             # 失敗したリクエストの詳細をログに残す
+            # ポリシー上、実データ値 (KeyCondition/Filter 式に含まれる値) はログに出さず、
+            # 式の有無のみを記録する。
             logger.error(
                 f"DynamoDB {label} failed with {error_code}: {error_msg}",
                 extra={
                     "error_code": error_code,
                     "error_message": error_msg,
                     "index_name": kwargs.get("IndexName"),
-                    "key_condition_expression": str(kwargs.get("KeyConditionExpression"))
-                    if kwargs.get("KeyConditionExpression")
-                    else None,
-                    "filter_expression": str(kwargs.get("FilterExpression"))
-                    if kwargs.get("FilterExpression")
-                    else None,
+                    "has_key_condition_expression": kwargs.get("KeyConditionExpression") is not None,
+                    "has_filter_expression": kwargs.get("FilterExpression") is not None,
                 },
                 exc_info=True,
             )

@@ -94,7 +94,8 @@ class Query:
                 logger.warning(f"get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
             _res = self.search(getattr(self.__model__.__class__, key).eq(value), pk_only=pk_only)
-            logger.debug(f"get_by_unique: {key}={value} result={_res}")
+            # ポリシー上、実データ値 (unique key の値・検索結果) はログに出さない。
+            logger.debug("get_by_unique: key=%s, results=%d", key, len(_res))
             res.extend(_res)
         if res:
             return res[0]
@@ -131,7 +132,8 @@ class Query:
                 logger.warning(f"batch_get_by_unique: {key} not in {specified_keys} ... skip")
                 continue
             _res = self.search(getattr(self.__model__.__class__, key).in_(uniques), pk_only=pk_only)
-            logger.debug(f"batch_get_by_unique: {key} in {uniques} result={_res}")
+            # ポリシー上、実データ値 (unique key の値・検索結果) はログに出さない。
+            logger.debug("batch_get_by_unique: key=%s, uniques_count=%d, results=%d", key, len(uniques), len(_res))
             res.extend(_res)
         return res
 
