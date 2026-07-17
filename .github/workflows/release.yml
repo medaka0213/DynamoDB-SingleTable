@@ -22,6 +22,8 @@ jobs:
     permissions:
       # Read tags for the changelog and create the GitHub Release (built-in GITHUB_TOKEN)
       contents: write
+      # PyPI Trusted Publishing (OIDC)
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -52,11 +54,9 @@ jobs:
           echo "VERSION=$version" >> $GITHUB_ENV
 
       - name: Build and publish package
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           uv build
-          uv publish
+          uv publish --trusted-publishing always
 
       - name: Set up git
         run: |
