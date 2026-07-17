@@ -8,6 +8,7 @@ models where one model name is a prefix of another
 import datetime
 import logging
 import unittest
+import uuid
 
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
@@ -16,7 +17,7 @@ from ddb_single.table import Table
 logging.basicConfig(level=logging.INFO)
 
 table = Table(
-    table_name="prefix_col_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    table_name=f"prefix_col_{datetime.datetime.now():%Y%m%d%H%M%S%f}_{uuid.uuid4().hex}",
     endpoint_url="http://localhost:8000",
     region_name="us-west-2",
     aws_access_key_id="fakeMyKeyId",
