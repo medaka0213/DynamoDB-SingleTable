@@ -373,3 +373,57 @@ But main item's value is not chenged.
 |user_xxxx|search_user_name|John|
 |blogpost_xxxx|blogpost_item||Hello|Michael|Hello world|
 |blogpost_xxxx|search_blogpost_title|Hello|
+
+## Security and Operational Notes
+
+### Unbounded pagination in `Table.scan()` / `Table.query()`
+
+When `Limit` is not passed, `Table.scan()` and `Table.query()` automatically follow
+`LastEvaluatedKey` and keep fetching pages until **all** matching items have been
+retrieved. On large tables this can consume a lot of memory (all items are
+accumulated in a single Python list) and a large amount of read capacity (RCU),
+which can degrade or throttle the rest of your service.
+
+Recommendations:
+
+- Pass a `Limit` whenever you do not need the full result set:
+
+  ```python
+  items = table.scan(Limit=100)
+  items = table.query(KeyConditionExpression=..., Limit=100)
+  ```
+
+- Be especially careful with `scan()` and with search calls that fall back to
+  filter (scan) conditions on large production tables.
+
+The library intentionally does not enforce a hard cap, so bounding the result
+size is the caller's responsibility.
+
+### `DYNAMODB_ENDPOINT_URL` environment variable
+
+If the environment variable `DYNAMODB_ENDPOINT_URL` is set and `endpoint_url` is
+**not** passed to `Table(...)`, the library implicitly uses the environment
+variable as the DynamoDB endpoint for all connections created by that `Table`.
+
+This is a convenience feature for development and testing (for example, pointing
+at DynamoDB Local on `http://localhost:8000`). Anyone who can modify the
+process environment can silently redirect all DynamoDB traffic to an arbitrary
+endpoint, so:
+
+- Do **not** set `DYNAMODB_ENDPOINT_URL` in production environments.
+- In production, either leave it unset (so the default AWS endpoint is used) or
+  pass `endpoint_url` explicitly to `Table(...)`; an explicit `endpoint_url`
+  always takes precedence over the environment variable.
+
+### CLI executes the target module on import
+
+The `ddb_single` CLI (for example, `ddb_single apply-model-change my_pkg.my_models`)
+loads the given module path with `importlib.import_module()`. Importing a Python
+module **executes its top-level code**. Although the module path format is
+validated (dotted identifiers only), any module reachable via `sys.path` —
+which includes the current working directory — can be imported and executed.
+
+Therefore, only run the CLI in directories and virtual environments you trust.
+Do not run it in directories containing untrusted Python files (for example, a
+freshly cloned third-party repository), since a malicious module could be
+imported and executed with your credentials.
