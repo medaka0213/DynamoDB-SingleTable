@@ -12,6 +12,17 @@ from ddb_single.table import FieldType, SearchExpression, Table
 logger = logging.getLogger(__name__)
 
 
+def _value_summary(value):
+    """実データ値をログ・例外メッセージに含めないための要約 (型と長さのみ)。
+
+    実データ値は PII を含む恐れがあるため、ログ・例外メッセージには出力しない。
+    """
+    try:
+        return f"type={type(value).__name__}, len={len(value)}"
+    except TypeError:
+        return f"type={type(value).__name__}"
+
+
 class DBField:
     """
     DBField is a field of a model. It is used to define the structure of a model.
@@ -176,7 +187,7 @@ class DBField:
             expected = "list" if self.type == FieldType.LIST else "collection (list, set, tuple, or frozenset)"
             if not isinstance(value, allowed_types):
                 raise ValidationError(
-                    f"{field_name} must be a {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a {expected}: expected {self.type}, got {_value_summary(value)}"
                 )
             try:
                 if self.type == FieldType.LIST:
@@ -191,13 +202,13 @@ class DBField:
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"{field_name} must be a valid {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a valid {expected}: expected {self.type}, got {_value_summary(value)}"
                 )
         else:
             try:
                 if isinstance(value, list):
                     raise ValidationError(
-                        f"{field_name} must not be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                        f"{field_name} must not be a list: expected {self.type}, got {_value_summary(value)}"
                     )
                 if self.type == FieldType.STRING:
                     return str(value)
@@ -214,7 +225,7 @@ class DBField:
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"Value {field_name} must be a valid value, {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"Value {field_name} must be a valid value: expected {self.type}, got {_value_summary(value)}"
                 )
 
     def search_key_factory(self):

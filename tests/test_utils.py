@@ -4,7 +4,16 @@ from decimal import Decimal
 from boto3.dynamodb.conditions import Attr, Key
 
 from ddb_single.error import InvalidParameterError
-from ddb_single.utils_botos import QueryType, attr_ex, attr_method, is_same_json, json_export, json_import, range_ex
+from ddb_single.utils_botos import (
+    QueryType,
+    attr_ex,
+    attr_method,
+    deserialize,
+    is_same_json,
+    json_export,
+    json_import,
+    range_ex,
+)
 
 
 class TestUtilsBotos(unittest.TestCase):
@@ -80,6 +89,23 @@ class TestUtilsBotos(unittest.TestCase):
         data = {"key1": Decimal("1.23"), "key2": [Decimal("2.34"), Decimal("3.45")], "key3": {"key4": Decimal("4.56")}}
         expected = {"key1": 1.23, "key2": [2.34, 3.45], "key3": {"key4": 4.56}}
         self.assertEqual(json_export(data), expected)
+
+    def test_deserialize_typed_dict(self):
+        # DynamoDB 型付き dict はそのままデシリアライズされる
+        data = {"name": {"S": "hello"}, "count": {"N": "3"}}
+        self.assertEqual(deserialize(data), {"name": "hello", "count": Decimal("3")})
+
+    def test_deserialize_fallback_logs_debug(self):
+        # DynamoDB 型付きでない普通の dict は再帰フォールバックし、DEBUG ログが出る
+        data = {"outer": {"inner": {"S": "secret-value"}}}
+        with self.assertLogs("ddb_single.utils_botos", level="DEBUG") as cm:
+            result = deserialize(data)
+        self.assertEqual(result, {"outer": {"inner": "secret-value"}})
+        joined = "\n".join(cm.output)
+        self.assertIn("falling back", joined)
+        self.assertIn("key=outer", joined)
+        # 実データ値はログに出さない
+        self.assertNotIn("secret-value", joined)
 
 
 if __name__ == "__main__":

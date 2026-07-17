@@ -99,6 +99,26 @@ class TestDBFieldValidation(unittest.TestCase):
             with self.assertRaises(ValidationError):
                 field.validate("not a collection")
 
+    def test_validation_error_message_hides_raw_value(self):
+        # 例外メッセージに実データ値 (PII の恐れ) を含めない。型・長さのみ。
+        field = DBField(type=FieldType.LIST)
+        field.name = "secret_field"
+        raw_value = "raw-secret-value"
+        with self.assertRaises(ValidationError) as ctx:
+            field.validate(raw_value)
+        message = str(ctx.exception)
+        self.assertNotIn(raw_value, message)
+        self.assertIn("secret_field", message)
+        self.assertIn("type=str", message)
+
+        field2 = DBField(type=FieldType.STRING)
+        field2.name = "secret_field2"
+        with self.assertRaises(ValidationError) as ctx:
+            field2.validate(["raw-secret-item"])
+        message = str(ctx.exception)
+        self.assertNotIn("raw-secret-item", message)
+        self.assertIn("type=list", message)
+
     def test_default_value_is_validated(self):
         # A default supplied when no value is given must still be type-validated.
         field = DBField(type=FieldType.NUMBER, default=5)
