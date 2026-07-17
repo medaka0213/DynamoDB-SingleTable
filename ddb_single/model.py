@@ -171,24 +171,27 @@ class DBField:
     def _validate_value(self, value):
         field_name = getattr(self, "name", "DBField")
         if self.is_list():
-            if not isinstance(value, list):
+            # LIST fields require an actual list; set fields also accept other collections.
+            allowed_types = list if self.type == FieldType.LIST else (list, set, tuple, frozenset)
+            expected = "list" if self.type == FieldType.LIST else "collection (list, set, tuple, or frozenset)"
+            if not isinstance(value, allowed_types):
                 raise ValidationError(
-                    f"{field_name} must be a list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
             try:
                 if self.type == FieldType.LIST:
                     return value
                 elif self.type == FieldType.STRING_SET:
-                    return set(value)
+                    return {str(v) for v in value}
                 elif self.type == FieldType.NUMBER_SET:
-                    return set(map(Decimal, str(value)))
+                    return {Decimal(str(v)) for v in value}
                 elif self.type == FieldType.BINARY_SET:
-                    return set(map(bytes, str(value)))
+                    return {v.encode("utf-8") if isinstance(v, str) else bytes(v) for v in value}
                 return value
             except Exception as e:
                 logger.info("Failed to validate", exc_info=e)
                 raise ValidationError(
-                    f"{field_name} must be a valid list: {self.type} != {type(value)}, input={str(value)[:100]}"
+                    f"{field_name} must be a valid {expected}: {self.type} != {type(value)}, input={str(value)[:100]}"
                 )
         else:
             try:

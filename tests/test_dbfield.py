@@ -66,6 +66,39 @@ class TestDBFieldValidation(unittest.TestCase):
         with self.assertRaises(ValidationError):
             field.validate(["not", "a", "string"])
 
+    def test_string_set_field_valid(self):
+        field = DBField(type=FieldType.STRING_SET)
+        # Each element is converted to str and the result is a set.
+        self.assertEqual(field.validate(["a", "b", "a"]), {"a", "b"})
+        self.assertEqual(field.validate({"x", "y"}), {"x", "y"})
+        self.assertEqual(field.validate([1, 2]), {"1", "2"})
+
+    def test_number_set_field_valid(self):
+        field = DBField(type=FieldType.NUMBER_SET)
+        # Regression for issue #116: a list of numbers used to be str()-ed and
+        # converted character-by-character, so [1, 2] always failed.
+        self.assertEqual(field.validate([1, 2]), {Decimal("1"), Decimal("2")})
+        self.assertEqual(field.validate([1.5, "2.5"]), {Decimal("1.5"), Decimal("2.5")})
+        self.assertEqual(field.validate({3, 4}), {Decimal("3"), Decimal("4")})
+        self.assertEqual(field.validate((5,)), {Decimal("5")})
+
+    def test_number_set_field_invalid_element(self):
+        field = DBField(type=FieldType.NUMBER_SET)
+        with self.assertRaises(ValidationError):
+            field.validate([1, "not a number"])
+
+    def test_binary_set_field_valid(self):
+        field = DBField(type=FieldType.BINARY_SET)
+        # str elements are utf-8 encoded, others go through bytes() like the scalar BINARY type.
+        self.assertEqual(field.validate(["abc", b"def"]), {b"abc", b"def"})
+        self.assertEqual(field.validate([bytearray(b"xy")]), {b"xy"})
+
+    def test_set_field_rejects_non_collection(self):
+        for field_type in (FieldType.STRING_SET, FieldType.NUMBER_SET, FieldType.BINARY_SET):
+            field = DBField(type=field_type)
+            with self.assertRaises(ValidationError):
+                field.validate("not a collection")
+
     def test_default_value_is_validated(self):
         # A default supplied when no value is given must still be type-validated.
         field = DBField(type=FieldType.NUMBER, default=5)
