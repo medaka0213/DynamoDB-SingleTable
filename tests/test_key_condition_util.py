@@ -10,7 +10,8 @@ from ddb_single.key_condition_util import (
     iter_key_attributes_used_in_key_condition,
     validate_single_condition_per_key,
 )
-from ddb_single.table import SearchExpression, Table, _coerce_search_expression_filter_status
+from ddb_single.table import SearchExpression, _coerce_search_expression_filter_status
+from tests.conftest import make_table
 
 
 class TestKeyConditionUtil(unittest.TestCase):
@@ -73,13 +74,7 @@ class TestKeyConditionUtil(unittest.TestCase):
 
     def test_search_simple_path_rejects_gsi_shape_on_search_status(self):
         """SEARCH expressions must only add primary-key predicates (issue #967 merge bug)."""
-        t = Table(
-            table_name="t",
-            endpoint_url="http://localhost:8000",
-            region_name="us-west-2",
-            aws_access_key_id="f",
-            aws_secret_access_key="f",
-        )
+        t = make_table("t", timestamp=False)
         bad = SearchExpression(
             FilterStatus=util_b.FilterStatus.SEARCH,
             KeyConditionExpression=Key("sk").eq("search_user_name") & Key("data").eq("v"),

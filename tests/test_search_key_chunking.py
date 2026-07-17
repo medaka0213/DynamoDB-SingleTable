@@ -1,11 +1,11 @@
-import datetime
 import unittest
 
 from boto3.dynamodb.conditions import Key
 
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
-from ddb_single.table import FieldType, Table
+from ddb_single.table import FieldType
+from tests.conftest import make_table
 
 
 class LongText(BaseModel):
@@ -18,13 +18,7 @@ class LongText(BaseModel):
 class TestSearchKeyChunking(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        table = Table(
-            table_name="chunk_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-            endpoint_url="http://localhost:8000",
-            region_name="us-west-2",
-            aws_access_key_id="fakeMyKeyId",
-            aws_secret_access_key="fakeSecretAccessKey",
-        )
+        table = make_table("chunk_test_")
         table.init()
         LongText.__table__ = table
         cls.table = table

@@ -5,24 +5,19 @@ models where one model name is a prefix of another
 (e.g. "user" vs "user_admin", "note" vs "note_child").
 """
 
-import datetime
 import logging
 import unittest
 import uuid
 
 from ddb_single.model import BaseModel, DBField
 from ddb_single.query import Query
-from ddb_single.table import Table
+from tests.conftest import make_table
 
 logging.basicConfig(level=logging.INFO)
 
-table = Table(
-    table_name=f"prefix_col_{datetime.datetime.now():%Y%m%d%H%M%S%f}_{uuid.uuid4().hex}",
-    endpoint_url="http://localhost:8000",
-    region_name="us-west-2",
-    aws_access_key_id="fakeMyKeyId",
-    aws_secret_access_key="fakeSecretAccessKey",
-)
+# uuid suffix in the prefix keeps uniqueness at least as strong as the
+# original timestamp+uuid name; make_table appends the timestamp itself.
+table = make_table(f"prefix_col_{uuid.uuid4().hex}_")
 table.init()
 
 

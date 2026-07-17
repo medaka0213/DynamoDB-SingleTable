@@ -5,24 +5,17 @@ Previously DynamoDB returned ValidationException; ddb_single now rejects these
 before the API call (GitHub issue #967).
 """
 
-import datetime
 import logging
 import unittest
 
 from boto3.dynamodb.conditions import Key
 
 from ddb_single.error import InvalidParameterError
-from ddb_single.table import Table
+from tests.conftest import make_table
 
 logging.basicConfig(level=logging.DEBUG)
 
-table = Table(
-    table_name="duplicate_key_test_" + datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-    endpoint_url="http://localhost:8000",
-    region_name="us-west-2",
-    aws_access_key_id="fakeMyKeyId",
-    aws_secret_access_key="fakeSecretAccessKey",
-)
+table = make_table("duplicate_key_test_")
 
 
 class TestDuplicateKeyCondition(unittest.TestCase):
