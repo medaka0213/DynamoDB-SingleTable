@@ -363,6 +363,15 @@ class Table:
         return self.batch_get(keys)
 
     # --- 検索関連 ---
+    def _pk_model_matches(self, pk, model_name):
+        """pk のモデル名が model_name と完全一致するか確認する。
+
+        begins_with によるプレフィックス照合は、モデル名が別モデル名の前方一致に
+        なっている場合 (例: "user" と "user_admin") に衝突するため、
+        取得後にモデル名の完全一致を確認する必要がある。
+        """
+        return self.pk2model(pk) == model_name
+
     def relation(self, pk, model_name="", field_name="", pk_only=False):
         """関連先を検索"""
         logger.debug(f"pk: {pk}, model_name: {model_name}, field_name: {field_name}")
@@ -383,6 +392,10 @@ class Table:
                 ProjectionExpression=self.__secondary_key__,
             )
         pks = [self.rel_key2pk(r[self.__secondary_key__]) for r in res]
+        if model_name:
+            # begins_with はプレフィックス一致のため、モデル名が前方一致する
+            # 別モデル (例: "user" と "user_admin") を除外する
+            pks = [p for p in pks if self._pk_model_matches(p, model_name)]
         if pk_only:
             return pks
         else:
@@ -415,6 +428,10 @@ class Table:
                 ProjectionExpression=self.__primary_key__,
             )
         pks = [r[self.__primary_key__] for r in res]
+        if model_name:
+            # begins_with はプレフィックス一致のため、モデル名が前方一致する
+            # 別モデル (例: "user" と "user_admin") を除外する
+            pks = [p for p in pks if self._pk_model_matches(p, model_name)]
         if pk_only:
             return pks
         else:
@@ -720,6 +737,10 @@ class Table:
             KeyConditionExpression=KeyConditionExpression,
             ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
         )
+        if model_name:
+            # begins_with はプレフィックス一致のため、モデル名が前方一致する
+            # 別モデル (例: "user" と "user_admin") の関連を誤削除しない
+            items = [i for i in items if self._pk_model_matches(self.rel_key2pk(i[self.__secondary_key__]), model_name)]
         self.batch_delete_items(items, batch)
 
     def clear_reference(self, pk, model_name="", batch=None):
@@ -732,6 +753,10 @@ class Table:
             IndexName=self.__range_index_name__,
             ProjectionExpression=f"{self.__primary_key__}, {self.__secondary_key__}",
         )
+        if model_name:
+            # begins_with はプレフィックス一致のため、モデル名が前方一致する
+            # 別モデル (例: "user" と "user_admin") の参照を誤削除しない
+            items = [i for i in items if self._pk_model_matches(i[self.__primary_key__], model_name)]
         self.batch_delete_items(items, batch)
 
     # --- ここからテーブル作成 ---
