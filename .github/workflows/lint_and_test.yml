@@ -60,7 +60,6 @@ jobs:
   e2e_test:
     # 単体テスト通過後に example/ のサンプルアプリを起動し、Playwright で E2E テストする
     runs-on: ubuntu-latest
-    needs: lint_and_test
     permissions:
       contents: read
 
