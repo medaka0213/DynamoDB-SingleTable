@@ -20,14 +20,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      # Read tags for the changelog and create the GitHub Release (built-in GITHUB_TOKEN)
+      # Read tags for the changelog, push the tag, create the GitHub Release
       contents: write
+      # Open the version-bump pull request
+      pull-requests: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          # Do not persist credentials; the tag push authenticates explicitly with GH_TOKEN
+          # Do not persist credentials; the tag push authenticates explicitly,
+          # and create-pull-request configures its own credential from `token`
           persist-credentials: false
 
       - name: Install uv
@@ -72,11 +75,13 @@ jobs:
           body: |
             Bump version to ${{ env.VERSION }}
             ${{ steps.tag_version.outputs.changelog }}
-          token: ${{ secrets.GH_TOKEN }}
+          # The bump commit carries [skip ci] and lint_and_test.yml has no
+          # pull_request trigger, so nothing is lost by using the built-in token.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create and push tag
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git tag "v${VERSION}"
           git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "v${VERSION}"
