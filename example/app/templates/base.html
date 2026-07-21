@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ddb_single Blog{% endblock %}</title>
+  <style>
+    :root {
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    header .brand { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--text); }
+    header .brand span { color: var(--accent); }
+    header nav a { color: var(--muted); text-decoration: none; margin-right: 1rem; }
+    header nav a:hover { color: var(--accent); }
+    main { max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 { margin: 0 0 0.3rem; font-size: 1.15rem; }
+    .card h2 a { color: var(--text); text-decoration: none; }
+    .card h2 a:hover { color: var(--accent); }
+    .meta { color: var(--muted); font-size: 0.85rem; }
+    .meta a { color: var(--accent); text-decoration: none; }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-danger { background: #dc2626; }
+    .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    form.stack label { display: block; font-weight: 600; margin: 1rem 0 0.3rem; }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #fff;
+    }
+    textarea { min-height: 10rem; resize: vertical; }
+    .searchbar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .searchbar input { flex: 1; }
+    .page-title { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .content-body { white-space: pre-wrap; }
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/">ddb_single <span>Blog</span></a>
+    <nav>
+      <a href="/">記事一覧</a>
+      <a href="/authors">著者一覧</a>
+      <a href="/posts/new">記事を書く</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    DynamoDB Single-Table Design サンプルアプリ — User / Post / Comment は 1 つのテーブルに格納されています
+  </footer>
+</body>
+</html>
