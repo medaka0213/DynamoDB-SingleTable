@@ -54,12 +54,11 @@ jobs:
           version=$(uv version --short)
           echo "VERSION=$version" >> $GITHUB_ENV
 
-      - name: Build and publish package
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          uv build
-          uv publish
+      # Build before touching git so a broken build fails the run cheaply.
+      # dist/ is gitignored, so it survives the working-tree resets that
+      # create-pull-request performs and is still present at publish time.
+      - name: Build package
+        run: uv build
 
       - name: Set up git
         run: |
@@ -85,6 +84,14 @@ jobs:
         run: |
           git tag "v${VERSION}"
           git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "v${VERSION}"
+
+      # Published last: PyPI uploads cannot be undone, so everything that can
+      # still fail runs first. --check-url skips files already on the index
+      # instead of failing with "400 File already exists", making re-runs safe.
+      - name: Publish package to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish --check-url https://pypi.org/simple/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
