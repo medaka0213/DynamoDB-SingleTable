@@ -1,6 +1,6 @@
 [project]
 name = "ddb_single"
-version = "0.6.1"
+version = "0.7.0"
 description = "Python DynamoDB interface, specialized in single-table design."
 authors = [{ name = "medaka0213" }]
 license = "MIT"
