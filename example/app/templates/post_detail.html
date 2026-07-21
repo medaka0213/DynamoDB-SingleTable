@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} | ddb_single Blog{% endblock %}
+{% block content %}
+<article class="card">
+  <h1>{{ post.title }}</h1>
+  <p class="meta">
+    by
+    {% if author %}
+    <a href="/authors/{{ author.pk }}">{{ author.name }}</a>
+    {% else %}
+    {{ post.author or "不明" }}
+    {% endif %}
+    ・ {{ post.created_at }}
+  </p>
+  <div class="content-body">{{ post.content }}</div>
+</article>
+
+<form method="post" action="/posts/{{ post.pk }}/delete"
+      onsubmit="return confirm('この記事とコメントを削除しますか？');">
+  <button class="btn btn-danger" type="submit">記事を削除</button>
+</form>
+
+<h2 style="margin-top:2rem">コメント ({{ comments | length }})</h2>
+{% for comment in comments %}
+<div class="card">
+  <p class="meta">{{ comment.author_name }} ・ {{ comment.created_at }}</p>
+  <div class="content-body">{{ comment.body }}</div>
+</div>
+{% else %}
+<p class="meta">まだコメントはありません。</p>
+{% endfor %}
+
+<div class="card">
+  <h3 style="margin-top:0">コメントを書く</h3>
+  <form class="stack" method="post" action="/posts/{{ post.pk }}/comments">
+    <label for="author_name">お名前</label>
+    <input type="text" id="author_name" name="author_name" placeholder="名無しさん">
+    <label for="body">コメント</label>
+    <textarea id="body" name="body" required style="min-height:5rem"></textarea>
+    <p><button class="btn" type="submit">投稿する</button></p>
+  </form>
+</div>
+{% endblock %}

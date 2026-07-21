@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}著者一覧 | ddb_single Blog{% endblock %}
+{% block content %}
+<h1>著者一覧</h1>
+{% for author in authors %}
+<div class="card">
+  <h2><a href="/authors/{{ author.pk }}">{{ author.name }}</a></h2>
+  {% if author.email %}<p class="meta">{{ author.email }}</p>{% endif %}
+  {% if author.bio %}<p>{{ author.bio }}</p>{% endif %}
+</div>
+{% else %}
+<div class="card"><p>まだ著者がいません。記事を書くと著者が自動で登録されます。</p></div>
+{% endfor %}
+{% endblock %}

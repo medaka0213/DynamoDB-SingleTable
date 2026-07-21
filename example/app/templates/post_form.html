@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}記事を書く | ddb_single Blog{% endblock %}
+{% block content %}
+<h1>記事を書く</h1>
+<div class="card">
+  <form class="stack" method="post" action="/posts">
+    <label for="title">タイトル</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="author_name">著者名</label>
+    <input type="text" id="author_name" name="author_name" required
+           list="author-list" placeholder="未登録の名前なら自動で著者が作成されます">
+    <datalist id="author-list">
+      {% for author in authors %}
+      <option value="{{ author.name }}"></option>
+      {% endfor %}
+    </datalist>
+
+    <label for="content">本文</label>
+    <textarea id="content" name="content" required></textarea>
+
+    <p><button class="btn" type="submit">公開する</button></p>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ author.name }} | ddb_single Blog{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>{{ author.name }}</h1>
+  {% if author.email %}<p class="meta">{{ author.email }}</p>{% endif %}
+  {% if author.bio %}<p>{{ author.bio }}</p>{% endif %}
+</div>
+
+<h2>{{ author.name }} さんの記事 ({{ posts | length }})</h2>
+{% for post in posts %}
+<article class="card">
+  <h2><a href="/posts/{{ post.pk }}">{{ post.title }}</a></h2>
+  <p class="meta">{{ post.created_at }}</p>
+  <p>{{ post.content | truncate(100) }}</p>
+</article>
+{% else %}
+<p class="meta">まだ記事がありません。</p>
+{% endfor %}
+{% endblock %}

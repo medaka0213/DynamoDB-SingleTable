@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}記事一覧 | ddb_single Blog{% endblock %}
+{% block content %}
+<div class="page-title">
+  <h1>記事一覧</h1>
+  <a class="btn" href="/posts/new">＋ 記事を書く</a>
+</div>
+
+<form class="searchbar" method="get" action="/">
+  <input type="text" name="q" value="{{ q }}" placeholder="タイトルで検索 (contains 検索)">
+  <button class="btn btn-ghost" type="submit">検索</button>
+</form>
+
+{% if q %}
+<p class="meta">「{{ q }}」の検索結果: {{ posts | length }} 件</p>
+{% endif %}
+
+{% for post in posts %}
+<article class="card">
+  <h2><a href="/posts/{{ post.pk }}">{{ post.title }}</a></h2>
+  <p class="meta">by {{ post.author or "不明" }} ・ {{ post.created_at }}</p>
+  <p>{{ post.content | truncate(100) }}</p>
+</article>
+{% else %}
+<div class="card">
+  <p>まだ記事がありません。<a href="/posts/new">最初の記事を書いてみましょう</a>。</p>
+</div>
+{% endfor %}
+{% endblock %}

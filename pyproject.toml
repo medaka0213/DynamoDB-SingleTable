@@ -28,6 +28,10 @@ dev = [
     "sphinx-rtd-theme>=2,<4",
     "myst-parser>=2,<5",
 ]
+e2e = [
+    "pytest>=8.0",
+    "pytest-playwright>=0.5",
+]
 
 [build-system]
 requires = ["hatchling"]

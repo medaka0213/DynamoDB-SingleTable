@@ -1,0 +1,43 @@
+name: ddb-single-blog-example
+
+services:
+  dynamodb-local:
+    image: "amazon/dynamodb-local:3.3.0"
+    command: "-jar DynamoDBLocal.jar -sharedDb"
+    ports:
+      - "127.0.0.1:${DYNAMODB_PORT:-8000}:8000"
+
+  app:
+    build:
+      # リポジトリルートをコンテキストにして、ローカルの ddb_single をインストールする
+      context: ..
+      dockerfile: example/app/Dockerfile
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    environment:
+      DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
+      TABLE_NAME: blog_example
+      AWS_ACCESS_KEY_ID: fakeMyKeyId
+      AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
+      AWS_DEFAULT_REGION: us-west-2
+      SEED_DATA: "1"
+    depends_on:
+      - dynamodb-local
+    healthcheck:
+      # `docker compose up --wait` でアプリの起動完了を待てるようにする
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+  # テーブルの中身 (single-table の実際のアイテム) を見るための管理画面 (任意)
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:5.3.4@sha256:ac41724cd99706256d405a14a5fb96f51f18c41a630c84fa3357f900cbd16d2e
+    tty: true
+    ports:
+      - "127.0.0.1:${ADMIN_PORT:-8001}:8001"
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb-local:8000
+    depends_on:
+      - dynamodb-local
