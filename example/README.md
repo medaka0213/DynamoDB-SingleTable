@@ -31,24 +31,26 @@ APP_PORT=18080 ADMIN_PORT=18001 DYNAMODB_PORT=18000 docker compose up --build
 ```python
 class User(BaseModel):
     __model_name__ = "user"
-    name = DBField(unique_key=True)      # ユニークキー: 同名なら同一著者として扱う
-    email = DBField(search_key=True)     # GSI で検索可能
+    name = DBField(unique_key=True)  # ユニークキー: 同名なら同一著者として扱う
+    email = DBField(search_key=True)  # GSI で検索可能
     bio = DBField()
+
 
 class Post(BaseModel):
     __model_name__ = "post"
-    slug = DBField(unique_key=True)      # uuid から自動生成
-    title = DBField(search_key=True)     # タイトル検索 (contains) に使用
+    slug = DBField(unique_key=True)  # uuid から自動生成
+    title = DBField(search_key=True)  # タイトル検索 (contains) に使用
     content = DBField()
-    author = DBField(relation=User)      # User へのリレーション
+    author = DBField(relation=User)  # User へのリレーション
     created_at = DBField(search_key=True)
+
 
 class Comment(BaseModel):
     __model_name__ = "comment"
     comment_id = DBField(unique_key=True)
     body = DBField()
     author_name = DBField()
-    post = DBField(relation=Post)        # Post へのリレーション
+    post = DBField(relation=Post)  # Post へのリレーション
     created_at = DBField()
 ```
 
