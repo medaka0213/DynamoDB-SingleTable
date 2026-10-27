@@ -46,13 +46,14 @@ And you can set `serch_key` to enable search via GSI
 ```python
 from ddb_single import BaseModel, DBField, FieldType
 
+
 class User(BaseModel):
-    __table__=table
+    __table__ = table
     __model_name__ = "user"
     name = DBField(unique_key=True)
     email = DBField(search_key=True)
     age = DBField(type=FieldType.NUMBER, search_key=True)
-    description=DBField()
+    description = DBField()
 ```
 
 ## Usage
@@ -66,6 +67,7 @@ need "Qurey" object for CRUD
 
 ```python
 from ddb_single import Query
+
 query = Query(table)
 ```
 
@@ -210,7 +212,7 @@ query.model(User).delete_by_unique("John")
 ```python
 with table.batch_writer() as batch:
     for i in range(3):
-        user = User(name=f"test{i}", age=i+10)
+        user = User(name=f"test{i}", age=i + 10)
         query.model(user).create(batch=batch)
 res = query.model(User).search(User.name.begins_with("test"))
 print([(r["name"], r["age"]) for r in res])
@@ -222,7 +224,7 @@ print([(r["name"], r["age"]) for r in res])
 ```python
 with table.batch_writer() as batch:
     for i in range(3):
-        user = User(name=f"test{i}", age=i+20)
+        user = User(name=f"test{i}", age=i + 20)
         query.model(user).update(batch=batch)
 res = query.model(User).search(User.name.begins_with("test"))
 print([(r["name"], r["age"]) for r in res])
@@ -252,7 +254,7 @@ You can sat relationns to other models
 ```python
 class BlogPost(BaseModel):
     __model_name__ = "blogpost"
-    __table__=table
+    __table__ = table
     name = DBField(unique_key=True)
     content = DBField()
     author = DBField(relation=User)
@@ -262,11 +264,7 @@ class BlogPost(BaseModel):
 
 
 ```python
-blogpost = BlogPost(
-    name="Hello",
-    content="Hello world",
-    author=self.user
-)
+blogpost = BlogPost(name="Hello", content="Hello world", author=self.user)
 query.model(blogpost).create()
 ```
 
